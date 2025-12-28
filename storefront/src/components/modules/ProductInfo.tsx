@@ -32,16 +32,17 @@ export function ProductInfo({ title, price, description, currencyCode = "USD" }:
                     <h3 className="text-sm font-bold uppercase tracking-wide">Select Size</h3>
                     <button className="text-xs underline text-secondary-text hover:text-charcoal-black">Size Guide</button>
                 </div>
-                <div className="grid grid-cols-5 gap-2">
+                <div className="flex flex-wrap gap-3">
                     {sizes.map((size) => (
                         <button
                             key={size}
                             onClick={() => setSelectedSize(size)}
                             className={cn(
-                                "h-10 border text-sm font-medium transition-colors",
+                                "relative min-w-[3rem] h-10 px-3 text-sm font-medium transition-all duration-200 ease-out",
+                                "border border-border hover:border-charcoal-black",
                                 selectedSize === size
-                                    ? "border-charcoal-black bg-charcoal-black text-pure-white"
-                                    : "border-border text-charcoal-black hover:border-charcoal-black"
+                                    ? "bg-charcoal-black text-pure-white border-charcoal-black"
+                                    : "bg-transparent text-charcoal-black"
                             )}
                         >
                             {size}

@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   description: "The ultimate destination for modern fashion.",
 };
 
+import SmoothScroll from "@/components/global/SmoothScroll";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -21,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${openSans.variable} antialiased font-sans`}>
-        {children}
+        <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>
   );
