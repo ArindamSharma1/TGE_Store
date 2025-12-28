@@ -1,0 +1,28 @@
+@import "tailwindcss";
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap');
+
+@theme {
+  --color-off-white: #F8F8F8;
+  --color-pure-white: #FFFFFF;
+  --color-charcoal-black: #121212;
+  --color-secondary-text: #5F5F5F;
+  --color-disabled-text: #9A9A9A;
+  --color-border: #E4E4E4;
+
+  --font-satoshi: 'Satoshi', sans-serif;
+  --font-open-sans: var(--font-open-sans);
+}
+
+:root {
+  --font-open-sans: "Open Sans", sans-serif; /* Fallback until next/font loads */
+}
+
+body {
+  background-color: var(--color-off-white);
+  color: var(--color-charcoal-black);
+  font-family: var(--font-open-sans);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-satoshi);
+}
