@@ -18,13 +18,15 @@ const MOCK_PRODUCT = {
 };
 
 interface ProductPageProps {
-    params: {
+    params: Promise<{
         handle: string;
-    }
+    }>
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
     // In a real app, fetch product data using params.handle
+    // const { handle } = await params; 
+
     const title = MOCK_PRODUCT.title;
     const description = MOCK_PRODUCT.description.substring(0, 160);
 
@@ -39,7 +41,8 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     };
 }
 
-export default function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({ params }: ProductPageProps) {
+    const { handle } = await params;
     return (
         <>
             <Header />

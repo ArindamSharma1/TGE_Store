@@ -9,8 +9,9 @@ export default function Home() {
       <Header />
       <main>
         <Hero
-          heading="The Future of Fashion"
-          subheading="Minimalist designs for the modern era."
+          heading="SUMMER DROP 2024"
+          subheading="Fresh styles just landed. 500+ new items added today."
+          ctaText="SHOP NEW ARRIVALS"
           imageUrl="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070&auto=format&fit=crop"
         />
 

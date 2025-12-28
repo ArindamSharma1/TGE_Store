@@ -28,14 +28,15 @@ const MOCK_PRODUCTS = Array.from({ length: 9 }).map((_, i) => ({
 }));
 
 interface CollectionPageProps {
-    params: {
+    params: Promise<{
         handle: string;
-    }
+    }>
 }
 
 export async function generateMetadata({ params }: CollectionPageProps): Promise<Metadata> {
+    const { handle } = await params;
     // Decode handle: "new-arrivals" -> "New Arrivals"
-    const title = params.handle.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+    const title = handle.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
 
     return {
         title: `${title} | TGS`,
@@ -43,7 +44,8 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
     };
 }
 
-export default function CollectionPage({ params }: CollectionPageProps) {
+export default async function CollectionPage({ params }: CollectionPageProps) {
+    const { handle } = await params;
     // In a real app, strict mode might complain about async params in newer Next.js versions. 
     // For now simple prop usage.
 
