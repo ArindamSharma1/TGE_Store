@@ -1,45 +1,52 @@
-import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
+import { ButtonHTMLAttributes, forwardRef } from "react";
 import { cn } from "@/lib/utils/cn";
+import Link from "next/link";
 
-export interface ButtonProps
-    extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+    variant?: "primary" | "secondary" | "outline" | "ghost";
+    size?: "sm" | "md" | "lg" | "icon";
     asChild?: boolean;
-    variant?: "primary" | "secondary" | "outline" | "ghost" | "link";
-    size?: "default" | "sm" | "lg" | "icon";
+    href?: string;
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ className, variant = "primary", size = "default", asChild = false, ...props }, ref) => {
-        const Comp = asChild ? Slot : "button";
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+    ({ className, variant = "primary", size = "md", asChild = false, href, ...props }, ref) => {
+        const baseStyles = "inline-flex items-center justify-center rounded-full font-medium transition-transform active:scale-95 disabled:pointer-events-none disabled:opacity-50 tracking-wide";
 
-        // Base styles: Rectangular (no pill), 150ms transition, ease-in-out
-        const baseStyles = "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-150 ease-in-out focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 uppercase tracking-wider";
-
-        const variants: Record<string, string> = {
-            primary: "bg-charcoal-black text-pure-white hover:opacity-90",
-            secondary: "bg-off-white text-charcoal-black hover:bg-border",
-            outline: "border border-border bg-transparent hover:bg-off-white text-charcoal-black",
-            ghost: "hover:bg-off-white hover:text-charcoal-black",
-            link: "text-charcoal-black underline-offset-4 hover:underline",
+        const variants = {
+            primary: "bg-zinc-900 text-white hover:bg-zinc-800",
+            secondary: "bg-white text-zinc-900 hover:bg-zinc-100",
+            outline: "border border-zinc-200 bg-transparent hover:bg-zinc-50 text-zinc-900",
+            ghost: "hover:bg-zinc-100 text-zinc-900",
         };
 
-        const sizes: Record<string, string> = {
-            default: "h-10 px-8 py-2",
-            sm: "h-8 px-4 text-xs",
-            lg: "h-12 px-10 text-base",
+        const sizes = {
+            sm: "h-9 px-4 text-xs",
+            md: "h-11 px-6 text-sm",
+            lg: "h-14 px-8 text-base",
             icon: "h-10 w-10",
         };
 
+        const classes = cn(baseStyles, variants[variant], sizes[size], className);
+
+        if (asChild && href) {
+            return (
+                <Link href={href} className={classes}>
+                    {props.children}
+                </Link>
+            );
+        }
+
         return (
-            <Comp
-                className={cn(baseStyles, variants[variant!] || variants.primary, sizes[size!] || sizes.default, className)}
+            <button
+                className={classes}
                 ref={ref}
                 {...props}
             />
         );
     }
 );
+
 Button.displayName = "Button";
 
 export { Button };

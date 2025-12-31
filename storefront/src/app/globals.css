@@ -1,34 +1,42 @@
-@import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-off-white: #F8F8F8;
-  --color-pure-white: #FFFFFF;
-  --color-charcoal-black: #121212;
-  --color-secondary-text: #5F5F5F;
-  --color-disabled-text: #9A9A9A;
-  --color-border: #E4E4E4;
+  --font-sans: var(--font-inter);
+  
+  --color-background: #FAFAFA; /* zinc-50 */
+  --color-foreground: #09090B; /* zinc-950 */
 
-  --font-satoshi: 'Satoshi', sans-serif;
-  --font-open-sans: var(--font-open-sans);
+  --color-zinc-50: #FAFAFA;
+  --color-zinc-100: #F4F4F5;
+  --color-zinc-200: #E4E4E7;
+  --color-zinc-300: #D4D4D8;
+  --color-zinc-400: #A1A1AA;
+  --color-zinc-500: #71717A;
+  --color-zinc-900: #18181B;
+  --color-zinc-950: #09090B;
+  
+  --radius-lg: 32px;
+  --radius-md: 24px;
+  --radius-sm: 12px;
+  --radius-pill: 9999px;
 }
 
-:root {
-  --font-open-sans: "Open Sans", sans-serif;
-  /* Fallback until next/font loads */
+@layer utilities {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+
+  .glass-heavy {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
 }
 
 body {
-  background-color: var(--color-off-white);
-  color: var(--color-charcoal-black);
-  font-family: var(--font-open-sans);
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-satoshi);
+  @apply bg-zinc-50 text-zinc-950 antialiased selection:bg-zinc-900 selection:text-white;
 }

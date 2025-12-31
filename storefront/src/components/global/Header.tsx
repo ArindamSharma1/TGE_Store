@@ -1,37 +1,75 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShoppingBag, User } from "lucide-react";
+import { Search, ShoppingBag, User, Menu } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { MegaMenu } from "@/components/global/MegaMenu";
+import { useScroll } from "framer-motion";
+import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils/cn";
 
 export function Header() {
+    const { scrollY } = useScroll();
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    useEffect(() => {
+        return scrollY.onChange((latest) => {
+            setIsScrolled(latest > 20);
+        });
+    }, [scrollY]);
+
+    const navLinks = [
+        { name: "Shop", href: "/collections/all" },
+        { name: "New In", href: "/collections/new-in" },
+        { name: "Brands", href: "/collections/brands" },
+        { name: "Sale", href: "/collections/sale" },
+    ];
+
     return (
-        <header className="sticky top-0 z-50 w-full border-b border-border bg-pure-white/80 backdrop-blur-md">
-            <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                {/* Logo */}
-                <div className="flex shrink-0 items-center">
-                    <Link href="/" className="font-satoshi text-2xl font-bold tracking-widest uppercase text-charcoal-black">
-                        TGS
-                    </Link>
-                </div>
+        <>
+            <header className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+                <div className="flex items-center justify-between w-full max-w-7xl pointer-events-auto">
 
-                {/* Desktop Navigation */}
-                <MegaMenu />
+                    {/* Left: Navigation Pill */}
+                    <nav className="glass-card rounded-full px-2 py-2 flex items-center gap-1">
+                        <Button variant="ghost" size="icon" className="rounded-full md:hidden">
+                            <Menu className="w-5 h-5" />
+                        </Button>
+                        <Link href="/" className="px-4 py-2 font-black tracking-tighter text-lg flex items-center">
+                            TGE
+                        </Link>
+                        <div className="hidden md:flex items-center gap-1">
+                            {navLinks.map(link => (
+                                <Link
+                                    key={link.name}
+                                    href={link.href}
+                                    className="px-4 py-2 text-sm font-medium hover:bg-zinc-100/50 rounded-full transition-colors"
+                                >
+                                    {link.name}
+                                </Link>
+                            ))}
+                        </div>
+                    </nav>
 
-                {/* Actions */}
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" aria-label="Search">
-                        <Search className="h-5 w-5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" aria-label="Account">
-                        <User className="h-5 w-5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" aria-label="Cart">
-                        <ShoppingBag className="h-5 w-5" />
-                    </Button>
+                    {/* Right: Utility Pills */}
+                    <div className="flex items-center gap-3">
+                        <div className="glass-card rounded-full p-1 flex items-center gap-1">
+                            <Button variant="ghost" size="icon" className="rounded-full w-10 h-10 hover:bg-zinc-100/50">
+                                <Search className="w-5 h-5" />
+                            </Button>
+                        </div>
+                        <div className="glass-card rounded-full p-1 flex items-center gap-1">
+                            <Button variant="ghost" size="icon" className="rounded-full w-10 h-10 hover:bg-zinc-100/50">
+                                <User className="w-5 h-5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="rounded-full w-10 h-10 hover:bg-zinc-100/50 relative">
+                                <ShoppingBag className="w-5 h-5" />
+                                <span className="absolute top-2 right-2 w-2 h-2 bg-zinc-900 rounded-full border border-white"></span>
+                            </Button>
+                        </div>
+                    </div>
+
                 </div>
-            </div>
-        </header>
+            </header>
+        </>
     );
 }

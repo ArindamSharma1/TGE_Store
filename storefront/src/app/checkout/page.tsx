@@ -9,7 +9,7 @@ export default function CheckoutPage() {
             <header className="border-b border-border bg-pure-white py-6">
                 <div className="mx-auto max-w-7xl px-4 flex justify-between items-center">
                     <Link href="/" className="font-satoshi text-2xl font-bold tracking-widest uppercase text-charcoal-black">
-                        TGS
+                        TGE STORE
                     </Link>
                     <div className="flex items-center gap-2 text-sm text-secondary-text">
                         <Lock className="w-4 h-4" />

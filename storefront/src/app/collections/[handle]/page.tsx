@@ -39,8 +39,8 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
     const title = handle.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
 
     return {
-        title: `${title} | TGS`,
-        description: `Shop the latest ${title} collection at TGS.`,
+        title: `${title} | TGE Store`,
+        description: `Shop the latest ${title} collection at TGE Store.`,
     };
 }
 

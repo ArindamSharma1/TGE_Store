@@ -1,19 +1,21 @@
 import type { Metadata } from "next";
-import { Open_Sans } from "next/font/google";
+import { Inter } from "next/font/google"; // Changed to Inter
 import "./globals.css";
+import SmoothScroll from "@/components/global/SmoothScroll";
 
-const openSans = Open_Sans({
-  variable: "--font-open-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "TGS | Modern Fashion Store",
+  title: {
+    template: "%s | TGE Store",
+    default: "TGE Store | Modern Fashion",
+  },
   description: "The ultimate destination for modern fashion.",
 };
-
-import SmoothScroll from "@/components/global/SmoothScroll";
 
 export default function RootLayout({
   children,
@@ -22,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${openSans.variable} antialiased font-sans`}>
+      <body className={`${inter.variable} antialiased font-sans bg-zinc-50`}>
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

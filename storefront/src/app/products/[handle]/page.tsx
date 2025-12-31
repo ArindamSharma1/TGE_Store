@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     const description = MOCK_PRODUCT.description.substring(0, 160);
 
     return {
-        title: `${title} | TGS`,
+        title: `${title} | TGE Store`,
         description: description,
         openGraph: {
             title: title,
