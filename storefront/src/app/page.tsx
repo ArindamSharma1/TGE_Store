@@ -101,7 +101,89 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 6: WHY TGS */}
+      {/* SECTION 6: THE LOOKBOOK */}
+      <section className="mx-auto max-w-7xl px-4 py-16 border-t border-zinc-100">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Editorial Image */}
+          <div className="relative aspect-[4/5] lg:aspect-square w-full overflow-hidden rounded-[32px] bg-zinc-100">
+            <Image
+              src="https://images.unsplash.com/photo-1550614000-4b9519e007d9?q=80&w=1200&auto=format&fit=crop"
+              alt="Editorial Look"
+              fill
+              className="object-cover"
+            />
+          </div>
+
+          {/* Look Details */}
+          <div className="flex flex-col gap-8">
+            <div>
+              <span className="text-zinc-500 font-medium uppercase tracking-widest text-sm mb-2 block">
+                Editorial
+              </span>
+              <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-zinc-900 mb-6">
+                The City Roamer
+              </h2>
+              <p className="text-zinc-600 text-lg leading-relaxed max-w-md">
+                Navigating the concrete jungle requires a uniform that adapts.
+                Structured layers meet technical fabrics for a look that means business.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <h3 className="font-bold uppercase tracking-wide text-zinc-900 border-b border-zinc-100 pb-2">
+                Get the Look
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { name: "Technical Overshirt", price: "$140.00", img: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=400&auto=format&fit=crop" },
+                  { name: "Wide Pleated Pant", price: "$110.00", img: "https://images.unsplash.com/photo-1479064555552-3ef4979f8908?q=80&w=400&auto=format&fit=crop" }
+                ].map((item, i) => (
+                  <Link key={i} href="#" className="group flex gap-4 items-center bg-white p-3 rounded-2xl border border-zinc-100 hover:border-zinc-300 transition-colors">
+                    <div className="relative w-16 h-20 rounded-lg overflow-hidden bg-zinc-100 flex-shrink-0">
+                      <Image src={item.img} alt={item.name} fill className="object-cover" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-zinc-900 group-hover:underline">{item.name}</p>
+                      <p className="text-sm text-zinc-500">{item.price}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 7: SEEN ON YOU (SOCIAL GRID) */}
+      <section className="mx-auto max-w-7xl px-4 py-20">
+        <div className="flex flex-col items-center text-center mb-12">
+          <h2 className="text-2xl font-bold uppercase tracking-tight text-zinc-900 mb-2">Seen on You</h2>
+          <p className="text-zinc-500">Tag @TGS_Store to be featured.</p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          {[
+            "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=600&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1529139574466-a302d27f3d9f?q=80&w=600&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1550614000-4b9519e007d9?q=80&w=600&auto=format&fit=crop"
+          ].map((src, i) => (
+            <div key={i} className="relative aspect-square overflow-hidden bg-zinc-100 group">
+              <Image
+                src={src}
+                alt="Community Styling"
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-110 grayscale group-hover:grayscale-0"
+              />
+              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <span className="text-white font-bold text-sm">@tgs_community</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* SECTION 8: WHY TGS */}
       <section className="mx-auto max-w-7xl px-4 py-20 border-t border-zinc-100">
         <div className="mb-12">
           <h2 className="text-2xl font-bold uppercase tracking-tight text-zinc-900">Why TGS</h2>
