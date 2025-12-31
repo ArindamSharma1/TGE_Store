@@ -27,8 +27,8 @@ export function ProductCard({
     price,
     currencyCode,
     images = {
-        main: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop",
-        hover: "https://images.unsplash.com/photo-1529139574466-a302d27f3d9f?q=80&w=1000&auto=format&fit=crop"
+        main: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop",
+        hover: "https://images.unsplash.com/photo-1582552938357-32b906df40cb?q=80&w=1000&auto=format&fit=crop"
     }
 }: ProductCardProps) {
     return (
@@ -40,7 +40,7 @@ export function ProductCard({
                         src={images.main}
                         alt={title}
                         fill
-                        className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
+                        className="object-cover transition-transform duration-500 ease-out group-hover:scale-105 will-change-transform"
                         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                     />
                     {/* Hover Image */}
@@ -48,7 +48,7 @@ export function ProductCard({
                         src={images.hover}
                         alt={`${title} - Alternate View`}
                         fill
-                        className="absolute inset-0 object-cover opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100 group-hover:scale-105"
+                        className="absolute inset-0 object-cover opacity-0 transition-all duration-500 ease-out group-hover:opacity-100 group-hover:scale-105 will-change-transform"
                         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                     />
 

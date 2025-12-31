@@ -1,15 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Search, ShoppingBag, User, Menu } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useScroll } from "framer-motion";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils/cn";
+import { useCart } from "@/context/CartContext";
 
 export function Header() {
     const { scrollY } = useScroll();
     const [isScrolled, setIsScrolled] = useState(false);
+    const { openCart, cartCount } = useCart();
 
     useEffect(() => {
         return scrollY.onChange((latest) => {
@@ -30,12 +33,23 @@ export function Header() {
                 <div className="flex items-center justify-between w-full max-w-7xl pointer-events-auto">
 
                     {/* Left: Navigation Pill */}
-                    <nav className="glass-card rounded-full px-2 py-2 flex items-center gap-1">
+                    <nav
+                        className={cn(
+                            "rounded-full px-2 py-2 flex items-center gap-1 transition-all duration-300",
+                            isScrolled ? "glass-heavy shadow-md" : "glass-card"
+                        )}
+                    >
                         <Button variant="ghost" size="icon" className="rounded-full md:hidden">
                             <Menu className="w-5 h-5" />
                         </Button>
-                        <Link href="/" className="px-4 py-2 font-black tracking-tighter text-lg flex items-center">
-                            TGE
+                        <Link href="/" className="px-4 py-2 flex items-center">
+                            <Image
+                                src="/logo-main-white.svg"
+                                alt="TGE Store"
+                                width={80}
+                                height={24}
+                                className="h-6 w-auto object-contain brightness-0"
+                            />
                         </Link>
                         <div className="hidden md:flex items-center gap-1">
                             {navLinks.map(link => (
@@ -52,18 +66,31 @@ export function Header() {
 
                     {/* Right: Utility Pills */}
                     <div className="flex items-center gap-3">
-                        <div className="glass-card rounded-full p-1 flex items-center gap-1">
+                        <div className={cn(
+                            "rounded-full p-1 flex items-center gap-1 transition-all duration-300",
+                            isScrolled ? "glass-heavy shadow-md" : "glass-card"
+                        )}>
                             <Button variant="ghost" size="icon" className="rounded-full w-10 h-10 hover:bg-zinc-100/50">
                                 <Search className="w-5 h-5" />
                             </Button>
                         </div>
-                        <div className="glass-card rounded-full p-1 flex items-center gap-1">
+                        <div className={cn(
+                            "rounded-full p-1 flex items-center gap-1 transition-all duration-300",
+                            isScrolled ? "glass-heavy shadow-md" : "glass-card"
+                        )}>
                             <Button variant="ghost" size="icon" className="rounded-full w-10 h-10 hover:bg-zinc-100/50">
                                 <User className="w-5 h-5" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="rounded-full w-10 h-10 hover:bg-zinc-100/50 relative">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-full w-10 h-10 hover:bg-zinc-100/50 relative"
+                                onClick={openCart}
+                            >
                                 <ShoppingBag className="w-5 h-5" />
-                                <span className="absolute top-2 right-2 w-2 h-2 bg-zinc-900 rounded-full border border-white"></span>
+                                {cartCount > 0 && (
+                                    <span className="absolute top-2 right-2 w-2 h-2 bg-zinc-900 rounded-full border border-white"></span>
+                                )}
                             </Button>
                         </div>
                     </div>

@@ -2,9 +2,11 @@
 
 @theme {
   --font-sans: var(--font-inter);
-  
-  --color-background: #FAFAFA; /* zinc-50 */
-  --color-foreground: #09090B; /* zinc-950 */
+
+  --color-background: #FAFAFA;
+  /* zinc-50 */
+  --color-foreground: #09090B;
+  /* zinc-950 */
 
   --color-zinc-50: #FAFAFA;
   --color-zinc-100: #F4F4F5;
@@ -14,7 +16,7 @@
   --color-zinc-500: #71717A;
   --color-zinc-900: #18181B;
   --color-zinc-950: #09090B;
-  
+
   --radius-lg: 32px;
   --radius-md: 24px;
   --radius-sm: 12px;
@@ -23,20 +25,33 @@
 
 @layer utilities {
   .glass-card {
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.6);
+    background: transparent;
+    /* backdrop-filter: blur(16px); */
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.4);
   }
 
   .glass-heavy {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(18px);
+    /* -webkit-backdrop-filter: blur(18px); */
     border: 1px solid rgba(255, 255, 255, 0.5);
   }
 }
 
 body {
   @apply bg-zinc-50 text-zinc-950 antialiased selection:bg-zinc-900 selection:text-white;
+}
+
+/* Globally hide scrollbar - Aggressive Universal Selector */
+* {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+*::-webkit-scrollbar {
+  display: none;
 }

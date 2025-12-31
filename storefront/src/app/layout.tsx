@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google"; // Changed to Inter
 import "./globals.css";
 import SmoothScroll from "@/components/global/SmoothScroll";
+import { Header } from "@/components/global/Header";
+import { Footer } from "@/components/global/Footer";
+import { CartProvider } from "@/context/CartContext";
+import { CartDrawer } from "@/components/modules/cart/CartDrawer";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -23,9 +27,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} antialiased font-sans bg-zinc-50`}>
-        <SmoothScroll>{children}</SmoothScroll>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} antialiased font-sans bg-zinc-50`} suppressHydrationWarning>
+        <CartProvider>
+          <SmoothScroll>
+            <Header />
+            <CartDrawer />
+            <main className="min-h-screen">
+              {children}
+            </main>
+            <Footer />
+          </SmoothScroll>
+        </CartProvider>
       </body>
     </html>
   );
