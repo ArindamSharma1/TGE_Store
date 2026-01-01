@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { VariantSelector } from "./VariantSelector";
-import { ShoppingBag, Star } from "lucide-react";
+import { ShoppingBag, Star, Heart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
 interface ProductOption {
@@ -22,6 +22,7 @@ interface ProductInfoProps {
 
 export function ProductInfo({ title, price, description, options = [], image, handle }: ProductInfoProps) {
     const [selections, setSelections] = useState<Record<string, string>>({});
+    const [inWishlist, setInWishlist] = useState(false);
     const { addItem } = useCart();
 
     const handleSelect = (optionName: string, value: string) => {
@@ -95,7 +96,7 @@ export function ProductInfo({ title, price, description, options = [], image, ha
             </div>
 
             {/* Actions */}
-            <div className="pt-4 border-t border-zinc-100">
+            <div className="pt-4 border-t border-zinc-100 flex flex-col gap-3">
                 <Button
                     size="lg"
                     className="w-full h-16 rounded-full text-lg font-bold bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-center gap-2"
@@ -105,6 +106,14 @@ export function ProductInfo({ title, price, description, options = [], image, ha
                     <ShoppingBag className="w-5 h-5" />
                     {allSelected || options.length === 0 ? "Add to Bag" : "Select Options"}
                 </Button>
+
+                <button
+                    onClick={() => setInWishlist(!inWishlist)}
+                    className="flex items-center justify-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors py-2"
+                >
+                    <Heart className={`w-4 h-4 ${inWishlist ? "fill-red-500 text-red-500" : ""}`} />
+                    {inWishlist ? "Saved to Wishlist" : "Add to Wishlist"}
+                </button>
             </div>
 
             {/* Shipping/Returns Micro-copy */}
