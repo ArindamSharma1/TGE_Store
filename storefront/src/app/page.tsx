@@ -51,6 +51,11 @@ export default function Home() {
               </div>
             </Link>
           </div>
+          <div className="mt-8 flex justify-center">
+            <Button asChild href="/collections/all" size="lg" className="rounded-full px-12 h-14 text-base font-bold bg-zinc-900 text-white hover:bg-zinc-800">
+              Shop All
+            </Button>
+          </div>
         </Reveal>
       </section>
 
@@ -260,10 +265,10 @@ export default function Home() {
             Our support team is here for you. From fit advice to order tracking, we've got you covered.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button variant="outline" className="rounded-full px-8 h-12 border-zinc-200 hover:border-zinc-900">
+            <Button asChild href="/contact" variant="outline" className="rounded-full px-8 h-12 border-zinc-200 hover:border-zinc-900">
               Contact Support
             </Button>
-            <Button variant="outline" className="rounded-full px-8 h-12 border-zinc-200 hover:border-zinc-900">
+            <Button asChild href="/returns" variant="outline" className="rounded-full px-8 h-12 border-zinc-200 hover:border-zinc-900">
               Shipping & Returns
             </Button>
           </div>

@@ -89,7 +89,7 @@ export function Header() {
                             "rounded-full p-1 flex items-center gap-1 transition-all duration-300",
                             isScrolled ? "glass-heavy shadow-md" : "glass-card"
                         )}>
-                            <Button variant="ghost" size="icon" className="rounded-full w-10 h-10 hover:bg-zinc-100/50">
+                            <Button asChild href="/login" variant="ghost" size="icon" className="rounded-full w-10 h-10 hover:bg-zinc-100/50">
                                 <User className="w-5 h-5" />
                             </Button>
                             <Button

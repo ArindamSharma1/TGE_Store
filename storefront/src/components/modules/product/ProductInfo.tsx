@@ -100,6 +100,7 @@ export function ProductInfo({ title, price, description, options = [], image, ha
                     size="lg"
                     className="w-full h-16 rounded-full text-lg font-bold bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-center gap-2"
                     disabled={!allSelected && options.length > 0}
+                    onClick={handleAddToBag}
                 >
                     <ShoppingBag className="w-5 h-5" />
                     {allSelected || options.length === 0 ? "Add to Bag" : "Select Options"}

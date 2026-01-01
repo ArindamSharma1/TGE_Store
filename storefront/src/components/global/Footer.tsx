@@ -12,9 +12,32 @@ export function Footer() {
     if (pathname === "/checkout") return null;
 
     const footerLinks = [
-        { title: "Shop", links: ["New In", "Clothing", "Shoes", "Accessories"] },
-        { title: "Support", links: ["Help Center", "Returns", "Shipping", "Contact"] },
-        { title: "Legal", links: ["Privacy Policy", "Terms of Service", "Cookies"] },
+        {
+            title: "Shop",
+            links: [
+                { name: "New In", href: "/collections/new-in" },
+                { name: "Clothing", href: "/collections/clothing" },
+                { name: "Shoes", href: "/collections/shoes" },
+                { name: "Accessories", href: "/collections/accessories" }
+            ]
+        },
+        {
+            title: "Support",
+            links: [
+                { name: "Help Center", href: "/contact" },
+                { name: "Returns", href: "/returns" },
+                { name: "Shipping", href: "/returns" },
+                { name: "Contact", href: "/contact" }
+            ]
+        },
+        {
+            title: "Legal",
+            links: [
+                { name: "Privacy Policy", href: "/privacy" },
+                { name: "Terms of Service", href: "/terms" },
+                { name: "Cookies", href: "/cookies" }
+            ]
+        },
     ];
 
     return (
@@ -47,9 +70,9 @@ export function Footer() {
                             <h3 className="font-bold text-zinc-900 mb-6">{group.title}</h3>
                             <ul className="space-y-4">
                                 {group.links.map(link => (
-                                    <li key={link}>
-                                        <Link href="#" className="text-zinc-500 hover:text-zinc-900 text-sm transition-colors">
-                                            {link}
+                                    <li key={link.name}>
+                                        <Link href={link.href} className="text-zinc-500 hover:text-zinc-900 text-sm transition-colors">
+                                            {link.name}
                                         </Link>
                                     </li>
                                 ))}
