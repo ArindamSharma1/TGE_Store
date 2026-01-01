@@ -37,7 +37,14 @@ export function CartItem({ item }: { item: CartItemType }) {
                 <div>
                     <div className="flex justify-between text-base font-medium text-zinc-900">
                         <h3>{item.productTitle}</h3>
-                        <p className="ml-4">${item.price * item.quantity}</p>
+                        <p className="ml-4">
+                            {new Intl.NumberFormat('en-IN', {
+                                style: 'currency',
+                                currency: 'INR',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0,
+                            }).format(item.price * item.quantity)}
+                        </p>
                     </div>
                     {item.variantTitle && (
                         <p className="mt-1 text-sm text-zinc-500">{item.variantTitle}</p>

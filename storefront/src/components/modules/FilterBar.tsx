@@ -10,18 +10,18 @@ export function FilterBar() {
     const [activeCategory, setActiveCategory] = useState("All");
 
     return (
-        <div className="w-full overflow-x-auto no-scrollbar py-4 -mx-4 px-4 sm:mx-0 sm:px-0">
-            <div className="flex items-center gap-2 min-w-max">
+        <div className="w-full overflow-x-auto no-scrollbar -mx-4 sm:mx-0">
+            <div className="flex items-center gap-3 px-4 sm:px-0 min-w-max">
                 {CATEGORIES.map((cat) => (
                     <Button
                         key={cat}
-                        variant={activeCategory === cat ? "primary" : "outline"}
+                        variant="ghost"
                         onClick={() => setActiveCategory(cat)}
                         className={cn(
-                            "rounded-full px-6 transition-all duration-300",
+                            "rounded-full px-5 h-10 text-sm font-medium transition-all duration-300 border",
                             activeCategory === cat
-                                ? "bg-zinc-900 text-white border-zinc-900 shadow-lg scale-105"
-                                : "bg-white text-zinc-600 border-zinc-200 hover:border-zinc-900 hover:text-zinc-900"
+                                ? "bg-zinc-900 text-white border-zinc-900 shadow-md"
+                                : "bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300 hover:text-zinc-900"
                         )}
                     >
                         {cat}

@@ -8,17 +8,21 @@ import { useScroll } from "framer-motion";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils/cn";
 import { useCart } from "@/context/CartContext";
+import { usePathname } from "next/navigation";
 
 export function Header() {
     const { scrollY } = useScroll();
     const [isScrolled, setIsScrolled] = useState(false);
     const { openCart, cartCount } = useCart();
+    const pathname = usePathname();
 
     useEffect(() => {
         return scrollY.onChange((latest) => {
             setIsScrolled(latest > 20);
         });
     }, [scrollY]);
+
+    if (pathname === "/checkout") return null;
 
     const navLinks = [
         { name: "Shop", href: "/collections/all" },

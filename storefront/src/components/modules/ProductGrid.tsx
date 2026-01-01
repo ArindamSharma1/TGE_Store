@@ -23,11 +23,11 @@ export function ProductGrid({ products }: ProductGridProps) {
                     key={product.id}
                     id={product.id}
                     title={product.title}
+                    thumbnail={product.images.main}
+                    handle={product.handle}
                     price={product.price}
-                    currencyCode="USD"
+                    currencyCode="INR"
                     images={product.images}
-                // handle is optional in ProductCard interface but we can pass it if needed, 
-                // or construct link inside card. Let's assume Card handles it.
                 />
             ))}
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { X, ShoppingBag } from "lucide-react";
 import { CartItem } from "./CartItem";
@@ -74,18 +75,27 @@ export function CartDrawer() {
                             <div className="border-t border-zinc-100 px-4 py-6 sm:px-6 bg-zinc-50/50">
                                 <div className="flex justify-between text-base font-bold text-zinc-900 mb-4">
                                     <p>Subtotal</p>
-                                    <p>${subtotal.toFixed(2)}</p>
+                                    <p>
+                                        {new Intl.NumberFormat('en-IN', {
+                                            style: 'currency',
+                                            currency: 'INR',
+                                            minimumFractionDigits: 0,
+                                            maximumFractionDigits: 0,
+                                        }).format(subtotal)}
+                                    </p>
                                 </div>
                                 <p className="mt-0.5 text-sm text-zinc-500 mb-6">
                                     Shipping and taxes calculated at checkout.
                                 </p>
                                 <div className="mt-6">
-                                    <Button
-                                        size="lg"
-                                        className="w-full rounded-full bg-zinc-900 hover:bg-zinc-800 text-white h-14 font-bold text-lg"
-                                    >
-                                        Checkout
-                                    </Button>
+                                    <Link href="/checkout" onClick={closeCart}>
+                                        <Button
+                                            size="lg"
+                                            className="w-full rounded-full bg-zinc-900 hover:bg-zinc-800 text-white h-14 font-bold text-lg"
+                                        >
+                                            Checkout
+                                        </Button>
+                                    </Link>
                                 </div>
                                 <div className="mt-6 flex justify-center text-center text-sm text-zinc-500">
                                     <p>

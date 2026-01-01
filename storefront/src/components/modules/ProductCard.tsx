@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/Button";
+import { useCart } from "@/context/CartContext";
 
 interface ProductCardProps {
     id: string;
@@ -31,6 +32,21 @@ export function ProductCard({
         hover: "https://images.unsplash.com/photo-1582552938357-32b906df40cb?q=80&w=1000&auto=format&fit=crop"
     }
 }: ProductCardProps) {
+    const { addItem } = useCart();
+
+    const handleAddToCart = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        addItem({
+            productTitle: title,
+            price: price,
+            image: images.main,
+            handle: handle,
+            variantTitle: undefined // Base product add
+        });
+    };
+
     return (
         <div className="group relative block h-full w-full">
             <Link href={`/products/${handle}`} className="block h-full w-full">
@@ -57,10 +73,7 @@ export function ProductCard({
                         <Button
                             size="icon"
                             className="bg-white text-zinc-900 shadow-md hover:bg-zinc-900 hover:text-white rounded-full h-10 w-10"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                console.log("Quick add", title);
-                            }}
+                            onClick={handleAddToCart}
                         >
                             <Plus className="w-5 h-5" />
                         </Button>

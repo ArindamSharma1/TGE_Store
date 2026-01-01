@@ -3,9 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
+import { usePathname } from "next/navigation";
 
 export function Footer() {
     const currentYear = new Date().getFullYear();
+    const pathname = usePathname();
+
+    if (pathname === "/checkout") return null;
 
     const footerLinks = [
         { title: "Shop", links: ["New In", "Clothing", "Shoes", "Accessories"] },
