@@ -51,11 +51,11 @@ export function Hero({
                     </p>
                 )}
                 <div className="flex gap-4">
-                    <Button asChild size="lg" className="rounded-full h-14 px-8 text-base">
-                        <Link href={ctaLink}>{ctaText}</Link>
+                    <Button asChild href={ctaLink} size="lg" className="rounded-full h-14 px-8 text-base">
+                        {ctaText}
                     </Button>
-                    <Button asChild variant="secondary" size="lg" className="rounded-full h-14 px-8 text-base bg-white/10 hover:bg-white/20 text-white border-none backdrop-blur-md">
-                        <Link href="/about">About Us</Link>
+                    <Button asChild href="/about" variant="secondary" size="lg" className="rounded-full h-14 px-8 text-base bg-white/10 hover:bg-white/20 text-white border-none backdrop-blur-md">
+                        About Us
                     </Button>
                 </div>
             </div>

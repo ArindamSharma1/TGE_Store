@@ -86,9 +86,9 @@ export default function Home() {
         <Reveal width="100%">
           <div className="flex justify-between items-end mb-10">
             <h2 className="text-2xl font-bold uppercase tracking-tight text-zinc-900">Trending Now</h2>
-            <Link href="/collections/all">
-              <Button variant="ghost" className="hover:bg-zinc-100 rounded-full">View All</Button>
-            </Link>
+            <Button asChild href="/collections/all" variant="ghost" className="hover:bg-zinc-100 rounded-full">
+              View All
+            </Button>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-10">
@@ -135,11 +135,9 @@ export default function Home() {
               <p className="text-white/90 text-lg mb-8 max-w-md font-medium">
                 Effortless outlines for days off. Curated for comfort without compromising style.
               </p>
-              <Link href="/collections/weekend-edit">
-                <Button size="lg" className="rounded-full bg-white text-zinc-900 border-none hover:bg-zinc-100 font-bold px-8 h-14">
-                  Shop the Edit
-                </Button>
-              </Link>
+              <Button asChild href="/collections/weekend-edit" size="lg" className="rounded-full bg-white text-zinc-900 border-none hover:bg-zinc-100 font-bold px-8 h-14">
+                Shop the Edit
+              </Button>
             </div>
           </div>
         </Reveal>
