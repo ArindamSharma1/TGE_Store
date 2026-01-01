@@ -5,7 +5,9 @@ import SmoothScroll from "@/components/global/SmoothScroll";
 import { Header } from "@/components/global/Header";
 import { Footer } from "@/components/global/Footer";
 import { CartProvider } from "@/context/CartContext";
+import { SearchProvider } from "@/context/SearchContext";
 import { CartDrawer } from "@/components/modules/cart/CartDrawer";
+import { SearchOverlay } from "@/components/modules/search/SearchOverlay";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -30,14 +32,17 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased font-sans bg-zinc-50`} suppressHydrationWarning>
         <CartProvider>
-          <SmoothScroll>
-            <Header />
-            <CartDrawer />
-            <main className="min-h-screen">
-              {children}
-            </main>
-            <Footer />
-          </SmoothScroll>
+          <SearchProvider>
+            <SmoothScroll>
+              <Header />
+              <CartDrawer />
+              <SearchOverlay />
+              <main className="min-h-screen">
+                {children}
+              </main>
+              <Footer />
+            </SmoothScroll>
+          </SearchProvider>
         </CartProvider>
       </body>
     </html>
