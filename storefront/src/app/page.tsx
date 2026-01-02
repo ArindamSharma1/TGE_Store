@@ -17,11 +17,15 @@ export default function Home() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const { products } = await medusaClient.store.product.list({
-        limit: 4,
-        fields: "title,handle,thumbnail,id,variants.prices,variants.images,images"
-      });
-      setProducts(products);
+      try {
+        const { products } = await medusaClient.store.product.list({
+          limit: 8, // Increase limit to fill 2 rows if available
+          fields: "*variants.calculated_price,+images"
+        });
+        setProducts(products);
+      } catch (error) {
+        console.error("Failed to fetch home products:", error);
+      }
     };
     fetchProducts();
   }, []);

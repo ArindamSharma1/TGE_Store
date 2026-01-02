@@ -20,7 +20,7 @@ export default function ProductPage() {
             try {
                 const { products } = await medusaClient.store.product.list({
                     handle: handle,
-                    fields: "*variants.calculated_price,+options,+images"
+                    fields: "*variants.calculated_price,+options,+images,+variants.prices"
                 });
 
                 if (products && products.length > 0) {
@@ -49,6 +49,8 @@ export default function ProductPage() {
     // Map images
     const images = (product.images?.map((img: any) => img.url).filter((url: any): url is string => !!url)) || (product.thumbnail ? [product.thumbnail] : []);
 
+    console.log("DEBUG: Product Images", images);
+
     // Map options
     const options = product.options?.map((opt: any) => ({
         name: opt.title,
@@ -56,7 +58,8 @@ export default function ProductPage() {
     })) || [];
 
     // Lowest Price
-    const lowestPrice = product.variants[0]?.prices.find((p: any) => p.currency_code === "inr")?.amount || product.variants[0]?.prices[0]?.amount || 0;
+    const lowestPrice = product.variants?.[0]?.prices?.find((p: any) => p.currency_code === "inr")?.amount ||
+        product.variants?.[0]?.prices?.[0]?.amount || 0;
     const formattedPrice = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(lowestPrice / 100);
 
     return (
