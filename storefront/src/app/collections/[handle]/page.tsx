@@ -1,5 +1,4 @@
 import { Header } from "@/components/global/Header";
-import { Footer } from "@/components/global/Footer";
 import { CollectionHeader } from "@/components/modules/CollectionHeader";
 import { FilterBar } from "@/components/modules/FilterBar";
 import { ProductGrid } from "@/components/modules/ProductGrid";
@@ -82,7 +81,6 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
                 </div>
             </main>
 
-            <Footer />
         </div>
     );
 }

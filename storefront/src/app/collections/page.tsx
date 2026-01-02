@@ -1,5 +1,4 @@
 import { Header } from "@/components/global/Header";
-import { Footer } from "@/components/global/Footer";
 import { GlassCard } from "@/components/ui/GlassCard";
 import Image from "next/image";
 import Link from "next/link";
@@ -88,7 +87,6 @@ export default function CollectionsPage() {
                 </div>
             </main>
 
-            <Footer />
         </div>
     );
 }
