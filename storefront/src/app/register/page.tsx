@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -79,6 +80,10 @@ export default function RegisterPage() {
             await medusaClient.auth.login("customer", "emailpass", {
                 email,
                 password
+            });
+
+            toast.success("Account created successfully!", {
+                description: "You have been signed in."
             });
 
             // Redirect to home or account

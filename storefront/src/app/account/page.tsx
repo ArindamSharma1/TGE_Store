@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/Button";
 import { GlassCard } from "@/components/ui/GlassCard";
 import Link from "next/link";
+import { toast } from "sonner";
 import Image from "next/image";
 import { Package, MapPin, CreditCard, LogOut, ChevronRight } from "lucide-react";
 
@@ -60,6 +61,7 @@ export default function AccountPage() {
 
     const handleLogout = async () => {
         await medusaClient.auth.logout();
+        toast.success("Logged out successfully");
         router.push("/login");
         router.refresh();
     };
