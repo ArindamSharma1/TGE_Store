@@ -60,15 +60,12 @@ export default function RegisterPage() {
             const first_name = nameParts[0];
             const last_name = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
 
-            console.log("Step 1: Requesting registration token for:", email);
             // 1. Get registration token
             const token = await medusaClient.auth.register("customer", "emailpass", {
                 email,
                 password
             });
-            console.log("Step 1 Success: Token received");
 
-            console.log("Step 2: Creating customer profile...");
             // 2. Create customer using the token
             await medusaClient.store.customer.create({
                 email,
@@ -77,28 +74,22 @@ export default function RegisterPage() {
             }, {}, {
                 Authorization: `Bearer ${token}`
             });
-            console.log("Step 2 Success: Customer created");
 
-            console.log("Step 3: Logging in...");
             // 3. Login to ensure session/token is set for future requests
             await medusaClient.auth.login("customer", "emailpass", {
                 email,
                 password
             });
-            console.log("Step 3 Success: Logged in");
 
             // Redirect to home or account
             router.push("/");
             router.refresh();
 
         } catch (error: any) {
-            console.error("FULL RAW ERROR:", error);
             console.error("Registration error details:", {
                 message: error?.message,
                 response: error?.response?.data,
-                status: error?.status || error?.response?.status,
-                type: error?.type,
-                name: error?.name
+                status: error?.status || error?.response?.status
             });
 
             let errorMessage = "Registration failed. Please try again.";
