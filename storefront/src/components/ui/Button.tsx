@@ -7,6 +7,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     size?: "sm" | "md" | "lg" | "icon";
     asChild?: boolean;
     href?: string;
+    target?: string;
+    rel?: string;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
