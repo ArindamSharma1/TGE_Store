@@ -90,17 +90,37 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             await createCart();
         }
 
-        try {
-            let currentCartId = cartId || localStorage.getItem("medusa_cart_id");
-            if (!currentCartId) return;
+        const currentCartId = cartId || localStorage.getItem("medusa_cart_id");
+        if (!currentCartId) return; // Should be created by now
 
+        try {
             const { cart } = await medusaClient.store.cart.createLineItem(currentCartId, {
                 variant_id: variantId,
                 quantity: quantity,
             });
             setItems(mapLineItems(cart.items));
         } catch (e) {
-            console.error("Failed to add item", e);
+            console.error("Failed to add item, attempting to refresh cart...", e);
+            // Self-Healing: Cart might be stale/invalid. Delete and Re-create.
+            localStorage.removeItem("medusa_cart_id");
+            setCartId("");
+
+            try {
+                // Create new cart
+                const { cart: newCart } = await medusaClient.store.cart.create({});
+                setCartId(newCart.id);
+                localStorage.setItem("medusa_cart_id", newCart.id);
+
+                // Retry Add Item
+                const { cart: updatedCart } = await medusaClient.store.cart.createLineItem(newCart.id, {
+                    variant_id: variantId,
+                    quantity: quantity,
+                });
+                setItems(mapLineItems(updatedCart.items));
+                console.log("Cart refreshed and item added.");
+            } catch (retryError) {
+                console.error("Critical: Failed to recover cart.", retryError);
+            }
         }
     };
 

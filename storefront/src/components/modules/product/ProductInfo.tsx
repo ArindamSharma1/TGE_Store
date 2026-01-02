@@ -67,14 +67,20 @@ export function ProductInfo({ title, price, description, options = [], image, ha
         }
 
         if (!selectedVariantId) {
-            console.error("No variant found");
+            console.error("No variant found. Debug Info:", { selections, variants });
             return;
         }
 
-        await addItem({
-            variantId: selectedVariantId,
-            quantity: 1
-        });
+        console.log("DEBUG: Adding to cart", { variantId: selectedVariantId, quantity: 1 });
+
+        try {
+            await addItem({
+                variantId: selectedVariantId,
+                quantity: 1
+            });
+        } catch (e) {
+            console.error("DEBUG: Add to cart failed", e);
+        }
     };
 
     return (
