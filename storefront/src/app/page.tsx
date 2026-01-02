@@ -7,6 +7,8 @@ import Link from "next/link";
 import { ProductCard } from "@/components/modules/ProductCard";
 import { Reveal } from "@/components/ui/Reveal";
 import { Newsletter } from "@/components/modules/Newsletter";
+import { WhyTGE } from "@/components/modules/WhyTGE";
+import { NeedHelp } from "@/components/modules/NeedHelp";
 import { medusaClient } from "@/lib/medusa/client";
 import { useState, useEffect } from "react";
 
@@ -249,48 +251,13 @@ export default function Home() {
       </section>
 
       {/* SECTION 8: WHY TGE */}
-      <section className="mx-auto max-w-7xl px-4 py-20 border-t border-zinc-100">
-        <Reveal width="100%">
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold uppercase tracking-tight text-zinc-900">Why TGE</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {[
-              { title: "Built for Daily Wear", text: "Fabrics that breathe and move with you. Our pieces are engineered for the reality of your day, not just the photo." },
-              { title: "Versatile Design", text: "A modular wardrobe system. Every piece interacts with the next, reducing decision fatigue and maximizing style." },
-              { title: "Modern Comfort", text: "We believe structure shouldn't mean stiffness. Experience tailored fits with the ease of loungewear." }
-            ].map((feature, i) => (
-              <div key={i} className="space-y-4">
-                <h3 className="text-lg font-bold text-zinc-900">{feature.title}</h3>
-                <p className="text-zinc-500 leading-relaxed text-sm md:text-base">
-                  {feature.text}
-                </p>
-              </div>
-            ))}
-          </div>
-        </Reveal>
-      </section>
+      <WhyTGE />
 
-      {/* SECTION 9: NEWSLETTER */}
+      {/* SECTION 9: NEED HELP */}
+      <NeedHelp />
+
+      {/* SECTION 10: NEWSLETTER (Moved to bottom) */}
       <Newsletter />
-
-      {/* SECTION 10: NEED HELP */}
-      <section className="mx-auto max-w-7xl px-4 pb-24 pt-10 border-t border-zinc-100 text-center">
-        <Reveal width="100%">
-          <h2 className="text-2xl font-bold uppercase tracking-tight text-zinc-900 mb-6">Need Help?</h2>
-          <p className="text-zinc-500 mb-8 max-w-md mx-auto leading-relaxed">
-            Our support team is here for you. From fit advice to order tracking, we've got you covered.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button asChild href="/contact" variant="outline" className="rounded-full px-8 h-12 border-zinc-200 hover:border-zinc-900">
-              Contact Support
-            </Button>
-            <Button asChild href="/returns" variant="outline" className="rounded-full px-8 h-12 border-zinc-200 hover:border-zinc-900">
-              Shipping & Returns
-            </Button>
-          </div>
-        </Reveal>
-      </section>
 
     </main>
   );
