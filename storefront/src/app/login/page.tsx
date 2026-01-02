@@ -46,22 +46,33 @@ export default function LoginPage() {
                 password
             });
 
-            // Login successful - Store Token
-            // Medusa V2 returns 'access_token'
-            const token = response.access_token;
+            // Medusa V2: login returns the token string directly in some configs
+            // or an object { access_token: string } in others.
+            // The debugging confirmed it is returning the Token String directly.
+
+            let token: string | undefined;
+
+            if (typeof response === "string") {
+                token = response;
+            } else if (typeof response === "object" && response !== null) {
+                // @ts-ignore
+                token = response.access_token || response.token;
+            }
 
             if (token) {
                 localStorage.setItem("medusa_auth_token", token);
+
+                toast.success("Welcome back!", {
+                    description: "You have successfully signed in."
+                });
+
+                window.location.href = "/";
             } else {
-                console.error("Login succeeded but no token returned", response);
+                console.error("Login failed: Unexpected response format", response);
+                toast.error("Login Error", {
+                    description: "Server returned an unexpected format. Please contact support."
+                });
             }
-
-            toast.success("Welcome back!", {
-                description: "You have successfully signed in."
-            });
-
-            // Force reload to update medusaClient with new token
-            window.location.href = "/";
         } catch (error: any) {
             // Console Hygiene: Log only in development, and use debug level
             if (process.env.NODE_ENV === "development") {

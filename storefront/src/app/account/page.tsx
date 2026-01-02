@@ -6,7 +6,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import Image from "next/image";
 import { Package, MapPin, CreditCard, LogOut, ChevronRight, Plus, Trash2, Edit2, User, Loader2 } from "lucide-react";
-import { medusaClient } from "@/lib/medusa/client";
+import { medusaClient, getMedusa } from "@/lib/medusa/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/Input";
@@ -37,8 +37,13 @@ export default function AccountPage() {
     useEffect(() => {
         const checkAuth = async () => {
             try {
+                // Use dynamic client to ensure headers are fresh
+                const client = getMedusa();
+
                 // 1. Get Customer (with addresses)
-                const { customer } = await medusaClient.store.customer.retrieve();
+                // Remove the customHeaders arg that caused the crash
+                const { customer } = await client.store.customer.retrieve();
+
                 if (!customer) throw new Error("Not logged in");
                 setCustomer(customer);
                 setProfileForm({
@@ -48,12 +53,15 @@ export default function AccountPage() {
                 });
 
                 // 2. Get Orders
-                const { orders } = await medusaClient.store.orders.list({
+                // Note: Medusa SDK V2 namespaces are usually singular (store.cart, store.customer, store.order)
+                // We previously used 'orders' which caused a crash.
+                const { orders } = await client.store.order.list({
                     fields: "*items"
                 });
                 setOrders(orders);
 
             } catch (e) {
+                console.error("Auth Check Failed:", e);
                 router.push("/login");
             } finally {
                 setIsLoading(false);
