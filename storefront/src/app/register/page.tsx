@@ -86,13 +86,20 @@ export default function RegisterPage() {
             router.refresh();
 
         } catch (error: any) {
-            console.error("Registration error:", error);
+            console.error("Registration error details:", {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status
+            });
+
             let errorMessage = "Registration failed. Please try again.";
 
             if (error.response?.data?.type === "duplicate_error") {
                 errorMessage = "User with this email already exists.";
             } else if (error.response?.data?.message) {
                 errorMessage = error.response.data.message;
+            } else if (error.message) {
+                errorMessage = error.message;
             }
 
             setErrors(prev => ({
