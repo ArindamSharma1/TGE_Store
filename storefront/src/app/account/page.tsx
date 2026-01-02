@@ -97,16 +97,19 @@ export default function AccountPage() {
         e.preventDefault();
         try {
             const client = getMedusa();
-            // SDK V2: Use 'createAddress' directly on customer resource
-            // Payload needs to be `(address)`
-            const { customer } = await client.store.customer.createAddress({
+            // 1. Create Address
+            await client.store.customer.createAddress({
                 ...addressForm,
                 company: "",
                 address_2: "",
                 province: "",
                 metadata: {}
             });
-            setCustomer(customer); // Customer object includes updated addresses
+
+            // 2. Refetch Customer to get the updated list explicitly
+            const { customer: freshCustomer } = await client.store.customer.retrieve();
+
+            setCustomer(freshCustomer);
             setIsAddingAddress(false);
             setAddressForm({ first_name: "", last_name: "", address_1: "", city: "", postal_code: "", phone: "", country_code: "in" }); // Reset
             toast.success("Address added");
@@ -119,9 +122,12 @@ export default function AccountPage() {
     const handleDeleteAddress = async (addressId: string) => {
         try {
             const client = getMedusa();
-            // SDK V2: Use 'deleteAddress' directly on customer resource
-            const { customer } = await client.store.customer.deleteAddress(addressId);
-            setCustomer(customer);
+            await client.store.customer.deleteAddress(addressId);
+
+            // Refetch Customer
+            const { customer: freshCustomer } = await client.store.customer.retrieve();
+
+            setCustomer(freshCustomer);
             toast.success("Address removed");
         } catch (e) {
             toast.error("Failed to remove address");
