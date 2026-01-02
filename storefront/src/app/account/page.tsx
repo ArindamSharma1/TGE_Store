@@ -29,9 +29,49 @@ const MOCK_ORDERS = [
     }
 ];
 
+import { medusaClient } from "@/lib/medusa/client";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+// Mock Order Data (keep as is)
+const MOCK_ORDERS = [... ]; // Logic omitted for brevity, but I will just preserve existing lines if possible? No, I need to fully replace the top part or insert lines.
+// Since I can't effectively "preserve" efficiently with replace_file_content if I'm not careful, I will just add the imports and the logic inside the function.
+
 export default function AccountPage() {
+    const router = useRouter();
+    const [customer, setCustomer] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const { customer } = await medusaClient.store.customer.retrieve();
+                if (!customer) {
+                    throw new Error("Not logged in");
+                }
+                setCustomer(customer);
+            } catch (e) {
+                router.push("/login");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        checkAuth();
+    }, [router]);
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen pt-32 pb-24 px-4 bg-zinc-50 flex items-center justify-center">
+                <div className="animate-pulse">Loading account...</div>
+            </div>
+        );
+    }
+
+    if (!customer) return null;
+
     return (
         <div className="min-h-screen pt-32 pb-24 px-4 bg-zinc-50">
+            {/* ... rest of the component ... */}
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">

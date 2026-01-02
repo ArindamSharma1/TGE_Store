@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils/cn";
 import { useCart } from "@/context/CartContext";
 import { useSearch } from "@/context/SearchContext";
 import { usePathname } from "next/navigation";
+import { medusaClient } from "@/lib/medusa/client";
 
 export function Header() {
     const { scrollY } = useScroll();
@@ -17,6 +18,21 @@ export function Header() {
     const { openCart, cartCount } = useCart();
     const { openSearch } = useSearch();
     const pathname = usePathname();
+    const [customer, setCustomer] = useState<any>(null);
+
+    useEffect(() => {
+        // Check for authentication
+        const checkAuth = async () => {
+            try {
+                const { customer } = await medusaClient.store.customer.retrieve();
+                setCustomer(customer);
+            } catch (e) {
+                // Not logged in or error
+                setCustomer(null);
+            }
+        };
+        checkAuth();
+    }, [pathname]); // Re-check on navigation
 
     useEffect(() => {
         return scrollY.onChange((latest) => {
@@ -89,9 +105,17 @@ export function Header() {
                             "rounded-full p-1 flex items-center gap-1 transition-all duration-300",
                             isScrolled ? "glass-heavy shadow-md" : "glass-card"
                         )}>
-                            <Button asChild href="/login" variant="ghost" size="icon" className="rounded-full w-10 h-10 hover:bg-zinc-100/50">
+                            {/* Updated User Icon Logic */}
+                            <Button
+                                asChild
+                                href={customer ? "/account" : "/login"}
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-full w-10 h-10 hover:bg-zinc-100/50"
+                            >
                                 <User className="w-5 h-5" />
                             </Button>
+
                             <Button
                                 variant="ghost"
                                 size="icon"
