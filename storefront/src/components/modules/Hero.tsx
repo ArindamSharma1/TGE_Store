@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { FadeIn } from "@/components/ui/FadeIn";
 
 interface HeroProps {
     heading?: string;
@@ -42,22 +43,28 @@ export function Hero({
 
             {/* Main Content (Centered) */}
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-4">
-                <h1 className="text-5xl md:text-8xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-6 drop-shadow-lg max-w-4xl">
-                    {heading}
-                </h1>
+                <FadeIn delay={0.1} direction="up">
+                    <h1 className="text-5xl md:text-8xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-6 drop-shadow-lg max-w-4xl">
+                        {heading}
+                    </h1>
+                </FadeIn>
                 {subheading && (
-                    <p className="text-lg md:text-xl text-white/90 font-medium mb-8 max-w-lg drop-shadow-md">
-                        {subheading}
-                    </p>
+                    <FadeIn delay={0.2} direction="up">
+                        <p className="text-lg md:text-xl text-white/90 font-medium mb-8 max-w-lg drop-shadow-md mx-auto">
+                            {subheading}
+                        </p>
+                    </FadeIn>
                 )}
-                <div className="flex gap-4">
-                    <Button asChild href={ctaLink} size="lg" className="rounded-full h-14 px-8 text-base">
-                        {ctaText}
-                    </Button>
-                    <Button asChild href="/about" variant="secondary" size="lg" className="rounded-full h-14 px-8 text-base bg-white/10 hover:bg-white/20 text-white border-none backdrop-blur-md">
-                        About Us
-                    </Button>
-                </div>
+                <FadeIn delay={0.3} direction="up">
+                    <div className="flex gap-4 justify-center">
+                        <Button asChild href={ctaLink} size="lg" className="rounded-full h-14 px-8 text-base">
+                            {ctaText}
+                        </Button>
+                        <Button asChild href="/about" variant="secondary" size="lg" className="rounded-full h-14 px-8 text-base bg-white/10 hover:bg-white/20 text-white border-none backdrop-blur-md">
+                            About Us
+                        </Button>
+                    </div>
+                </FadeIn>
             </div>
 
             {/* Floating Info (Bottom Right) */}

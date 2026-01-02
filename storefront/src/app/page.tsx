@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ProductCard } from "@/components/modules/ProductCard";
 import { Reveal } from "@/components/ui/Reveal";
+import { Newsletter } from "@/components/modules/Newsletter";
 import { medusaClient } from "@/lib/medusa/client";
 import { useState, useEffect } from "react";
 
@@ -270,7 +271,10 @@ export default function Home() {
         </Reveal>
       </section>
 
-      {/* SECTION 9: NEED HELP */}
+      {/* SECTION 9: NEWSLETTER */}
+      <Newsletter />
+
+      {/* SECTION 10: NEED HELP */}
       <section className="mx-auto max-w-7xl px-4 pb-24 pt-10 border-t border-zinc-100 text-center">
         <Reveal width="100%">
           <h2 className="text-2xl font-bold uppercase tracking-tight text-zinc-900 mb-6">Need Help?</h2>
