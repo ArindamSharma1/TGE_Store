@@ -67,21 +67,7 @@ export function Hero({
                 </FadeIn>
             </div>
 
-            {/* Floating Info (Bottom Right) */}
-            <div className="absolute bottom-12 right-4 md:right-12 z-20 hidden md:block">
-                <GlassCard className="p-6 md:max-w-xs w-full backdrop-blur-xl bg-black/20 border-white/10 text-white">
-                    <div className="flex justify-between items-start mb-4">
-                        <span className="text-[10px] font-bold uppercase tracking-widest bg-white/20 px-2 py-1 rounded-full">New Drop</span>
-                        <span className="text-[10px] font-medium opacity-80">Aug 24</span>
-                    </div>
-                    <p className="text-base font-bold leading-tight mb-2">
-                        Essential Pieces for the Urban Nomad.
-                    </p>
-                    <Link href={ctaLink} className="text-xs font-bold underline underline-offset-4 hover:opacity-80">
-                        View Lookbook
-                    </Link>
-                </GlassCard>
-            </div>
+
         </section>
     );
 }

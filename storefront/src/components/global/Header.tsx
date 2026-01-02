@@ -58,7 +58,7 @@ export function Header() {
                     <nav
                         className={cn(
                             "rounded-full px-2 py-2 flex items-center gap-1 transition-all duration-300",
-                            isScrolled ? "glass-heavy shadow-md" : "glass-card"
+                            isScrolled ? "glass-heavy shadow-sm" : "glass-card"
                         )}
                     >
                         <Button variant="ghost" size="icon" className="rounded-full md:hidden">
@@ -90,7 +90,7 @@ export function Header() {
                     <div className="flex items-center gap-3">
                         <div className={cn(
                             "rounded-full p-1 flex items-center gap-1 transition-all duration-300",
-                            isScrolled ? "glass-heavy shadow-md" : "glass-card"
+                            isScrolled ? "glass-heavy shadow-sm" : "glass-card"
                         )}>
                             <Button
                                 variant="ghost"
@@ -103,7 +103,7 @@ export function Header() {
                         </div>
                         <div className={cn(
                             "rounded-full p-1 flex items-center gap-1 transition-all duration-300",
-                            isScrolled ? "glass-heavy shadow-md" : "glass-card"
+                            isScrolled ? "glass-heavy shadow-sm" : "glass-card"
                         )}>
                             {/* Updated User Icon Logic */}
                             <Button

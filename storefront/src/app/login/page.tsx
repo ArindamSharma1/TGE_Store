@@ -64,13 +64,18 @@ export default function LoginPage() {
 
             let errorMessage = "Invalid email or password. Please try again.";
 
-            // Safe error inspection
-            if (error?.response?.data?.message) {
+            // Handle specific 401 Unauthorized (Wrong credentials)
+            if (error?.response?.status === 401) {
+                errorMessage = "The email or password you entered is incorrect.";
+            } else if (error?.response?.data?.message) {
+                // Use backend message if available and safe (e.g., validation)
                 errorMessage = error.response.data.message;
-            } else if (error?.message && error.message !== "Network Error") {
-                // Only use the raw message if it's not a generic network error
-                errorMessage = error.message;
             }
+
+            // Check for user not found specifically if backend exposes it (Medusa typically treats this as 401 for security to prevent enumeration, but we can customize the generic message)
+            // However, strictly following user request to say "email not existing", we might need to rely on 401. 
+            // Ideally, Medusa returns 401 for both wrong password and user not found. 
+            // We will update the generic 401 message to cover both cleanly or rely on specific types if available.
 
             setErrors(prev => ({
                 ...prev,
