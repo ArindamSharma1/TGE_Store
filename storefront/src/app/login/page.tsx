@@ -41,14 +41,19 @@ export default function LoginPage() {
         }
 
         try {
-            const { token } = await medusaClient.auth.login("customer", "emailpass", {
+            const response = await medusaClient.auth.login("customer", "emailpass", {
                 email,
                 password
             });
 
             // Login successful - Store Token
+            // Medusa V2 returns 'access_token'
+            const token = response.access_token;
+
             if (token) {
                 localStorage.setItem("medusa_auth_token", token);
+            } else {
+                console.error("Login succeeded but no token returned", response);
             }
 
             toast.success("Welcome back!", {
