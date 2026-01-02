@@ -40,6 +40,7 @@ export default function AccountPage() {
     const [customer, setCustomer] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    // function AccountPage()...
     useEffect(() => {
         const checkAuth = async () => {
             try {
@@ -56,6 +57,12 @@ export default function AccountPage() {
         };
         checkAuth();
     }, [router]);
+
+    const handleLogout = async () => {
+        await medusaClient.auth.logout();
+        router.push("/login");
+        router.refresh();
+    };
 
     if (isLoading) {
         return (
@@ -77,9 +84,13 @@ export default function AccountPage() {
                         <h1 className="text-3xl font-black uppercase tracking-tighter text-zinc-900 mb-2">
                             My Account
                         </h1>
-                        <p className="text-zinc-500">Welcome back, Arindam.</p>
+                        <p className="text-zinc-500">Welcome back, {customer.first_name || "Guest"}.</p>
                     </div>
-                    <Button variant="outline" className="rounded-full border-zinc-200 hover:bg-zinc-100 text-zinc-600 gap-2">
+                    <Button
+                        variant="outline"
+                        className="rounded-full border-zinc-200 hover:bg-zinc-100 text-zinc-600 gap-2"
+                        onClick={handleLogout}
+                    >
                         <LogOut className="w-4 h-4" />
                         Sign Out
                     </Button>
