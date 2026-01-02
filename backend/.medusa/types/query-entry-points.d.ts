@@ -806,6 +806,45 @@ export type ApiKey = {
   sales_channels: Maybe<Array<Maybe<SalesChannel>>>;
 };
 
+export type Store = {
+  __typename?: 'Store';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  default_sales_channel_id: Maybe<Scalars['String']['output']>;
+  default_region_id: Maybe<Scalars['String']['output']>;
+  default_location_id: Maybe<Scalars['String']['output']>;
+  metadata: Maybe<Scalars['JSON']['output']>;
+  supported_currencies: Array<Maybe<StoreCurrency>>;
+  supported_locales: Array<Maybe<StoreLocale>>;
+  created_at: Scalars['DateTime']['output'];
+  updated_at: Scalars['DateTime']['output'];
+  deleted_at: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type StoreCurrency = {
+  __typename?: 'StoreCurrency';
+  id: Scalars['ID']['output'];
+  currency_code: Scalars['String']['output'];
+  is_default: Scalars['Boolean']['output'];
+  store_id: Maybe<Scalars['String']['output']>;
+  store: Maybe<Store>;
+  created_at: Scalars['DateTime']['output'];
+  updated_at: Scalars['DateTime']['output'];
+  deleted_at: Maybe<Scalars['DateTime']['output']>;
+  currency: Maybe<Currency>;
+};
+
+export type StoreLocale = {
+  __typename?: 'StoreLocale';
+  id: Scalars['ID']['output'];
+  locale_code: Scalars['String']['output'];
+  store_id: Maybe<Scalars['String']['output']>;
+  store: Maybe<Store>;
+  created_at: Scalars['DateTime']['output'];
+  updated_at: Scalars['DateTime']['output'];
+  deleted_at: Maybe<Scalars['DateTime']['output']>;
+};
+
 export type ChangeActionType =
   | 'CANCEL_RETURN_ITEM'
   | 'FULFILL_ITEM'
@@ -1387,45 +1426,6 @@ export type OrderTransaction = {
   metadata: Maybe<Scalars['JSON']['output']>;
   created_at: Scalars['DateTime']['output'];
   updated_at: Scalars['DateTime']['output'];
-};
-
-export type Store = {
-  __typename?: 'Store';
-  id: Scalars['ID']['output'];
-  name: Scalars['String']['output'];
-  default_sales_channel_id: Maybe<Scalars['String']['output']>;
-  default_region_id: Maybe<Scalars['String']['output']>;
-  default_location_id: Maybe<Scalars['String']['output']>;
-  metadata: Maybe<Scalars['JSON']['output']>;
-  supported_currencies: Array<Maybe<StoreCurrency>>;
-  supported_locales: Array<Maybe<StoreLocale>>;
-  created_at: Scalars['DateTime']['output'];
-  updated_at: Scalars['DateTime']['output'];
-  deleted_at: Maybe<Scalars['DateTime']['output']>;
-};
-
-export type StoreCurrency = {
-  __typename?: 'StoreCurrency';
-  id: Scalars['ID']['output'];
-  currency_code: Scalars['String']['output'];
-  is_default: Scalars['Boolean']['output'];
-  store_id: Maybe<Scalars['String']['output']>;
-  store: Maybe<Store>;
-  created_at: Scalars['DateTime']['output'];
-  updated_at: Scalars['DateTime']['output'];
-  deleted_at: Maybe<Scalars['DateTime']['output']>;
-  currency: Maybe<Currency>;
-};
-
-export type StoreLocale = {
-  __typename?: 'StoreLocale';
-  id: Scalars['ID']['output'];
-  locale_code: Scalars['String']['output'];
-  store_id: Maybe<Scalars['String']['output']>;
-  store: Maybe<Store>;
-  created_at: Scalars['DateTime']['output'];
-  updated_at: Scalars['DateTime']['output'];
-  deleted_at: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type ViewConfiguration = {
@@ -2285,6 +2285,12 @@ declare module '@medusajs/framework/types' {
     shipping_method_tax_lines: ShippingMethodTaxLine
     api_key: ApiKey
     api_keys: ApiKey
+    store: Store
+    stores: Store
+    store_currency: StoreCurrency
+    store_currencies: StoreCurrency
+    store_locale: StoreLocale
+    store_locales: StoreLocale
     order: Order
     orders: Order
     order_address: OrderAddress
@@ -2307,12 +2313,6 @@ declare module '@medusajs/framework/types' {
     returns: Return
     return_reason: any
     return_reasons: any
-    store: Store
-    stores: Store
-    store_currency: StoreCurrency
-    store_currencies: StoreCurrency
-    store_locale: StoreLocale
-    store_locales: StoreLocale
     view_configuration: ViewConfiguration
     view_configurations: ViewConfiguration
     user_preference: UserPreference
