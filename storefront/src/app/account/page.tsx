@@ -33,9 +33,7 @@ import { medusaClient } from "@/lib/medusa/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-// Mock Order Data (keep as is)
-const MOCK_ORDERS = [... ]; // Logic omitted for brevity, but I will just preserve existing lines if possible? No, I need to fully replace the top part or insert lines.
-// Since I can't effectively "preserve" efficiently with replace_file_content if I'm not careful, I will just add the imports and the logic inside the function.
+
 
 export default function AccountPage() {
     const router = useRouter();
