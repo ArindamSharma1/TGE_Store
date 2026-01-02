@@ -3,35 +3,7 @@ import { CollectionHeader } from "@/components/modules/CollectionHeader";
 import { FilterBar } from "@/components/modules/FilterBar";
 import { ProductGrid } from "@/components/modules/ProductGrid";
 import { Button } from "@/components/ui/Button";
-
-// Mock Data (Enhanced with array images for the new card)
-const MOCK_PRODUCTS = Array.from({ length: 9 }).map((_, i) => ({
-    id: `prod_${i}`,
-    title: [
-        "Oversized Cotton T-Shirt",
-        "Slim Fit Denim Jeans",
-        "Wool Blend Coat",
-        "Leather Chelsea Boots",
-        "Knitted Crew Neck Jumper",
-        "Silk Button Up",
-        "Pleated Trousers",
-        "Tech Runner 2000",
-        "Crossbody Bag"
-    ][i % 9],
-    price: [45, 120, 250, 180, 85, 150, 95, 210, 65][i % 9],
-    handle: `product-${i}`,
-    images: {
-        main: [
-            "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1780&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1542272454315-4c01d7abdf4a?q=80&w=2070&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1936&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?q=80&w=1000&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1618932260643-2b672a8d3107?q=80&w=1000&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop"
-        ][i % 6],
-        hover: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=1887&auto=format&fit=crop"
-    }
-}));
+import { medusaClient } from "@/lib/medusa/client";
 
 interface CollectionPageProps {
     params: Promise<{
@@ -42,8 +14,65 @@ interface CollectionPageProps {
 export default async function CollectionPage({ params }: CollectionPageProps) {
     const { handle } = await params;
 
-    // Simple logic to format title
-    const formattedTitle = handle === "all" ? "All Products" : handle.replace(/-/g, " ");
+    // Helper: Map Medusa Product to UI Product
+    const mapProduct = (p: any) => {
+        const lowestPrice = p.variants?.[0]?.prices?.find((px: any) => px.currency_code === "inr")?.amount ||
+            p.variants?.[0]?.prices?.[0]?.amount || 0;
+
+        return {
+            id: p.id,
+            title: p.title,
+            price: lowestPrice / 100, // Medusa stores in cents
+            handle: p.handle,
+            images: {
+                main: p.thumbnail || "",
+                // Fallback to second image if available, else thumbnail
+                hover: p.images?.[1]?.url || p.images?.[0]?.url || p.thumbnail || ""
+            }
+        };
+    };
+
+    let products = [];
+    let collectionTitle = "All Products";
+    let collectionCount = 0;
+
+    try {
+        if (handle === "all") {
+            const { products: fetchedProducts, count } = await medusaClient.store.product.list({
+                fields: "*variants.calculated_price,+images",
+                limit: 50 // Initial limit
+            });
+            products = fetchedProducts.map(mapProduct);
+            collectionCount = count;
+        } else {
+            // 1. Get Collection ID by Handle
+            // Medusa V2: List collections and filter by handle
+            const { collections } = await medusaClient.store.collection.list({
+                handle: handle,
+                limit: 1
+            });
+
+            const collection = collections[0];
+
+            if (collection) {
+                collectionTitle = collection.title;
+
+                // 2. Get Products for this Collection
+                const { products: fetchedProducts, count } = await medusaClient.store.product.list({
+                    collection_id: collection.id,
+                    fields: "*variants.calculated_price,+images",
+                    limit: 50
+                });
+
+                products = fetchedProducts.map(mapProduct);
+                collectionCount = count;
+            } else {
+                collectionTitle = "Collection Not Found";
+            }
+        }
+    } catch (e) {
+        console.error("Failed to fetch collection data:", e);
+    }
 
     return (
         <div className="bg-zinc-50 min-h-screen flex flex-col">
@@ -54,9 +83,9 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
 
                     {/* Header Section */}
                     <CollectionHeader
-                        title={formattedTitle}
-                        description="Explore our latest collection of essentials designed for the modern wardrobe. Sustainability meets style."
-                        count={MOCK_PRODUCTS.length}
+                        title={collectionTitle}
+                        description={`Explore our ${collectionTitle} collection. Quality essentials for the modern wardrobe.`}
+                        count={collectionCount}
                     />
 
                     {/* Filter Bar (Sticky) */}
@@ -65,18 +94,27 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
                     </div>
 
                     {/* Product Grid */}
-                    <ProductGrid products={MOCK_PRODUCTS} />
-
-                    {/* Load More */}
-                    <div className="mt-20 flex flex-col items-center gap-4">
-                        <span className="text-xs text-zinc-400 font-medium">Showing 9 of 45 products</span>
-                        <div className="w-48 h-1 bg-zinc-200 rounded-full overflow-hidden">
-                            <div className="w-1/4 h-full bg-zinc-900 rounded-full"></div>
+                    {products.length > 0 ? (
+                        <ProductGrid products={products} />
+                    ) : (
+                        <div className="py-20 text-center">
+                            <p className="text-zinc-500">No products found in this collection.</p>
+                            <p className="text-sm text-zinc-400 mt-2">Try checking back later!</p>
                         </div>
-                        <Button variant="outline" size="lg" className="rounded-full px-8 mt-2">
-                            Load More
-                        </Button>
-                    </div>
+                    )}
+
+                    {/* Load More (Hidden if no more products - for now static check) */}
+                    {collectionCount > 50 && (
+                        <div className="mt-20 flex flex-col items-center gap-4">
+                            <span className="text-xs text-zinc-400 font-medium">Showing {products.length} of {collectionCount} products</span>
+                            <div className="w-48 h-1 bg-zinc-200 rounded-full overflow-hidden">
+                                <div className="w-1/4 h-full bg-zinc-900 rounded-full"></div>
+                            </div>
+                            <Button variant="outline" size="lg" className="rounded-full px-8 mt-2">
+                                Load More
+                            </Button>
+                        </div>
+                    )}
 
                 </div>
             </main>
