@@ -1,11 +1,13 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { medusaClient } from "@/lib/medusa/client";
 
 export type CartItem = {
-    id: string; // Product ID + Variant IDs ideally, but for now just a unique string
+    id: string; // Line Item ID
+    variantId: string;
     productTitle: string;
-    variantTitle?: string; // e.g. "Size: M / Color: Black"
+    variantTitle?: string;
     price: number;
     image: string;
     quantity: number;
@@ -18,10 +20,11 @@ interface CartContextType {
     closeCart: () => void;
     toggleCart: () => void;
     items: CartItem[];
-    addItem: (item: Omit<CartItem, "id" | "quantity">) => void;
-    removeItem: (id: string) => void;
+    addItem: (item: { variantId: string; quantity: number }) => Promise<void>;
+    removeItem: (id: string) => Promise<void>;
     cartCount: number;
     subtotal: number;
+    cartId: string;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -29,61 +32,86 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const [isOpen, setIsOpen] = useState(false);
     const [items, setItems] = useState<CartItem[]>([]);
-
-    // Hydrate from local storage on mount
-    useEffect(() => {
-        const savedCart = localStorage.getItem("tge-cart");
-        if (savedCart) {
-            try {
-                setItems(JSON.parse(savedCart));
-            } catch (e) {
-                console.error("Failed to parse cart", e);
-            }
-        }
-    }, []);
-
-    // Persist to local storage
-    useEffect(() => {
-        localStorage.setItem("tge-cart", JSON.stringify(items));
-    }, [items]);
+    const [cartId, setCartId] = useState<string>("");
 
     const openCart = () => setIsOpen(true);
     const closeCart = () => setIsOpen(false);
     const toggleCart = () => setIsOpen((prev) => !prev);
 
-    const addItem = (itemToAdd: Omit<CartItem, "id" | "quantity">) => {
-        // Open cart immediately when adding
-        setIsOpen(true);
-
-        setItems((prev) => {
-            const existingItem = prev.find(
-                (item) =>
-                    item.handle === itemToAdd.handle &&
-                    item.variantTitle === itemToAdd.variantTitle
-            );
-
-            if (existingItem) {
-                return prev.map((item) =>
-                    item.id === existingItem.id
-                        ? { ...item, quantity: item.quantity + 1 }
-                        : item
-                );
+    // Initialize Cart
+    useEffect(() => {
+        const initCart = async () => {
+            const storedCartId = localStorage.getItem("medusa_cart_id");
+            if (storedCartId) {
+                try {
+                    const { cart } = await medusaClient.store.cart.retrieve(storedCartId, {
+                        fields: "*items,*items.variant,*items.variant.product"
+                    });
+                    setCartId(cart.id);
+                    setItems(mapLineItems(cart.items));
+                } catch (e) {
+                    console.error("Failed to retrieve cart, creating new one", e);
+                    createCart();
+                }
+            } else {
+                createCart();
             }
+        };
+        initCart();
+    }, []);
 
-            const newItem: CartItem = {
-                ...itemToAdd,
-                id: Math.random().toString(36).substring(7),
-                quantity: 1,
-            };
-
-            console.log("Adding item to cart:", newItem);
-
-            return [...prev, newItem];
-        });
+    const createCart = async () => {
+        try {
+            const { cart } = await medusaClient.store.cart.create({});
+            setCartId(cart.id);
+            localStorage.setItem("medusa_cart_id", cart.id);
+            setItems([]);
+        } catch (e) {
+            console.error("Failed to create cart", e);
+        }
     };
 
-    const removeItem = (id: string) => {
-        setItems((prev) => prev.filter((item) => item.id !== id));
+    const mapLineItems = (medusaItems: any[]): CartItem[] => {
+        return medusaItems?.map((item) => ({
+            id: item.id,
+            variantId: item.variant_id,
+            productTitle: item.title,
+            variantTitle: item.variant_title,
+            price: item.unit_price / 100, // Medusa stores in cents
+            image: item.thumbnail,
+            quantity: item.quantity,
+            handle: item.variant?.product?.handle || "",
+        })) || [];
+    };
+
+    const addItem = async ({ variantId, quantity }: { variantId: string; quantity: number }) => {
+        setIsOpen(true);
+        if (!cartId) {
+            await createCart();
+        }
+
+        try {
+            let currentCartId = cartId || localStorage.getItem("medusa_cart_id");
+            if (!currentCartId) return;
+
+            const { cart } = await medusaClient.store.cart.createLineItem(currentCartId, {
+                variant_id: variantId,
+                quantity: quantity,
+            });
+            setItems(mapLineItems(cart.items));
+        } catch (e) {
+            console.error("Failed to add item", e);
+        }
+    };
+
+    const removeItem = async (id: string) => {
+        if (!cartId) return;
+        try {
+            const { cart } = await medusaClient.store.cart.deleteLineItem(cartId, id);
+            setItems(mapLineItems(cart.items));
+        } catch (e) {
+            console.error("Failed to remove item", e);
+        }
     };
 
     const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
@@ -101,6 +129,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 removeItem,
                 cartCount,
                 subtotal,
+                cartId,
             }}
         >
             {children}

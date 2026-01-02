@@ -6,8 +6,23 @@ import Image from "next/image";
 import Link from "next/link";
 import { ProductCard } from "@/components/modules/ProductCard";
 import { Reveal } from "@/components/ui/Reveal";
+import { medusaClient } from "@/lib/medusa/client";
+import { useState, useEffect } from "react";
 
 export default function Home() {
+  const [products, setProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { products } = await medusaClient.store.product.list({
+        limit: 4,
+        fields: "title,handle,thumbnail,id,variants.prices,variants.images,images"
+      });
+      setProducts(products);
+    };
+    fetchProducts();
+  }, []);
+
   return (
     <main className="min-h-screen bg-zinc-50 pb-20">
       <Hero
@@ -97,27 +112,22 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-10">
-            {[
-              { id: "t1", title: "Heavyweight Box Tee", price: 45, img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800&auto=format&fit=crop" },
-              { id: "t2", title: "Technical Cargo Pant", price: 120, img: "https://images.unsplash.com/photo-1552168324-d612d77725e3?q=80&w=800&auto=format&fit=crop" },
-              { id: "t3", title: "Oversized Puffer", price: 240, img: "https://images.unsplash.com/photo-1544923246-77307dd654cb?q=80&w=800&auto=format&fit=crop" },
-              { id: "t4", title: "Mohair Knit Cardigan", price: 160, img: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?q=80&w=800&auto=format&fit=crop" },
-              { id: "t5", title: "Relaxed Denim", price: 95, img: "https://images.unsplash.com/photo-1582552938357-32b906df40cb?q=80&w=800&auto=format&fit=crop" },
-              { id: "t6", title: "Utility Vest", price: 110, img: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=800&auto=format&fit=crop" },
-              { id: "t7", title: "Constructed Blazer", price: 280, img: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=800&auto=format&fit=crop" },
-              { id: "t8", title: "Leather Crossbody", price: 180, img: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=800&auto=format&fit=crop" }
-            ].map((product) => (
-              <ProductCard
-                key={product.id}
-                id={product.id}
-                title={product.title}
-                price={product.price}
-                currencyCode="USD"
-                handle={product.title.toLowerCase().replace(/ /g, "-")}
-                thumbnail={product.img}
-                images={{ main: product.img, hover: product.img }}
-              />
-            ))}
+            {products.map((product) => {
+              const lowestPrice = product.variants[0]?.prices?.find((p: any) => p.currency_code === "inr")?.amount || product.variants[0]?.prices?.[0]?.amount || 0;
+              return (
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  title={product.title}
+                  price={lowestPrice / 100} // Medusa prices are in Rupees (for now, will add international options later)
+                  currencyCode={"INR"}
+                  handle={product.handle}
+                  thumbnail={product.thumbnail}
+                  images={{ main: product.thumbnail, hover: product.images[1]?.url || product.thumbnail }}
+                  defaultVariantId={product.variants[0]?.id}
+                />
+              );
+            })}
           </div>
         </Reveal>
       </section>

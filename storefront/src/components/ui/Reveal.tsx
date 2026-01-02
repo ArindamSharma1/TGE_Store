@@ -13,7 +13,7 @@ interface RevealProps {
 
 export function Reveal({ children, className, delay = 0.25, width = "fit-content" }: RevealProps) {
     const ref = useRef(null);
-    const isInView = useInView(ref, { once: true, amount: 0.2 }); // Trigger when 20% visible
+    const isInView = useInView(ref, { once: true, amount: 0.15 }); // Trigger when 15% visible, don't change it without asking 
 
     return (
         <div ref={ref} className={cn("relative overflow-hidden", width === "100%" ? "w-full" : "w-fit", className)}>

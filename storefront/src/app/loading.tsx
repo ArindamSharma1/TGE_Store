@@ -4,7 +4,7 @@ export default function Loading() {
     return (
         <div className="flex w-full h-screen items-center justify-center bg-zinc-50">
             <div className="flex flex-col items-center gap-4">
-                {/* Simple TGE Logo Pulse */}
+                {/* Simple TGE Logo */}
                 <div className="flex items-center gap-2 animate-pulse">
                     <span className="font-black text-4xl tracking-tighter">TGE</span>
                 </div>

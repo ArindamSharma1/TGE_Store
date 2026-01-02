@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { Heart } from "lucide-react";
 
-// Mock Wishlist Data
+// Mock Wishlist Data - will update it account wise
 const WISHLIST_ITEMS = [
     {
         id: "w1",

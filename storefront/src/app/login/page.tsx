@@ -2,18 +2,62 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { medusaClient } from "@/lib/medusa/client";
 
 export default function LoginPage() {
+    const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState({
         email: "",
-        password: ""
+        password: "",
+        general: ""
     });
+
+    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setErrors({ email: "", password: "", general: "" });
+
+        const formData = new FormData(e.currentTarget);
+        const email = formData.get("email") as string;
+        const password = formData.get("password") as string;
+
+        if (!email || !password) {
+            setErrors(prev => ({
+                ...prev,
+                email: !email ? "Email is required" : "",
+                password: !password ? "Password is required" : ""
+            }));
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            await medusaClient.auth.login("customer", "emailpass", {
+                email,
+                password
+            });
+
+            // Login successful
+            router.push("/");
+            router.refresh();
+        } catch (error: any) {
+            console.error("Login error:", error);
+            setErrors(prev => ({
+                ...prev,
+                general: error.response?.data?.message || "Invalid email or password. Please try again."
+            }));
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <div className="min-h-screen pt-32 pb-20 px-4 flex items-center justify-center bg-zinc-50">
@@ -27,19 +71,27 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                <form className="space-y-6" onSubmit={handleLogin}>
+                    {errors.general && (
+                        <div className="p-3 bg-red-50 text-red-500 text-sm font-medium rounded-lg">
+                            {errors.general}
+                        </div>
+                    )}
+
                     <div className="space-y-2">
                         <label htmlFor="email" className="text-sm font-bold text-zinc-900 uppercase tracking-wide">
                             Email
                         </label>
                         <Input
                             id="email"
+                            name="email"
                             type="email"
                             placeholder="name@example.com"
                             className={cn(
                                 "h-12 rounded-lg border-zinc-200 focus:border-zinc-900 bg-white",
                                 errors.email && "border-red-500 focus:border-red-500"
                             )}
+                            disabled={isLoading}
                         />
                         {errors.email && <p className="text-xs text-red-500 font-medium">{errors.email}</p>}
                     </div>
@@ -56,17 +108,20 @@ export default function LoginPage() {
                         <div className="relative">
                             <Input
                                 id="password"
+                                name="password"
                                 type={showPassword ? "text" : "password"}
                                 placeholder="••••••••"
                                 className={cn(
                                     "h-12 rounded-lg border-zinc-200 focus:border-zinc-900 bg-white pr-10",
                                     errors.password && "border-red-500 focus:border-red-500"
                                 )}
+                                disabled={isLoading}
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-900"
+                                disabled={isLoading}
                             >
                                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                             </button>
@@ -74,15 +129,25 @@ export default function LoginPage() {
                         {errors.password && <p className="text-xs text-red-500 font-medium">{errors.password}</p>}
                     </div>
 
-                    <Button className="w-full h-14 rounded-full text-base font-bold bg-zinc-900 hover:bg-zinc-800 text-white mt-4">
-                        Sign In
+                    <Button
+                        type="submit"
+                        className="w-full h-14 rounded-full text-base font-bold bg-zinc-900 hover:bg-zinc-800 text-white mt-4"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <div className="flex items-center gap-2">
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Signing In...
+                            </div>
+                        ) : (
+                            "Sign In"
+                        )}
                     </Button>
                 </form>
 
                 <div className="mt-8 pt-6 border-t border-zinc-100 text-center">
                     <p className="text-zinc-500 text-sm">
                         Don't have an account?{" "}
-                        {/* Cleaner CTA */}
                         <Link href="/register" className="font-bold text-zinc-900 hover:underline underline-offset-4 decoration-zinc-300">
                             Create Account
                         </Link>

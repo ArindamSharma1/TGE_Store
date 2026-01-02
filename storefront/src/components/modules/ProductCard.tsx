@@ -19,6 +19,7 @@ interface ProductCardProps {
         main: string;
         hover: string;
     };
+    defaultVariantId?: string;
 }
 
 export function ProductCard({
@@ -30,21 +31,24 @@ export function ProductCard({
     images = {
         main: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop",
         hover: "https://images.unsplash.com/photo-1582552938357-32b906df40cb?q=80&w=1000&auto=format&fit=crop"
-    }
+    },
+    defaultVariantId
 }: ProductCardProps) {
     const { addItem } = useCart();
 
-    const handleAddToCart = (e: React.MouseEvent) => {
+    const handleAddToCart = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
 
-        addItem({
-            productTitle: title,
-            price: price,
-            image: images.main,
-            handle: handle,
-            variantTitle: undefined // Base product add
-        });
+        if (defaultVariantId) {
+            await addItem({
+                variantId: defaultVariantId,
+                quantity: 1
+            });
+        } else {
+            console.warn("No variant ID available for quick add");
+            // Ideally open product modal or navigate to product page
+        }
     };
 
     return (

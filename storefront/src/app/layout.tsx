@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google"; // Changed to Inter
+import { Inter } from "next/font/google"; // Inter
 import "./globals.css";
 import SmoothScroll from "@/components/global/SmoothScroll";
 import { Header } from "@/components/global/Header";

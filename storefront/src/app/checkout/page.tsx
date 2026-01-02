@@ -119,8 +119,8 @@ export default function CheckoutPage() {
                             <input type="text" placeholder="City" className="col-span-1 w-full h-12 px-4 rounded-lg border border-zinc-200 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400" />
 
                             <div className="col-span-1 relative">
-                                <select className="w-full h-12 px-4 rounded-lg border border-zinc-200 focus:border-zinc-900 outline-none transition-colors bg-white appearance-none text-zinc-700 placeholder:text-zinc-400">
-                                    <option value="" disabled selected>State</option>
+                                <select defaultValue="" className="w-full h-12 px-4 rounded-lg border border-zinc-200 focus:border-zinc-900 outline-none transition-colors bg-white appearance-none text-zinc-700 placeholder:text-zinc-400">
+                                    <option value="" disabled>State</option>
                                     <option>Delhi</option>
                                     <option>Maharashtra</option>
                                     <option>Karnataka</option>

@@ -8,17 +8,7 @@ import { cn } from "@/lib/utils/cn";
 export function CartItem({ item }: { item: CartItemType }) {
     const { removeItem, addItem } = useCart();
 
-    // Helper to re-add item (increment)
-    const increment = () => {
-        addItem({
-            ...item,
-            // We don't need these but TS needs them to match type, logic inside provider handles increment
-            price: item.price,
-            handle: item.handle,
-            image: item.image,
-            productTitle: item.productTitle
-        });
-    };
+
 
     return (
         <div className="flex gap-4 py-6 border-b border-zinc-100 last:border-0">
@@ -52,7 +42,7 @@ export function CartItem({ item }: { item: CartItemType }) {
                 </div>
 
                 <div className="flex flex-1 items-end justify-between text-sm">
-                    {/* Quantity Controls (Simplified for now - just display or basic logic) */}
+                    {/* Quantity Controls (Simplified for now...just display or basic logic) */}
                     <p className="text-zinc-500">Qty {item.quantity}</p>
 
                     <button

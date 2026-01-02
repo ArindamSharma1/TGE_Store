@@ -18,46 +18,62 @@ interface ProductInfoProps {
     options?: ProductOption[];
     image: string; // Main image for cart
     handle: string;
+    variants?: any[];
+    productOptions?: any[]; // Medusa options with IDs
 }
 
-export function ProductInfo({ title, price, description, options = [], image, handle }: ProductInfoProps) {
+export function ProductInfo({ title, price, description, options = [], image, handle, variants = [], productOptions = [] }: ProductInfoProps) {
     const [selections, setSelections] = useState<Record<string, string>>({});
     const [inWishlist, setInWishlist] = useState(false);
     const { addItem } = useCart();
 
     const handleSelect = (optionName: string, value: string) => {
-        console.log("Variant selected:", optionName, value);
         setSelections((prev) => ({ ...prev, [optionName]: value }));
     };
 
     const allSelected = options.every((opt) => selections[opt.name]);
 
-    const handleAddToBag = () => {
-        console.log("Add to Bag clicked");
-        console.log("Selections:", selections);
-        console.log("All Selected:", allSelected);
-
+    const handleAddToBag = async () => {
         if (!allSelected && options.length > 0) {
             console.warn("Not all options selected");
             return;
         }
 
-        // Create variant title (e.g. "Size: M / Color: Black")
-        const variantTitle = Object.entries(selections)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join(" / ");
+        let selectedVariantId: string | undefined;
 
-        // Parse price string "240.00" or "$240.00" -> 240.00
-        const numericPrice = parseFloat(price.replace(/[^0-9.]/g, ""));
+        if (variants.length === 1 && options.length === 0) {
+            selectedVariantId = variants[0].id;
+        } else {
+            // Find matching variant
+            // Map valid selections to option IDs
+            const selectionMap = new Map<string, string>(); // optionId -> value
 
-        console.log("Adding item:", { title, variantTitle, numericPrice, image, handle });
+            Object.entries(selections).forEach(([name, value]) => {
+                const opt = productOptions.find(o => o.title === name);
+                if (opt) selectionMap.set(opt.id, value);
+            });
 
-        addItem({
-            productTitle: title,
-            variantTitle: variantTitle || undefined,
-            price: numericPrice,
-            image,
-            handle
+            const variant = variants.find(v => {
+                return v.options.every((vo: any) => selectionMap.get(vo.option_id) === vo.value);
+            });
+
+            selectedVariantId = variant?.id;
+        }
+
+        if (!selectedVariantId) {
+            // Fallback for simple products or if matching fails (shouldn't happen if logic is correct)
+            selectedVariantId = variants[0]?.id;
+            console.warn("Could not match variant, using default", selectedVariantId);
+        }
+
+        if (!selectedVariantId) {
+            console.error("No variant found");
+            return;
+        }
+
+        await addItem({
+            variantId: selectedVariantId,
+            quantity: 1
         });
     };
 

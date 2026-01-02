@@ -1,58 +1,63 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { medusaClient } from "@/lib/medusa/client";
 import { ProductGallery } from "@/components/modules/product/ProductGallery";
 import { ProductInfo } from "@/components/modules/product/ProductInfo";
-
-// Mock Data for specific handles, fallbacks for others
-const PRODUCTS: Record<string, any> = {
-    "oversized-puffer": {
-        title: "Oversized Technical Puffer",
-        price: "$240.00",
-        description: "Built for the harshest winters. This oversized puffer features a water-resistant technical shell, 700-fill down insulation, and a detachable hood. Finished with matte black hardware and storm cuffs.",
-        images: [
-            "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop", // Puffer main
-            "https://images.unsplash.com/photo-1544923246-77307dd654cb?q=80&w=1000&auto=format&fit=crop", // Detail
-            "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop", // Lifestyle
-        ],
-        options: [
-            { name: "Color", values: ["Matte Black", "Stone Grey", "Midnight"] },
-            { name: "Size", values: ["S", "M", "L", "XL"] }
-        ]
-    },
-    "essential-hoodie": {
-        title: "Essential Heavyweight Hoodie",
-        price: "$120.00",
-        description: "The last hoodie you'll ever need. 450GSM french terry cotton, garment-dyed for a broken-in feel. Boxy fit with dropped shoulders and a double-lined hood.",
-        images: [
-            "https://images.unsplash.com/photo-1578587018452-892bacefd3f2?q=80&w=1000&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=1000&auto=format&fit=crop",
-        ],
-        options: [
-            { name: "Color", values: ["Black", "Heather Grey", "Cream"] },
-            { name: "Size", values: ["XS", "S", "M", "L", "XL", "XXL"] }
-        ]
-    }
-};
-
-const DEFAULT_PRODUCT = {
-    title: "Signature Utility Jacket",
-    price: "$180.00",
-    description: "A modern take on classic workwear. Constructed from durable heavy-twill cotton with reinforced stitching. Features four utility pockets, internal stash pocket, and adjustable cuffs.",
-    images: [
-        "https://images.unsplash.com/photo-1551488852-078bd9101521?q=80&w=1000&auto=format&fit=crop", // Kept one that might work or replace
-        "https://images.unsplash.com/photo-1544022613-207d80004d80?q=80&w=1000&auto=format&fit=crop"
-    ],
-    options: [
-        { name: "Color", values: ["Olive", "Black", "Tan"] },
-        { name: "Size", values: ["S", "M", "L", "XL"] }
-    ]
-}
+import { notFound } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
 export default function ProductPage() {
     const params = useParams();
     const handle = params.handle as string;
-    const product = PRODUCTS[handle] || DEFAULT_PRODUCT;
+    const [product, setProduct] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!handle) return;
+
+        const fetchProduct = async () => {
+            try {
+                const { products } = await medusaClient.store.product.list({
+                    handle: handle,
+                    fields: "*variants.calculated_price,+options,+images"
+                });
+
+                if (products && products.length > 0) {
+                    setProduct(products[0]);
+                } else {
+                    // Handle 404
+                }
+            } catch (error) {
+                console.error("Failed to fetch product", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProduct();
+    }, [handle]);
+
+    if (loading) {
+        return <div className="min-h-screen pt-32 text-center">Loading...</div>;
+    }
+
+    if (!product) {
+        return <div className="min-h-screen pt-32 text-center">Product not found</div>;
+    }
+
+    // Map images
+    const images = (product.images?.map((img: any) => img.url).filter((url: any): url is string => !!url)) || (product.thumbnail ? [product.thumbnail] : []);
+
+    // Map options
+    const options = product.options?.map((opt: any) => ({
+        name: opt.title,
+        values: opt.values.map((v: any) => v.value)
+    })) || [];
+
+    // Lowest Price
+    const lowestPrice = product.variants[0]?.prices.find((p: any) => p.currency_code === "inr")?.amount || product.variants[0]?.prices[0]?.amount || 0;
+    const formattedPrice = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(lowestPrice / 100);
 
     return (
         <main className="min-h-screen pt-24 pb-20">
@@ -61,7 +66,7 @@ export default function ProductPage() {
 
                     {/* Left Column: Gallery (Scrollable) */}
                     <div className="w-full lg:w-[60%]">
-                        <ProductGallery images={product.images} />
+                        <ProductGallery images={images} />
 
                         {/* Additional Details (Description extension, specs, etc) below gallery */}
                         <div className="mt-16 pt-16 border-t border-zinc-100 hidden lg:block">
@@ -85,12 +90,14 @@ export default function ProductPage() {
                     <div className="w-full lg:w-[40%] relative">
                         <div className="sticky top-32">
                             <ProductInfo
-                                title={product.title}
-                                price={product.price}
-                                description={product.description}
-                                options={product.options}
-                                image={product.images[0]}
+                                title={product.title || ""}
+                                price={formattedPrice}
+                                description={product.description || ""}
+                                options={options}
+                                image={product.thumbnail || ""}
                                 handle={handle}
+                                variants={product.variants}
+                                productOptions={product.options}
                             />
                         </div>
                     </div>
