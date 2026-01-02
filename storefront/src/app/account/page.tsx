@@ -78,10 +78,12 @@ export default function AccountPage() {
     };
 
     // --- Profile Handlers ---
+    // --- Profile Handlers ---
     const handleUpdateProfile = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const { customer } = await medusaClient.store.customer.update(profileForm);
+            const client = getMedusa();
+            const { customer } = await client.store.customer.update(profileForm);
             setCustomer(customer);
             setIsEditingProfile(false);
             toast.success("Profile updated successfully");
@@ -94,14 +96,15 @@ export default function AccountPage() {
     const handleAddAddress = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const { customer } = await medusaClient.store.customer.addresses.addAddress({
-                address: {
-                    ...addressForm,
-                    company: "",
-                    address_2: "",
-                    province: "",
-                    metadata: {}
-                }
+            const client = getMedusa();
+            // SDK V2: Use 'createAddress' directly on customer resource
+            // Payload needs to be `(address)`
+            const { customer } = await client.store.customer.createAddress({
+                ...addressForm,
+                company: "",
+                address_2: "",
+                province: "",
+                metadata: {}
             });
             setCustomer(customer); // Customer object includes updated addresses
             setIsAddingAddress(false);
@@ -115,7 +118,9 @@ export default function AccountPage() {
 
     const handleDeleteAddress = async (addressId: string) => {
         try {
-            const { customer } = await medusaClient.store.customer.addresses.deleteAddress(addressId);
+            const client = getMedusa();
+            // SDK V2: Use 'deleteAddress' directly on customer resource
+            const { customer } = await client.store.customer.deleteAddress(addressId);
             setCustomer(customer);
             toast.success("Address removed");
         } catch (e) {
