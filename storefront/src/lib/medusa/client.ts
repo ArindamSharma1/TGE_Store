@@ -16,7 +16,7 @@ export const medusaClient = new Medusa({
     baseUrl: BACKEND_URL,
     debug: process.env.NODE_ENV === "development",
     publishableKey: PUBLISHABLE_KEY,
-    customHeaders: getAuthToken() ? { Authorization: `Bearer ${getAuthToken()}` } : undefined
+    globalHeaders: getAuthToken() ? { Authorization: `Bearer ${getAuthToken()}` } : undefined
 });
 
 // Dynamic Client factory
@@ -27,6 +27,6 @@ export const getMedusa = () => {
         baseUrl: BACKEND_URL,
         debug: process.env.NODE_ENV === "development",
         publishableKey: PUBLISHABLE_KEY,
-        customHeaders: token ? { Authorization: `Bearer ${token}` } : undefined
+        globalHeaders: token ? { Authorization: `Bearer ${token}` } : undefined
     });
 };

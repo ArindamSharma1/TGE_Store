@@ -21,7 +21,7 @@ export function Hero({
 }: HeroProps) {
     return (
         <section className="relative h-[95vh] w-full bg-zinc-100 overflow-hidden flex items-end justify-center rounded-b-[40px] mb-4">
-            {/* Background Typography (Layer 1) - Replaced with SVG Logo as requested */}
+            {/* Background Typography (Layer 1) - Replaced with SVG Logo */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl px-4 z-0 pointer-events-none opacity-[0.05]">
                 <Image
                     src="/logo-main-white.svg"

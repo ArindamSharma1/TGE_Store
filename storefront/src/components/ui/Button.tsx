@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils/cn";
 import Link from "next/link";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: "primary" | "secondary" | "outline" | "ghost";
+    variant?: "primary" | "secondary" | "outline" | "ghost" | "link";
     size?: "sm" | "md" | "lg" | "icon";
     asChild?: boolean;
     href?: string;
@@ -18,6 +18,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             secondary: "bg-white text-zinc-900 hover:bg-zinc-100",
             outline: "border border-zinc-200 bg-transparent hover:bg-zinc-50 text-zinc-900",
             ghost: "hover:bg-zinc-100 text-zinc-900",
+            link: "text-zinc-900 underline-offset-4 hover:underline",
         };
 
         const sizes = {
