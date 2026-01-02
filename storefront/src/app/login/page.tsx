@@ -41,17 +41,22 @@ export default function LoginPage() {
         }
 
         try {
-            await medusaClient.auth.login("customer", "emailpass", {
+            const { token } = await medusaClient.auth.login("customer", "emailpass", {
                 email,
                 password
             });
 
-            // Login successful
+            // Login successful - Store Token
+            if (token) {
+                localStorage.setItem("medusa_auth_token", token);
+            }
+
             toast.success("Welcome back!", {
                 description: "You have successfully signed in."
             });
-            router.push("/");
-            router.refresh();
+
+            // Force reload to update medusaClient with new token
+            window.location.href = "/";
         } catch (error: any) {
             // Console Hygiene: Log only in development, and use debug level
             if (process.env.NODE_ENV === "development") {

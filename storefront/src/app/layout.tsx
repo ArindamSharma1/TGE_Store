@@ -21,7 +21,22 @@ export const metadata: Metadata = {
     template: "%s | TGE Store",
     default: "TGE Store | Modern Fashion",
   },
-  description: "The ultimate destination for modern fashion.",
+  description: "The ultimate destination for modern fashion. Discover our latest collections of everyday essentials and statement pieces.",
+  keywords: ["fashion", "modern", "clothing", "apparel", "TGE", "The Greatest Estate"],
+  openGraph: {
+    title: "TGE Store | Modern Fashion",
+    description: "The ultimate destination for modern fashion.",
+    url: "https://thegreatestestate.com",
+    siteName: "TGE Store",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TGE Store | Modern Fashion",
+    description: "The ultimate destination for modern fashion.",
+  },
+  metadataBase: new URL('https://thegreatestestate.com'),
 };
 
 export default function RootLayout({
