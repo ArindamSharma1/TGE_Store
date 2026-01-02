@@ -3,7 +3,8 @@ import { Inter } from "next/font/google"; // Inter
 import "./globals.css";
 import SmoothScroll from "@/components/global/SmoothScroll";
 import { Header } from "@/components/global/Header";
-import { Footer } from "@/components/global/Footer";
+import Footer from "@/components/global/Footer";
+import { Toaster } from "@/components/ui/Toaster";
 import { CartProvider } from "@/context/CartContext";
 import { SearchProvider } from "@/context/SearchContext";
 import { CartDrawer } from "@/components/modules/cart/CartDrawer";
@@ -39,6 +40,7 @@ export default function RootLayout({
               <SearchOverlay />
               <main className="min-h-screen">
                 {children}
+                <Toaster />
               </main>
               <Footer />
             </SmoothScroll>

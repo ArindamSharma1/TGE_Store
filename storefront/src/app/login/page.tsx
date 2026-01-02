@@ -49,17 +49,22 @@ export default function LoginPage() {
             router.push("/");
             router.refresh();
         } catch (error: any) {
-            console.error("Login error details:", {
-                message: error.message,
-                response: error.response?.data,
-                status: error.response?.status
-            });
+            // Console Hygiene: Log only in development, and use debug level
+            if (process.env.NODE_ENV === "development") {
+                console.debug("Login error (safe log):", {
+                    message: error?.message,
+                    status: error?.response?.status,
+                    type: error?.response?.data?.type
+                });
+            }
 
             let errorMessage = "Invalid email or password. Please try again.";
 
-            if (error.response?.data?.message) {
+            // Safe error inspection
+            if (error?.response?.data?.message) {
                 errorMessage = error.response.data.message;
-            } else if (error.message) {
+            } else if (error?.message && error.message !== "Network Error") {
+                // Only use the raw message if it's not a generic network error
                 errorMessage = error.message;
             }
 

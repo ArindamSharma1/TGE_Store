@@ -86,21 +86,30 @@ export default function RegisterPage() {
             router.refresh();
 
         } catch (error: any) {
-            // Detailed debugging for the "empty object" issue
-            console.error("Registration Error (Raw):", error);
-            console.error("Registration Error (Stringified):", JSON.stringify(error, Object.getOwnPropertyNames(error)));
-
             let errorMessage = "Registration failed. Please try again.";
 
-            // Attempt to extract message from various common locations
-            if (error.response?.data?.type === "duplicate_error") {
-                errorMessage = "User with this email already exists.";
-            } else if (error.response?.data?.message) {
-                errorMessage = error.response.data.message;
-            } else if (error.message) {
-                errorMessage = error.message;
-            } else if (typeof error === "string") {
-                errorMessage = error;
+            // Check for specific "Identity with email already exists" error
+            // We handle both legacy and new SDK error formats
+            const isDuplicate =
+                error?.message?.includes("Identity with email already exists") ||
+                error?.response?.data?.message === "Identity with email already exists" ||
+                error?.response?.data?.type === "duplicate_error";
+
+            if (isDuplicate) {
+                // Production-safe handling: No console error, specific user message
+                errorMessage = "An account with this email already exists. Please sign in instead.";
+            } else {
+                // Only log genuine unexpected errors in development
+                if (process.env.NODE_ENV === "development") {
+                    console.error("Registration Error:", error);
+                }
+
+                // Fallback error extraction
+                if (error?.response?.data?.message) {
+                    errorMessage = error.response.data.message;
+                } else if (error?.message) {
+                    errorMessage = error.message;
+                }
             }
 
             setErrors(prev => ({
@@ -110,8 +119,6 @@ export default function RegisterPage() {
         } finally {
             setIsLoading(false);
         }
-
-
     };
 
     return (
@@ -129,8 +136,24 @@ export default function RegisterPage() {
 
                 <form className="space-y-6" onSubmit={handleRegister}>
                     {errors.general && (
-                        <div className="p-3 bg-red-50 text-red-500 text-sm font-medium rounded-lg">
-                            {errors.general}
+                        <div className={cn(
+                            "p-4 text-sm rounded-xl border flex flex-col gap-2 transition-all duration-300",
+                            errors.general.includes("already exists")
+                                ? "bg-zinc-50/50 border-zinc-200 text-zinc-600"
+                                : "bg-red-50/50 border-red-100 text-red-500"
+                        )}>
+                            <p className="leading-relaxed">
+                                {errors.general}
+                            </p>
+                            {errors.general.includes("already exists") && (
+                                <Link
+                                    href="/login"
+                                    className="flex items-center gap-1.5 font-bold text-zinc-900 hover:text-zinc-700 transition-colors self-start group"
+                                >
+                                    <span>Sign in now</span>
+                                    <span className="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
+                                </Link>
+                            )}
                         </div>
                     )}
 
