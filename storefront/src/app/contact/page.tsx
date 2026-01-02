@@ -68,8 +68,8 @@ export default function ContactPage() {
                                 <p className="text-zinc-400 mb-6">
                                     Check our Frequently Asked Questions for quick answers about shipping, returns, and sizing.
                                 </p>
-                                <Button variant="outline" className="border-white text-white hover:bg-white hover:text-zinc-900 rounded-full">
-                                    Visit FAQ
+                                <Button asChild variant="outline" className="border-white text-white hover:bg-white hover:text-zinc-900 rounded-full">
+                                    <a href="/faq">Visit FAQ</a>
                                 </Button>
                             </div>
                             {/* Abstract circle decoration */}

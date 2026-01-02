@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 import { MessageCircle, PackageOpen, HelpCircle } from "lucide-react";
@@ -39,16 +40,20 @@ export function NeedHelp() {
 
                             {/* Feature Grid Right Side */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
-                                    <HelpCircle className="w-8 h-8 text-white mb-4" strokeWidth={1.5} />
-                                    <h3 className="text-white font-bold mb-2">FAQ</h3>
-                                    <p className="text-zinc-400 text-sm">Quick answers to common questions about shipping and sizing.</p>
-                                </div>
-                                <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
-                                    <PackageOpen className="w-8 h-8 text-white mb-4" strokeWidth={1.5} />
-                                    <h3 className="text-white font-bold mb-2">Returns</h3>
-                                    <p className="text-zinc-400 text-sm">Hassle-free 30-day return policy on all eligible items.</p>
-                                </div>
+                                <Link href="/faq" className="block cursor-pointer">
+                                    <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors h-full">
+                                        <HelpCircle className="w-8 h-8 text-white mb-4" strokeWidth={1.5} />
+                                        <h3 className="text-white font-bold mb-2">FAQ</h3>
+                                        <p className="text-zinc-400 text-sm">Quick answers to common questions about shipping and sizing.</p>
+                                    </div>
+                                </Link>
+                                <Link href="/returns" className="block cursor-pointer">
+                                    <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors h-full">
+                                        <PackageOpen className="w-8 h-8 text-white mb-4" strokeWidth={1.5} />
+                                        <h3 className="text-white font-bold mb-2">Returns</h3>
+                                        <p className="text-zinc-400 text-sm">Hassle-free 30-day return policy on all eligible items.</p>
+                                    </div>
+                                </Link>
                             </div>
                         </div>
                     </div>
