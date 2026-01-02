@@ -31,7 +31,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
         if (asChild && href) {
             return (
-                <Link href={href} className={classes}>
+                <Link href={href} className={classes} {...(props as any)}>
                     {props.children}
                 </Link>
             );
