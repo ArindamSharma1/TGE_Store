@@ -114,16 +114,19 @@ export default function Home() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-10">
             {products.map((product) => {
               const lowestPrice = product.variants[0]?.prices?.find((p: any) => p.currency_code === "inr")?.amount || product.variants[0]?.prices?.[0]?.amount || 0;
+              const thumbnail = product.thumbnail || "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop";
+              const hoverImage = product.images?.[1]?.url || thumbnail;
+
               return (
                 <ProductCard
                   key={product.id}
                   id={product.id}
                   title={product.title}
-                  price={lowestPrice / 100} // Medusa prices are in Rupees (for now, will add international options later)
+                  price={lowestPrice / 100} // Medusa prices are in Rupees
                   currencyCode={"INR"}
                   handle={product.handle}
-                  thumbnail={product.thumbnail}
-                  images={{ main: product.thumbnail, hover: product.images[1]?.url || product.thumbnail }}
+                  thumbnail={thumbnail}
+                  images={{ main: thumbnail, hover: hoverImage }}
                   defaultVariantId={product.variants[0]?.id}
                 />
               );
