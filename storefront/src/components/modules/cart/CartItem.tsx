@@ -6,7 +6,7 @@ import { useCart, CartItem as CartItemType } from "@/context/CartContext";
 import { cn } from "@/lib/utils/cn";
 
 export function CartItem({ item }: { item: CartItemType }) {
-    const { removeItem, addItem } = useCart();
+    const { removeItem, addItem, updateItem } = useCart();
 
 
 
@@ -42,13 +42,39 @@ export function CartItem({ item }: { item: CartItemType }) {
                 </div>
 
                 <div className="flex flex-1 items-end justify-between text-sm">
-                    {/* Quantity Controls (Simplified for now...just display or basic logic) */}
-                    <p className="text-zinc-500">Qty {item.quantity}</p>
+                    {/* Quantity Controls */}
+                    <div className="flex items-center gap-3 border border-zinc-200 rounded-full px-3 py-1">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (item.quantity > 1) {
+                                    updateItem(item.id, item.quantity - 1);
+                                }
+                            }}
+                            className={cn(
+                                "text-zinc-500 hover:text-zinc-900 transition-colors",
+                                item.quantity <= 1 && "opacity-50 cursor-not-allowed"
+                            )}
+                            disabled={item.quantity <= 1}
+                        >
+                            <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="text-xs font-semibold tabular-nums w-4 text-center">
+                            {item.quantity}
+                        </span>
+                        <button
+                            type="button"
+                            onClick={() => updateItem(item.id, item.quantity + 1)}
+                            className="text-zinc-500 hover:text-zinc-900 transition-colors"
+                        >
+                            <Plus className="w-3 h-3" />
+                        </button>
+                    </div>
 
                     <button
                         type="button"
                         onClick={() => removeItem(item.id)}
-                        className="font-medium text-zinc-400 hover:text-zinc-900 transition-colors"
+                        className="font-medium text-zinc-400 hover:text-red-500 transition-colors"
                     >
                         Remove
                     </button>

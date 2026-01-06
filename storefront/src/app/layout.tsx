@@ -7,6 +7,7 @@ import { Footer } from "@/components/global/Footer";
 import { Toaster } from "@/components/ui/Toaster";
 import { CartProvider } from "@/context/CartContext";
 import { SearchProvider } from "@/context/SearchContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 import { CartDrawer } from "@/components/modules/cart/CartDrawer";
 import { SearchOverlay } from "@/components/modules/search/SearchOverlay";
 
@@ -48,18 +49,20 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased font-sans bg-zinc-50`} suppressHydrationWarning>
         <CartProvider>
-          <SearchProvider>
-            <SmoothScroll>
-              <Header />
-              <CartDrawer />
-              <SearchOverlay />
-              <main className="min-h-screen">
-                {children}
-                <Toaster />
-              </main>
-              <Footer />
-            </SmoothScroll>
-          </SearchProvider>
+          <WishlistProvider>
+            <SearchProvider>
+              <SmoothScroll>
+                <Header />
+                <CartDrawer />
+                <SearchOverlay />
+                <main className="min-h-screen">
+                  {children}
+                  <Toaster />
+                </main>
+                <Footer />
+              </SmoothScroll>
+            </SearchProvider>
+          </WishlistProvider>
         </CartProvider>
       </body>
     </html>

@@ -5,11 +5,55 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import Link from "next/link";
 import { toast } from "sonner";
 import Image from "next/image";
-import { Package, MapPin, CreditCard, LogOut, ChevronRight, Plus, Trash2, Edit2, User, Loader2 } from "lucide-react";
+import { Package, MapPin, CreditCard, LogOut, ChevronRight, Plus, Trash2, Edit2, User, Loader2, Heart } from "lucide-react";
 import { medusaClient, getMedusa } from "@/lib/medusa/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/Input";
+import { useWishlist } from "@/context/WishlistContext";
+
+function WishlistSection() {
+    const { items, removeFromWishlist } = useWishlist();
+
+    if (items.length === 0) return null;
+
+    return (
+        <section>
+            <h2 className="text-xl font-bold uppercase tracking-tight text-zinc-900 mb-6 flex items-center gap-2">
+                <Heart className="w-5 h-5" />
+                My Wishlist
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {items.map((item) => (
+                    <GlassCard key={item.id} className="p-4 bg-white border-zinc-200 relative group flex gap-4">
+                        <div className="relative w-20 h-24 flex-shrink-0 bg-zinc-100 rounded-md overflow-hidden">
+                            <Image src={item.thumbnail} alt={item.title} fill className="object-cover" />
+                        </div>
+                        <div className="flex flex-col justify-between flex-1 py-1">
+                            <div>
+                                <Link href={`/products/${item.handle}`} className="font-bold text-zinc-900 hover:underline line-clamp-1">
+                                    {item.title}
+                                </Link>
+                                <p className="text-sm font-medium text-zinc-500">
+                                    {item.price ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(item.price) : "Price Varies"}
+                                </p>
+                            </div>
+                            <Button asChild size="sm" className="w-fit h-8 text-xs rounded-full bg-zinc-900 text-white">
+                                <Link href={`/products/${item.handle}`}>View Product</Link>
+                            </Button>
+                        </div>
+                        <button
+                            onClick={() => removeFromWishlist(item.id)}
+                            className="absolute top-2 right-2 p-2 text-zinc-400 hover:text-red-500 transition-colors"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    </GlassCard>
+                ))}
+            </div>
+        </section>
+    );
+}
 
 export default function AccountPage() {
     const router = useRouter();
@@ -214,7 +258,11 @@ export default function AccountPage() {
                                     ))}
                                 </div>
                             )}
+
                         </section>
+
+                        {/* Wishlist Section */}
+                        <WishlistSection />
                     </div>
 
                     {/* Sidebar: Profile & Settings */}
@@ -330,6 +378,6 @@ export default function AccountPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

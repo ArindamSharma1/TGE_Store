@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/Button";
 import { VariantSelector } from "./VariantSelector";
 import { ShoppingBag, Star, Heart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 interface ProductOption {
     name: string; // e.g. "Size", "Color"
@@ -22,8 +23,8 @@ interface ProductInfoProps {
 
 export function ProductInfo({ title, description, options = [], image, handle, variants = [], productOptions = [] }: ProductInfoProps) {
     const [selections, setSelections] = useState<Record<string, string>>({});
-    const [inWishlist, setInWishlist] = useState(false);
     const { addItem } = useCart();
+    const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
     const handleSelect = (optionName: string, value: string) => {
         setSelections((prev) => ({ ...prev, [optionName]: value }));
@@ -75,6 +76,49 @@ export function ProductInfo({ title, description, options = [], image, handle, v
         }).format(amount / 100);
     }, [selectedVariant]);
 
+    // Stock Logic
+    const isOutOfStock = useMemo(() => {
+        if (!selectedVariant) return false;
+        if (selectedVariant.allow_backorder) return false;
+        if (!selectedVariant.manage_inventory) return false;
+        return selectedVariant.inventory_quantity < 1;
+    }, [selectedVariant]);
+
+    // Wishlist Logic
+    const isSaved = selectedVariant ? isInWishlist(selectedVariant.product_id || selectedVariant.id) : false;
+    // Note: Items usually tracked by Product ID, not Variant ID for wishlist, but Medusa structure varies.
+    // Assuming Product ID for now (using handle for link).
+    // Actually, `variants` usually have `product_id`. If not, we might need `product.id` passed in props?
+    // Wait, ProductInfo doesn't receive `id`. It receives `handle`.
+    // Let's use `handle` as unique key for now or just check if we can pass ID.
+    // The previous implementation used "items" as { id, handle, ... }.
+    // Let's rely on handle if ID is missing from variants (which is unlikely).
+    // BETTER: Recieve `id` as prop. But for now, let's use `variants[0].product_id` if available.
+
+    const productId = variants?.[0]?.product_id;
+
+    // Safe wishlist check
+    const inWishlist = productId ? isInWishlist(productId) : false;
+
+    const toggleWishlist = () => {
+        if (!productId) return;
+        if (inWishlist) {
+            removeFromWishlist(productId);
+        } else {
+            // Need a valid price number for the wishlist item
+            // Let's strip the currency symbol from resolvedPrice or verify raw amount
+            const priceVal = selectedVariant?.prices?.[0]?.amount ? selectedVariant.prices[0].amount / 100 : 0;
+
+            addToWishlist({
+                id: productId,
+                title: title,
+                handle: handle,
+                thumbnail: image,
+                price: priceVal
+            });
+        }
+    };
+
     const handleAddToBag = async () => {
         if (!allSelected && options.length > 0) {
             console.warn("Not all options selected");
@@ -84,6 +128,10 @@ export function ProductInfo({ title, description, options = [], image, handle, v
         if (!selectedVariant) {
             console.error("No variant found");
             return;
+        }
+
+        if (isOutOfStock) {
+            return; // Should be disabled in UI, but safety check
         }
 
         try {
@@ -107,7 +155,14 @@ export function ProductInfo({ title, description, options = [], image, handle, v
                 <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-zinc-900 leading-[0.9]">
                     {title}
                 </h1>
-                <p className="text-2xl font-medium text-zinc-900">{resolvedPrice || "Price Unavailable"}</p>
+                <div className="flex items-center gap-4">
+                    <p className="text-2xl font-medium text-zinc-900">{resolvedPrice || "Price Unavailable"}</p>
+                    {isOutOfStock && (
+                        <span className="px-3 py-1 bg-zinc-100 text-zinc-500 text-xs font-bold uppercase rounded-full">
+                            Sold Out
+                        </span>
+                    )}
+                </div>
             </div>
 
             {/* Options */}
@@ -134,16 +189,23 @@ export function ProductInfo({ title, description, options = [], image, handle, v
             <div className="pt-4 border-t border-zinc-100 flex flex-col gap-3">
                 <Button
                     size="lg"
-                    className="w-full h-16 rounded-full text-lg font-bold bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-center gap-2"
-                    disabled={!allSelected && options.length > 0}
+                    className={`w-full h-16 rounded-full text-lg font-bold flex items-center justify-center gap-2 transition-all
+                        ${isOutOfStock
+                            ? "bg-zinc-100 text-zinc-400 cursor-not-allowed hover:bg-zinc-100"
+                            : "bg-zinc-900 hover:bg-zinc-800 text-white"
+                        }`}
+                    disabled={(!allSelected && options.length > 0) || isOutOfStock}
                     onClick={handleAddToBag}
                 >
                     <ShoppingBag className="w-5 h-5" />
-                    {allSelected || options.length === 0 ? "Add to Bag" : "Select Options"}
+                    {isOutOfStock
+                        ? "Out of Stock"
+                        : (allSelected || options.length === 0 ? "Add to Bag" : "Select Options")
+                    }
                 </Button>
 
                 <button
-                    onClick={() => setInWishlist(!inWishlist)}
+                    onClick={toggleWishlist}
                     className="flex items-center justify-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors py-2"
                 >
                     <Heart className={`w-4 h-4 ${inWishlist ? "fill-red-500 text-red-500" : ""}`} />

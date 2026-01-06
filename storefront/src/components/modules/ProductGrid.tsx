@@ -9,6 +9,7 @@ interface Product {
         main: string;
         hover: string;
     };
+    variants: any[];
 }
 
 interface ProductGridProps {
@@ -28,6 +29,7 @@ export function ProductGrid({ products }: ProductGridProps) {
                     price={product.price}
                     currencyCode="INR"
                     images={product.images}
+                    variants={product.variants}
                 />
             ))}
         </div>

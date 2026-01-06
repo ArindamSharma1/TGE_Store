@@ -16,7 +16,8 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
 
     // Helper: Map Medusa Product to UI Product
     const mapProduct = (p: any) => {
-        const lowestPrice = p.variants?.[0]?.prices?.find((px: any) => px.currency_code === "inr")?.amount ||
+        // Fallback price logic still useful for initial SSR, but ProductCard will refine it
+        const lowestPrice = p.variants?.[0]?.calculated_price?.calculated_amount ||
             p.variants?.[0]?.prices?.[0]?.amount || 0;
 
         return {
@@ -28,7 +29,8 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
                 main: p.thumbnail || "",
                 // Fallback to second image if available, else thumbnail
                 hover: p.images?.[1]?.url || p.images?.[0]?.url || p.thumbnail || ""
-            }
+            },
+            variants: p.variants // Pass variants
         };
     };
 
@@ -39,7 +41,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
     try {
         if (handle === "all") {
             const { products: fetchedProducts, count } = await medusaClient.store.product.list({
-                fields: "*variants.calculated_price,+images",
+                fields: "+variants.prices,+variants.calculated_price,+images",
                 limit: 50 // Initial limit
             });
             products = fetchedProducts.map(mapProduct);
@@ -60,7 +62,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
                 // 2. Get Products for this Collection
                 const { products: fetchedProducts, count } = await medusaClient.store.product.list({
                     collection_id: collection.id,
-                    fields: "*variants.calculated_price,+images",
+                    fields: "+variants.prices,+variants.calculated_price,+images",
                     limit: 50
                 });
 

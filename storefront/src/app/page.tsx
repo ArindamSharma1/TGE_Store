@@ -20,7 +20,7 @@ export default function Home() {
       try {
         const { products } = await medusaClient.store.product.list({
           limit: 8, // Increase limit to fill 2 rows if available
-          fields: "*variants.calculated_price,+images"
+          fields: "+variants.prices,+variants.calculated_price,+images"
         });
         setProducts(products);
       } catch (error) {
@@ -120,7 +120,6 @@ export default function Home() {
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-10">
             {products.map((product) => {
-              const lowestPrice = product.variants[0]?.prices?.find((p: any) => p.currency_code === "inr")?.amount || product.variants[0]?.prices?.[0]?.amount || 0;
               const thumbnail = product.thumbnail || "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop";
               const hoverImage = product.images?.[1]?.url || thumbnail;
 
@@ -129,12 +128,13 @@ export default function Home() {
                   key={product.id}
                   id={product.id}
                   title={product.title}
-                  price={lowestPrice / 100} // Medusa prices are in Rupees
+                  price={0} // Let ProductCard resolve from variants
                   currencyCode={"INR"}
                   handle={product.handle}
                   thumbnail={thumbnail}
                   images={{ main: thumbnail, hover: hoverImage }}
                   defaultVariantId={product.variants[0]?.id}
+                  variants={product.variants}
                 />
               );
             })}

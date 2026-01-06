@@ -22,6 +22,7 @@ interface CartContextType {
     items: CartItem[];
     addItem: (item: { variantId: string; quantity: number }) => Promise<void>;
     removeItem: (id: string) => Promise<void>;
+    updateItem: (id: string, quantity: number) => Promise<void>;
     cartCount: number;
     subtotal: number;
     cartId: string;
@@ -151,6 +152,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
+    const updateItem = async (id: string, quantity: number) => {
+        if (!cartId) return;
+        try {
+            const { cart } = await medusaClient.store.cart.updateLineItem(cartId, id, {
+                quantity: quantity
+            });
+            setItems(mapLineItems(cart.items));
+        } catch (e) {
+            console.error("Failed to update item quantity", e);
+        }
+    };
+
     const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
     const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
@@ -164,6 +177,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 items,
                 addItem,
                 removeItem,
+                updateItem,
                 cartCount,
                 subtotal,
                 cartId,
