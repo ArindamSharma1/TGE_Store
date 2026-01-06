@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    unoptimized: true, // Fix for local Medusa images ("private ip" error)
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',

@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { medusaClient } from "@/lib/medusa/client";
 
 export type CartItem = {
-    id: string; // Line Item ID
+    id: string;
     variantId: string;
     productTitle: string;
     variantTitle?: string;
@@ -38,7 +38,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const closeCart = () => setIsOpen(false);
     const toggleCart = () => setIsOpen((prev) => !prev);
 
-    // Initialize Cart
     useEffect(() => {
         const initCart = async () => {
             const storedCartId = localStorage.getItem("medusa_cart_id");
@@ -77,7 +76,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             variantId: item.variant_id,
             productTitle: item.title,
             variantTitle: item.variant_title,
-            price: item.unit_price / 100, // Medusa stores in cents
+            price: item.unit_price / 100,
             image: item.thumbnail,
             quantity: item.quantity,
             handle: item.variant?.product?.handle || "",
@@ -91,7 +90,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
 
         const currentCartId = cartId || localStorage.getItem("medusa_cart_id");
-        if (!currentCartId) return; // Should be created by now
+        if (!currentCartId) return;
 
         try {
             const { cart } = await medusaClient.store.cart.createLineItem(currentCartId, {
@@ -101,7 +100,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             setItems(mapLineItems(cart.items));
         } catch (e) {
             console.error("Failed to add item, attempting to refresh cart...", e);
-            // Self-Healing: Cart might be stale/invalid. Delete and Re-create.
             localStorage.removeItem("medusa_cart_id");
             setCartId("");
 
