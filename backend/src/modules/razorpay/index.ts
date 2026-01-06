@@ -1,5 +1,5 @@
 
-import { ModuleProvider, Modules } from "@medusajs/framework/utils"
+import { ModuleProvider, Modules } from "@medusajs/utils"
 import { RazorpayPaymentProviderService } from "./service"
 
 export default ModuleProvider(Modules.PAYMENT, {

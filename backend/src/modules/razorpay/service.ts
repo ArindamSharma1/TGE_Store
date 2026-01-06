@@ -4,8 +4,8 @@ import {
     PaymentProviderError,
     PaymentProviderSessionResponse,
     PaymentSessionStatus
-} from "@medusajs/framework/utils"
-import { Logger } from "@medusajs/framework/types"
+} from "@medusajs/utils"
+import { Logger } from "@medusajs/types"
 import Razorpay from "razorpay"
 
 type Options = {
