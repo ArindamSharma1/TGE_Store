@@ -2,6 +2,18 @@ import { loadEnv, defineConfig } from "@medusajs/framework/utils"
 
 loadEnv(process.env.NODE_ENV || "development", process.cwd())
 
+const modules: any[] = [];
+
+if (process.env.RAZORPAY_KEY_ID) {
+  modules.push({
+    resolve: "./src/modules/razorpay",
+    options: {
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    }
+  })
+}
+
 export default defineConfig({
   projectConfig: {
     // Database
@@ -18,4 +30,5 @@ export default defineConfig({
       cookieSecret: process.env.COOKIE_SECRET || "supersecret",
     },
   },
+  modules,
 })
