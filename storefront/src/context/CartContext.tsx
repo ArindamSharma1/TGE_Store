@@ -115,7 +115,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                     quantity: quantity,
                 });
                 setItems(mapLineItems(updatedCart.items));
-                console.log("Cart refreshed and item added.");
             } catch (retryError) {
                 console.error("Critical: Failed to recover cart.", retryError);
             }
@@ -125,10 +124,30 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const removeItem = async (id: string) => {
         if (!cartId) return;
         try {
-            const { cart } = await medusaClient.store.cart.deleteLineItem(cartId, id);
-            setItems(mapLineItems(cart.items));
+            const response = await medusaClient.store.cart.deleteLineItem(cartId, id);
+            if (response && response.cart) {
+                setItems(mapLineItems(response.cart.items));
+            } else {
+                // Fallback: If no cart returned, refresh by fetching the cart again
+                const storedCartId = localStorage.getItem("medusa_cart_id");
+                if (storedCartId) {
+                    const { cart } = await medusaClient.store.cart.retrieve(storedCartId, {
+                        fields: "*items,*items.variant,*items.variant.product"
+                    });
+                    // If cart is empty/deleted, it might return 404, but assuming just update:
+                    setItems(mapLineItems(cart.items));
+                }
+            }
         } catch (e) {
             console.error("Failed to remove item", e);
+            // Even on error, try to sync state
+            const storedCartId = localStorage.getItem("medusa_cart_id");
+            if (storedCartId) {
+                try {
+                    const { cart } = await medusaClient.store.cart.retrieve(storedCartId, { fields: "*items,*items.variant,*items.variant.product" });
+                    setItems(mapLineItems(cart.items));
+                } catch (err) { console.error("Could not refresh cart", err) }
+            }
         }
     };
 

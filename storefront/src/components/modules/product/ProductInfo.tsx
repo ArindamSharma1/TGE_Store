@@ -1,6 +1,4 @@
-"use client";
-
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/Button";
 import { VariantSelector } from "./VariantSelector";
 import { ShoppingBag, Star, Heart } from "lucide-react";
@@ -13,7 +11,7 @@ interface ProductOption {
 
 interface ProductInfoProps {
     title: string;
-    price: string;
+    price?: string; // Optional, deprecated
     description: string;
     options?: ProductOption[];
     image: string; // Main image for cart
@@ -22,7 +20,7 @@ interface ProductInfoProps {
     productOptions?: any[]; // Medusa options with IDs
 }
 
-export function ProductInfo({ title, price, description, options = [], image, handle, variants = [], productOptions = [] }: ProductInfoProps) {
+export function ProductInfo({ title, description, options = [], image, handle, variants = [], productOptions = [] }: ProductInfoProps) {
     const [selections, setSelections] = useState<Record<string, string>>({});
     const [inWishlist, setInWishlist] = useState(false);
     const { addItem } = useCart();
@@ -33,53 +31,68 @@ export function ProductInfo({ title, price, description, options = [], image, ha
 
     const allSelected = options.every((opt) => selections[opt.name]);
 
+    // Resolve selected variant
+    const selectedVariant = useMemo(() => {
+        if (variants.length === 0) return undefined;
+        if (variants.length === 1 && options.length === 0) return variants[0];
+
+        // Map selections to option IDs
+        const selectionMap = new Map<string, string>();
+        Object.entries(selections).forEach(([name, value]) => {
+            const opt = productOptions.find(o => o.title === name);
+            if (opt) selectionMap.set(opt.id, value);
+        });
+
+        // Find match
+        return variants.find(v => {
+            return v.options.every((vo: any) => selectionMap.get(vo.option_id) === vo.value);
+        }) || variants[0]; // Fallback to first variant (e.g. for "starting at" price)
+    }, [variants, options, selections, productOptions]);
+
+    // Resolve Price
+    const resolvedPrice = useMemo(() => {
+        if (!selectedVariant) return null;
+
+        // Priority 1: Calculated Price (Medusa context)
+        let amount = selectedVariant.calculated_price?.calculated_amount;
+
+        // Priority 2: Fallback to INR price in prices array
+        if (amount === undefined || amount === null) {
+            const inrPrice = selectedVariant.prices?.find((p: any) => p.currency_code?.toLowerCase() === "inr");
+            if (inrPrice) amount = inrPrice.amount;
+        }
+
+        // Priority 3: Fallback to first available price
+        if (amount === undefined || amount === null) {
+            amount = selectedVariant.prices?.[0]?.amount;
+        }
+
+        if (amount === undefined || amount === null) return null;
+
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR'
+        }).format(amount / 100);
+    }, [selectedVariant]);
+
     const handleAddToBag = async () => {
         if (!allSelected && options.length > 0) {
             console.warn("Not all options selected");
             return;
         }
 
-        let selectedVariantId: string | undefined;
-
-        if (variants.length === 1 && options.length === 0) {
-            selectedVariantId = variants[0].id;
-        } else {
-            // Find matching variant
-            // Map valid selections to option IDs
-            const selectionMap = new Map<string, string>(); // optionId -> value
-
-            Object.entries(selections).forEach(([name, value]) => {
-                const opt = productOptions.find(o => o.title === name);
-                if (opt) selectionMap.set(opt.id, value);
-            });
-
-            const variant = variants.find(v => {
-                return v.options.every((vo: any) => selectionMap.get(vo.option_id) === vo.value);
-            });
-
-            selectedVariantId = variant?.id;
-        }
-
-        if (!selectedVariantId) {
-            // Fallback for simple products or if matching fails (shouldn't happen if logic is correct)
-            selectedVariantId = variants[0]?.id;
-            console.warn("Could not match variant, using default", selectedVariantId);
-        }
-
-        if (!selectedVariantId) {
-            console.error("No variant found. Debug Info:", { selections, variants });
+        if (!selectedVariant) {
+            console.error("No variant found");
             return;
         }
 
-        console.log("DEBUG: Adding to cart", { variantId: selectedVariantId, quantity: 1 });
-
         try {
             await addItem({
-                variantId: selectedVariantId,
+                variantId: selectedVariant.id,
                 quantity: 1
             });
         } catch (e) {
-            console.error("DEBUG: Add to cart failed", e);
+            console.error("Add to cart failed", e);
         }
     };
 
@@ -94,7 +107,7 @@ export function ProductInfo({ title, price, description, options = [], image, ha
                 <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-zinc-900 leading-[0.9]">
                     {title}
                 </h1>
-                <p className="text-2xl font-medium text-zinc-900">{price}</p>
+                <p className="text-2xl font-medium text-zinc-900">{resolvedPrice || "Price Unavailable"}</p>
             </div>
 
             {/* Options */}
