@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: ['/account', '/cart', '/checkout'],
         },
-        sitemap: 'https://thegreatestestate.com/sitemap.xml',
+        sitemap: 'https://tgestore.com/sitemap.xml',
     }
 }

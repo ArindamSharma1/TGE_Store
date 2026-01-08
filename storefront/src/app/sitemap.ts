@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://thegreatestestate.com';
+    const baseUrl = 'https://tgestore.com';
 
     // In a real app, verify backend product handle list here
     // For now, static routes

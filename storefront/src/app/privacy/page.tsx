@@ -52,7 +52,7 @@ export default function PrivacyPage() {
                     <section>
                         <h2 className="text-2xl font-bold text-zinc-900 mb-4">5. Contact Us</h2>
                         <p>
-                            If you have any questions about this Privacy Policy, please contact us at support@thegreatestestate.com.
+                            If you have any questions about this Privacy Policy, please contact us at storetge@gmail.com.
                         </p>
                     </section>
                 </div>

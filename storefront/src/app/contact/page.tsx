@@ -33,7 +33,7 @@ export default function ContactPage() {
                                     </div>
                                     <div>
                                         <p className="font-bold text-zinc-900">Email Us</p>
-                                        <p className="text-zinc-500">support@thegreatestestate.com</p>
+                                        <p className="text-zinc-500">storetge@gmail.com</p>
                                         <p className="text-xs text-zinc-400 mt-1">Response within 24 hours</p>
                                     </div>
                                 </div>

@@ -77,6 +77,7 @@ export default function ReturnsPage() {
                             <ul className="list-disc pl-5 space-y-2 mb-6">
                                 <li>Items must be unworn, unwashed, and in original condition with tags attached.</li>
                                 <li>Footwear must be returned in the original box.</li>
+                                <li>Refunds are processed within 5-7 business days after we receive your return.</li>
                                 <li>Sale items are final sale and cannot be returned.</li>
                                 <li className="decoration-2 underline">Failing to follow these instructions may result in cancellation of your refund.</li>
                             </ul>
