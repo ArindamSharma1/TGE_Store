@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Minus, Plus, X } from "lucide-react";
+import { Minus, Plus, X, ShoppingBag } from "lucide-react";
 import { useCart, CartItem as CartItemType } from "@/context/CartContext";
 import { cn } from "@/lib/utils/cn";
 
@@ -13,13 +13,17 @@ export function CartItem({ item }: { item: CartItemType }) {
     return (
         <div className="flex gap-4 py-6 border-b border-zinc-100 last:border-0">
             {/* Image */}
-            <div className="relative h-24 w-20 flex-shrink-0 overflow-hidden rounded-md border border-zinc-100 bg-zinc-50">
-                <Image
-                    src={item.image}
-                    alt={item.productTitle}
-                    fill
-                    className="object-cover object-center"
-                />
+            <div className="relative h-24 w-20 flex-shrink-0 overflow-hidden rounded-md border border-zinc-100 bg-zinc-50 flex items-center justify-center">
+                {item.image ? (
+                    <Image
+                        src={item.image}
+                        alt={item.productTitle}
+                        fill
+                        className="object-cover object-center"
+                    />
+                ) : (
+                    <ShoppingBag className="w-8 h-8 text-zinc-300" />
+                )}
             </div>
 
             {/* Details */}
