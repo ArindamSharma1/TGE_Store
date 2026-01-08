@@ -29,7 +29,7 @@ export function WhyTGE() {
                     <div className="text-center mb-16">
                         <span className="text-sm font-bold uppercase tracking-widest text-zinc-500 mb-4 block">The TGE Standard</span>
                         <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-zinc-900">
-                            Why TGS?
+                            Why TGE?
                         </h2>
                     </div>
 
