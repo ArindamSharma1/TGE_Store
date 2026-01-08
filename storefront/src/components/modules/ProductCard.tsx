@@ -84,8 +84,9 @@ export function ProductCard({
             <Link href={`/products/${handle}`} className="block h-full w-full">
                 <GlassCard className="relative aspect-[4/5] w-full overflow-hidden bg-white border-zinc-100 mb-4 transition-all duration-500 group-hover:shadow-lg">
                     {/* Main Image */}
+                    {/* Main Image */}
                     <Image
-                        src={images.main}
+                        src={images.main || "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop"}
                         alt={title}
                         fill
                         className="object-cover transition-transform duration-500 ease-out group-hover:scale-105 will-change-transform"
@@ -93,7 +94,7 @@ export function ProductCard({
                     />
                     {/* Hover Image */}
                     <Image
-                        src={images.hover}
+                        src={images.hover || images.main || "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop"}
                         alt={`${title} - Alternate View`}
                         fill
                         className="absolute inset-0 object-cover opacity-0 transition-all duration-500 ease-out group-hover:opacity-100 group-hover:scale-105 will-change-transform"

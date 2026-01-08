@@ -1,5 +1,4 @@
-"use client";
-
+// ... imports
 import { Hero } from "@/components/modules/Hero";
 import { Button } from "@/components/ui/Button";
 import Image from "next/image";
@@ -10,38 +9,44 @@ import { Newsletter } from "@/components/modules/Newsletter";
 import { WhyTGE } from "@/components/modules/WhyTGE";
 import { NeedHelp } from "@/components/modules/NeedHelp";
 import { medusaClient } from "@/lib/medusa/client";
-import { useState, useEffect } from "react";
 
-export default function Home() {
-  const [products, setProducts] = useState<any[]>([]);
+// Revalidate every hour
+export const revalidate = 3600;
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const { products } = await medusaClient.store.product.list({
-          limit: 8, // Increase limit to fill 2 rows if available
-          fields: "+variants.prices,+variants.calculated_price,+images"
-        });
-        setProducts(products);
-      } catch (error) {
-        console.error("Failed to fetch home products:", error);
-      }
-    };
-    fetchProducts();
-  }, []);
+interface Product {
+  id: string;
+  title: string;
+  handle: string;
+  thumbnail?: string;
+  images?: { url: string }[];
+  variants: any[];
+}
+
+export default async function Home() {
+  let products: Product[] = [];
+  try {
+    // 1. Fetch Products directly (Server Side)
+    const res = await medusaClient.store.product.list({
+      limit: 8,
+      fields: "+variants.prices,+variants.calculated_price,+images"
+    });
+    products = res.products;
+  } catch (error) {
+    console.error("Failed to fetch home products:", error);
+  }
 
   return (
     <main className="min-h-screen bg-zinc-50 pb-20">
       <Hero
-        heading="New Season, New Fits"
-        subheading="Light layers. Modern cuts. Built for daily wear."
+        heading="Dailywear, Redefined."
+        subheading="The new standard for modern essentials. Built for daily wear."
       />
 
       {/* SECTION 2: SHOP BY GENDER */}
       <section className="mx-auto max-w-7xl px-4 py-8">
         <Reveal width="100%">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Men's Card */}
+            {/* Men's Card - unchanged */}
             <Link href="/collections/men" className="group relative h-[400px] md:h-[500px] w-full overflow-hidden rounded-[32px] bg-zinc-100">
               <Image
                 src="https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?q=80&w=1200&auto=format&fit=crop"
@@ -57,7 +62,7 @@ export default function Home() {
               </div>
             </Link>
 
-            {/* Women's Card */}
+            {/* Women's Card - unchanged */}
             <Link href="/collections/women" className="group relative h-[400px] md:h-[500px] w-full overflow-hidden rounded-[32px] bg-zinc-100">
               <Image
                 src="https://images.unsplash.com/photo-1618244972963-dbee1a7edc95?q=80&w=1200&auto=format&fit=crop"
@@ -81,7 +86,7 @@ export default function Home() {
         </Reveal>
       </section>
 
-      {/* SECTION 3: SHOP BY CATEGORY */}
+      {/* SECTION 3: SHOP BY CATEGORY - unchanged (kept hardcoded) */}
       <section className="mx-auto max-w-7xl px-4 py-16">
         <Reveal width="100%">
           <h2 className="text-2xl font-bold uppercase tracking-tight text-zinc-900 mb-8">Shop by Category</h2>
@@ -108,7 +113,7 @@ export default function Home() {
         </Reveal>
       </section>
 
-      {/* SECTION 4: TRENDING NOW */}
+      {/* SECTION 4: TRENDING NOW - SSR */}
       <section className="mx-auto max-w-7xl px-4 py-16 border-t border-zinc-100">
         <Reveal width="100%">
           <div className="flex justify-between items-end mb-10">
