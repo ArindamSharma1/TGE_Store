@@ -72,7 +72,7 @@ export default function CartPage() {
                             <Link href={`/products/${item.handle}`} className="relative h-40 w-32 shrink-0 overflow-hidden rounded-lg bg-zinc-100">
                                 <Image
                                     src={item.image}
-                                    alt={item.title || item.productTitle}
+                                    alt={item.productTitle}
                                     fill
                                     className="object-cover"
                                 />
