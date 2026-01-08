@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/Input";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { medusaClient } from "@/lib/medusa/client";
+import { loginAction } from "@/app/actions/auth";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -40,71 +41,27 @@ export default function LoginPage() {
             return;
         }
 
-        try {
-            const response = await medusaClient.auth.login("customer", "emailpass", {
-                email,
-                password
+        const result = await loginAction(formData);
+
+        if (result.success) {
+            // Sync token to LocalStorage for Client-Side SDK usage (e.g. Header profile check)
+            if (result.access_token) {
+                localStorage.setItem("medusa_auth_token", result.access_token);
+            }
+
+            toast.success("Welcome back!", {
+                description: "You have successfully signed in."
             });
-
-            // Medusa V2: login returns the token string directly in some configs
-            // or an object { access_token: string } in others.
-            // The debugging confirmed it is returning the Token String directly.
-
-            let token: string | undefined;
-
-            if (typeof response === "string") {
-                token = response;
-            } else if (typeof response === "object" && response !== null) {
-                // @ts-ignore
-                token = response.access_token || response.token;
-            }
-
-            if (token) {
-                localStorage.setItem("medusa_auth_token", token);
-
-                toast.success("Welcome back!", {
-                    description: "You have successfully signed in."
-                });
-
-                window.location.href = "/";
-            } else {
-                console.error("Login failed: Unexpected response format", response);
-                toast.error("Login Error", {
-                    description: "Server returned an unexpected format. Please contact support."
-                });
-            }
-        } catch (error: any) {
-            // Console Hygiene: Log only in development, and use debug level
-            if (process.env.NODE_ENV === "development") {
-                console.debug("Login error (safe log):", {
-                    message: error?.message,
-                    status: error?.response?.status,
-                    type: error?.response?.data?.type
-                });
-            }
-
-            let errorMessage = "Invalid email or password. Please try again.";
-
-            // Handle specific 401 Unauthorized (Wrong credentials)
-            if (error?.response?.status === 401) {
-                errorMessage = "The email or password you entered is incorrect.";
-            } else if (error?.response?.data?.message) {
-                // Use backend message if available and safe (e.g., validation)
-                errorMessage = error.response.data.message;
-            }
-
-            // Check for user not found specifically if backend exposes it (Medusa typically treats this as 401 for security to prevent enumeration, but we can customize the generic message)
-            // However, strictly following user request to say "email not existing", we might need to rely on 401. 
-            // Ideally, Medusa returns 401 for both wrong password and user not found. 
-            // We will update the generic 401 message to cover both cleanly or rely on specific types if available.
-
+            router.push("/");
+            router.refresh();
+        } else {
+            console.error("Login failed:", result.error);
             setErrors(prev => ({
                 ...prev,
-                general: errorMessage
+                general: result.error || "Invalid email or password"
             }));
-        } finally {
-            setIsLoading(false);
         }
+        setIsLoading(false);
     };
 
     return (

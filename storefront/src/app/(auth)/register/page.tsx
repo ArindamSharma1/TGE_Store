@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/Input";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { medusaClient } from "@/lib/medusa/client";
+import { registerAction } from "@/app/actions/auth";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -57,69 +58,37 @@ export default function RegisterPage() {
         }
 
         try {
-            const nameParts = name.trim().split(" ");
-            const first_name = nameParts[0];
-            const last_name = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
+            const formData = new FormData();
+            formData.append("email", email);
+            formData.append("password", password);
+            formData.append("firstName", name.split(" ")[0]);
+            formData.append("lastName", name.split(" ").slice(1).join(" ") || "");
 
-            // 1. Get registration token
-            const token = await medusaClient.auth.register("customer", "emailpass", {
-                email,
-                password
-            });
+            const result = await registerAction(formData);
 
-            // 2. Create customer using the token
-            await medusaClient.store.customer.create({
-                email,
-                first_name,
-                last_name
-            }, {}, {
-                Authorization: `Bearer ${token}`
-            });
+            if (result.success) {
+                // Sync token to LocalStorage for Client-Side SDK usage
+                if (result.access_token) {
+                    localStorage.setItem("medusa_auth_token", result.access_token);
+                }
 
-            // 3. Login to ensure session/token is set for future requests
-            await medusaClient.auth.login("customer", "emailpass", {
-                email,
-                password
-            });
-
-            toast.success("Account created successfully!", {
-                description: "You have been signed in."
-            });
-
-            // Redirect to home or account
-            router.push("/");
-            router.refresh();
-
-        } catch (error: any) {
-            let errorMessage = "Registration failed. Please try again.";
-
-            // Check for specific "Identity with email already exists" error
-            // We handle both legacy and new SDK error formats
-            const isDuplicate =
-                error?.message?.includes("Identity with email already exists") ||
-                error?.response?.data?.message === "Identity with email already exists" ||
-                error?.response?.data?.type === "duplicate_error";
-
-            if (isDuplicate) {
-                // Production-safe handling: No console error, specific user message
-                errorMessage = "An account with this email already exists. Please sign in instead.";
+                toast.success("Account created successfully!", {
+                    description: "You have been signed in."
+                });
+                router.push("/");
+                router.refresh();
             } else {
-                // Only log genuine unexpected errors in development
-                if (process.env.NODE_ENV === "development") {
-                    console.error("Registration Error:", error);
-                }
-
-                // Fallback error extraction
-                if (error?.response?.data?.message) {
-                    errorMessage = error.response.data.message;
-                } else if (error?.message) {
-                    errorMessage = error.message;
-                }
+                setErrors(prev => ({
+                    ...prev,
+                    general: result.error || "Registration failed. Please try again."
+                }));
             }
 
+        } catch (error: any) {
+            console.error("Registration Error:", error);
             setErrors(prev => ({
                 ...prev,
-                general: errorMessage
+                general: "An unexpected error occurred."
             }));
         } finally {
             setIsLoading(false);

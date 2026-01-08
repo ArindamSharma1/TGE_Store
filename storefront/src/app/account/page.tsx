@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { useWishlist } from "@/context/WishlistContext";
+import { logoutAction } from "@/app/actions/auth";
 
 function WishlistSection() {
     const { items, removeFromWishlist } = useWishlist();
@@ -115,8 +116,19 @@ export default function AccountPage() {
     }, [router]);
 
     const handleLogout = async () => {
-        await medusaClient.auth.logout();
+        // 1. Clear Server Cookie
+        await logoutAction();
+
+        // 2. Clear Client Token
         localStorage.removeItem("medusa_auth_token");
+
+        // 3. Attempt Medusa Logout (Best effort)
+        try {
+            await medusaClient.auth.logout();
+        } catch (e) {
+            // Ignore error if already logged out
+        }
+
         toast.success("Logged out successfully");
         window.location.href = "/login";
     };
