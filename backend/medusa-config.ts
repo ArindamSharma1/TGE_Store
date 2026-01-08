@@ -5,15 +5,7 @@ loadEnv(process.env.NODE_ENV || "development", process.cwd())
 
 const modules: any[] = [];
 
-if (process.env.RAZORPAY_KEY_ID) {
-  modules.push({
-    resolve: path.resolve(process.cwd(), "src/modules/razorpay"),
-    options: {
-      key_id: process.env.RAZORPAY_KEY_ID,
-      key_secret: process.env.RAZORPAY_KEY_SECRET,
-    }
-  })
-}
+
 
 export default defineConfig({
   projectConfig: {
