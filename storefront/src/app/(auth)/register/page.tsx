@@ -58,37 +58,76 @@ export default function RegisterPage() {
         }
 
         try {
-            const formData = new FormData();
-            formData.append("email", email);
-            formData.append("password", password);
-            formData.append("firstName", name.split(" ")[0]);
-            formData.append("lastName", name.split(" ").slice(1).join(" ") || "");
+            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
 
-            const result = await registerAction(formData);
+            const MSG_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
 
-            if (result.success) {
-                // Sync token to LocalStorage for Client-Side SDK usage
-                if (result.access_token) {
-                    localStorage.setItem("medusa_auth_token", result.access_token);
-                }
+            // 1. Register (Create Identity) - POST /auth/customer/emailpass/register
+            console.log("Creating identity...");
+            const createRes = await fetch(`${BACKEND_URL}/auth/customer/emailpass/register`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-publishable-api-key": MSG_KEY
+                },
+                body: JSON.stringify({ email, password }),
+            });
 
-                toast.success("Account created successfully!", {
-                    description: "You have been signed in."
-                });
-                router.push("/");
-                router.refresh();
-            } else {
-                setErrors(prev => ({
-                    ...prev,
-                    general: result.error || "Registration failed. Please try again."
-                }));
+            const createData = await createRes.json();
+
+            if (!createRes.ok) {
+                throw new Error(createData.message || "Registration failed");
             }
+
+            // 2. Login - POST /auth/customer/emailpass
+            console.log("Logging in...");
+            const loginRes = await fetch(`${BACKEND_URL}/auth/customer/emailpass`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-publishable-api-key": MSG_KEY
+                },
+                body: JSON.stringify({ email, password }),
+                credentials: "include",
+            });
+
+            if (!loginRes.ok) {
+                const loginData = await loginRes.json();
+                throw new Error(loginData.message || "Registration successful but login failed.");
+            }
+
+            // 3. Update Profile (Add Name) - POST /store/customers/me
+            // Now that we have the cookie, we can update the customer profile
+            console.log("Updating profile...");
+            const updateRes = await fetch(`${BACKEND_URL}/store/customers/me`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-publishable-api-key": MSG_KEY
+                },
+                body: JSON.stringify({
+                    first_name: name.split(" ")[0],
+                    last_name: name.split(" ").slice(1).join(" ") || ""
+                }),
+                credentials: "include",
+            });
+
+            if (!updateRes.ok) {
+                console.warn("Name update failed, but account created.");
+            }
+
+            toast.success("Account created successfully!", {
+                description: "You have been signed in."
+            });
+
+            // Force hard navigation to ensure cookies are picked up
+            window.location.href = "/account";
 
         } catch (error: any) {
             console.error("Registration Error:", error);
             setErrors(prev => ({
                 ...prev,
-                general: "An unexpected error occurred."
+                general: error.message || "An unexpected error occurred."
             }));
         } finally {
             setIsLoading(false);

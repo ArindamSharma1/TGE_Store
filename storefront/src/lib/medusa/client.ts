@@ -3,30 +3,49 @@ import Medusa from "@medusajs/js-sdk";
 const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
 const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_dummy";
 
-// Helper to get token safely
-const getAuthToken = () => {
-    if (typeof window !== "undefined") {
-        return localStorage.getItem("medusa_auth_token");
-    }
-    return null;
-};
-
-// Singleton Default (for non-authenticated or initial load)
+// Singleton Default (Still used for public endpoints like products)
 export const medusaClient = new Medusa({
     baseUrl: BACKEND_URL,
     debug: process.env.NODE_ENV === "development",
     publishableKey: PUBLISHABLE_KEY,
-    globalHeaders: getAuthToken() ? { Authorization: `Bearer ${getAuthToken()}` } : undefined
 });
 
-// Dynamic Client factory
-// Use this when you absolutely need to ensure the latest token is used (e.g., after login or in protected routes)
+// Dynamic Client factory - Deprecated for Auth/Profile calls due to Cookie/Credentials limitation
 export const getMedusa = () => {
-    const token = getAuthToken();
     return new Medusa({
         baseUrl: BACKEND_URL,
         debug: process.env.NODE_ENV === "development",
         publishableKey: PUBLISHABLE_KEY,
-        globalHeaders: token ? { Authorization: `Bearer ${token}` } : undefined
     });
 };
+
+// Native Fetch Helper for Authenticated Customer Calls
+// This bypasses the SDK's inability to set credentials: 'include' easily
+// DEPRECATED: We are reverting to standard SDK usage
+/*
+export const fetchCustomer = async () => {
+    const res = await fetch(`${BACKEND_URL}/store/customers/me`, {
+        headers: {
+            "Content-Type": "application/json",
+            "x-publishable-api-key": PUBLISHABLE_KEY,
+        },
+        credentials: "include", // Sends the httpOnly cookie
+    });
+    if (!res.ok) return null;
+    return await res.json();
+};
+
+export const updateCustomer = async (data: any) => {
+    const res = await fetch(`${BACKEND_URL}/store/customers/me`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "x-publishable-api-key": PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify(data),
+        credentials: "include", // Sends the httpOnly cookie
+    });
+    if (!res.ok) throw new Error("Failed to update customer");
+    return await res.json();
+};
+*/

@@ -19,20 +19,35 @@ export function Header() {
     const { openSearch } = useSearch();
     const pathname = usePathname();
     const [customer, setCustomer] = useState<any>(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false); // Added isLoggedIn state
 
     useEffect(() => {
-        // Check for authentication
         const checkAuth = async () => {
             try {
-                const { customer } = await medusaClient.store.customer.retrieve();
-                setCustomer(customer);
-            } catch (e) {
-                // Not logged in or error
+                const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
+                const MSG_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
+
+                const response = await fetch(`${BACKEND_URL}/store/customers/me`, {
+                    headers: {
+                        "x-publishable-api-key": MSG_KEY
+                    },
+                    credentials: "include"
+                });
+                setIsLoggedIn(response.ok);
+                if (response.ok) {
+                    const { customer } = await response.json();
+                    setCustomer(customer);
+                } else {
+                    setCustomer(null);
+                }
+            } catch (error) {
+                setIsLoggedIn(false);
                 setCustomer(null);
             }
         };
+
         checkAuth();
-    }, [pathname]); // Re-check on navigation
+    }, [pathname]); // Re-check on route change
 
     useEffect(() => {
         return scrollY.onChange((latest) => {

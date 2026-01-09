@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/Input";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { medusaClient } from "@/lib/medusa/client";
-import { loginAction } from "@/app/actions/auth";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -41,27 +40,47 @@ export default function LoginPage() {
             return;
         }
 
-        const result = await loginAction(formData);
+        try {
+            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
 
-        if (result.success) {
-            // Sync token to LocalStorage for Client-Side SDK usage (e.g. Header profile check)
-            if (result.access_token) {
-                localStorage.setItem("medusa_auth_token", result.access_token);
+            const MSG_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
+
+            console.log("Logging in via cookie auth...");
+            const response = await fetch(`${BACKEND_URL}/auth/customer/emailpass`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-publishable-api-key": MSG_KEY
+                },
+                body: JSON.stringify({
+                    email,
+                    password
+                }),
+                credentials: "include"
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || "Invalid email or password");
             }
 
+            // Success - Cookie should be set by backend
             toast.success("Welcome back!", {
-                description: "You have successfully signed in."
+                description: "You have been successfully logged in."
             });
-            router.push("/");
-            router.refresh();
-        } else {
-            console.error("Login failed:", result.error);
+
+            // Force hard navigation to ensure cookies are picked up
+            window.location.href = "/account";
+
+        } catch (error: any) {
+            console.error("Login Error:", error);
             setErrors(prev => ({
                 ...prev,
-                general: result.error || "Invalid email or password"
+                general: error?.message || "Invalid email or password"
             }));
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     };
 
     return (
