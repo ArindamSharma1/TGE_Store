@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { useWishlist } from "@/context/WishlistContext";
+import { logoutAction } from "@/app/actions/auth";
 
 
 function WishlistSection() {
@@ -82,34 +83,35 @@ export default function AccountPage() {
     useEffect(() => {
         const checkAuth = async () => {
             try {
+                // Determine backend URL
                 const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
-                const MSG_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
+                const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
 
-                const response = await fetch(`${BACKEND_URL}/store/customers/me?expand=billing_address,shipping_addresses,orders,orders.items`, {
+                const res = await fetch(`${BACKEND_URL}/store/customers/me?expand=billing_address,shipping_addresses,orders,orders.items`, {
                     headers: {
-                        "x-publishable-api-key": MSG_KEY
+                        "Content-Type": "application/json",
+                        "x-publishable-api-key": PUBLISHABLE_KEY,
                     },
-                    credentials: "include"
+                    credentials: "include", // REQUIRED
                 });
 
-                if (!response.ok) {
-                    // Gracefully handle not logged in state
-                    router.push("/login");
-                    return;
+                if (!res.ok) {
+                    throw new Error("Unauthorized");
                 }
 
-                const data = await response.json();
-                setCustomer(data.customer);
-                setProfileForm({
-                    first_name: data.customer.first_name || "",
-                    last_name: data.customer.last_name || "",
-                    phone: data.customer.phone || ""
-                });
-                setOrders(data.customer.orders);
+                const data = await res.json();
+                const customerData = data.customer;
 
+                setCustomer(customerData);
+                setProfileForm({
+                    first_name: customerData.first_name || "",
+                    last_name: customerData.last_name || "",
+                    phone: customerData.phone || ""
+                });
+                setOrders(customerData.orders || []);
             } catch (error) {
                 console.error("Auth check failed:", error);
-                router.push("/login"); // Redirect to login on failure
+                router.replace("/login");
             } finally {
                 setIsLoading(false);
             }
@@ -118,25 +120,9 @@ export default function AccountPage() {
     }, [router]);
 
     const handleLogout = async () => {
-        // 1. Clear Client Token (if used by custom logic)
-        localStorage.removeItem("medusa_auth_token");
-
-        // 2. Attempt Medusa Logout
         try {
-            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
-            const MSG_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
-
-            await fetch(`${BACKEND_URL}/auth/customer/emailpass`, {
-                method: "DELETE",
-                headers: {
-                    "x-publishable-api-key": MSG_KEY
-                },
-                credentials: "include"
-            });
-
-            // Clear any lingering local storage just in case
+            await logoutAction();
             localStorage.removeItem("medusa_auth_token");
-
             router.push("/login");
             router.refresh();
         } catch (error) {

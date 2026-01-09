@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/Input";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { medusaClient } from "@/lib/medusa/client";
+// import { loginAction } from "@/app/actions/auth";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -41,35 +42,39 @@ export default function LoginPage() {
         }
 
         try {
+            console.log("Logging in via client-side fetch (Token Flow)...");
+
             const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
+            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
 
-            const MSG_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
-
-            console.log("Logging in via cookie auth...");
-            const response = await fetch(`${BACKEND_URL}/auth/customer/emailpass`, {
+            const result = await fetch(`${BACKEND_URL}/auth/customer/emailpass`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-publishable-api-key": MSG_KEY
+                    "x-publishable-api-key": PUBLISHABLE_KEY,
                 },
                 body: JSON.stringify({
                     email,
                     password
                 }),
-                credentials: "include"
             });
 
-            if (!response.ok) {
-                const data = await response.json();
+            if (!result.ok) {
+                // Try to parse error message if available
+                const data = await result.json().catch(() => ({}));
                 throw new Error(data.message || "Invalid email or password");
             }
 
-            // Success - Cookie should be set by backend
+            const loginData = await result.json();
+            const token = loginData.token;
+            localStorage.setItem("medusa_auth_token", token);
+
+            // Success
             toast.success("Welcome back!", {
                 description: "You have been successfully logged in."
             });
 
-            // Force hard navigation to ensure cookies are picked up
+            // Force hard navigation
             window.location.href = "/account";
 
         } catch (error: any) {

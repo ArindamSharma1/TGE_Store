@@ -11,7 +11,6 @@ import { useCart } from "@/context/CartContext";
 import { useSearch } from "@/context/SearchContext";
 import { usePathname } from "next/navigation";
 import { medusaClient } from "@/lib/medusa/client";
-
 export function Header() {
     const { scrollY } = useScroll();
     const [isScrolled, setIsScrolled] = useState(false);
@@ -19,35 +18,50 @@ export function Header() {
     const { openSearch } = useSearch();
     const pathname = usePathname();
     const [customer, setCustomer] = useState<any>(null);
-    const [isLoggedIn, setIsLoggedIn] = useState(false); // Added isLoggedIn state
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
         const checkAuth = async () => {
-            try {
-                const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
-                const MSG_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
+            const token = localStorage.getItem("medusa_auth_token");
+            if (!token) {
+                setCustomer(null);
+                setIsLoggedIn(false);
+                return;
+            }
 
-                const response = await fetch(`${BACKEND_URL}/store/customers/me`, {
+            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
+            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/store/customers/me`, {
                     headers: {
-                        "x-publishable-api-key": MSG_KEY
+                        "Content-Type": "application/json",
+                        "x-publishable-api-key": PUBLISHABLE_KEY,
+                        "Authorization": `Bearer ${token}`
                     },
-                    credentials: "include"
                 });
-                setIsLoggedIn(response.ok);
-                if (response.ok) {
-                    const { customer } = await response.json();
-                    setCustomer(customer);
+
+                if (res.ok) {
+                    const data = await res.json();
+                    setCustomer(data.customer);
+                    setIsLoggedIn(true);
                 } else {
                     setCustomer(null);
+                    setIsLoggedIn(false);
+                    // If 401, token might be expired. Should we clear it? 
+                    // Maybe, to avoid infinite retries or confusion.
+                    if (res.status === 401) {
+                        localStorage.removeItem("medusa_auth_token");
+                    }
                 }
-            } catch (error) {
-                setIsLoggedIn(false);
+            } catch (e) {
                 setCustomer(null);
+                setIsLoggedIn(false);
             }
         };
 
         checkAuth();
-    }, [pathname]); // Re-check on route change
+    }, [pathname]);
 
     useEffect(() => {
         return scrollY.onChange((latest) => {

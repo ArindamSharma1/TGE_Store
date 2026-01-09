@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/Input";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { medusaClient } from "@/lib/medusa/client";
-import { registerAction } from "@/app/actions/auth";
+// import { registerAction } from "@/app/actions/auth";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -58,69 +58,59 @@ export default function RegisterPage() {
         }
 
         try {
+            console.log("Creating account via client-side fetch (Cookie Flow)...");
+
             const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
+            // Use the strict key we know is correct
+            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
 
-            const MSG_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
+            const firstName = name.split(" ")[0];
+            const lastName = name.split(" ").slice(1).join(" ") || "";
 
-            // 1. Register (Create Identity) - POST /auth/customer/emailpass/register
-            console.log("Creating identity...");
-            const createRes = await fetch(`${BACKEND_URL}/auth/customer/emailpass/register`, {
+            // 1. Create Customer (Anonymous)
+            const createRes = await fetch(`${BACKEND_URL}/store/customers`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-publishable-api-key": MSG_KEY
+                    "x-publishable-api-key": PUBLISHABLE_KEY,
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({
+                    email,
+                    password,
+                    first_name: firstName,
+                    last_name: lastName,
+                }),
             });
 
-            const createData = await createRes.json();
-
             if (!createRes.ok) {
-                throw new Error(createData.message || "Registration failed");
+                const data = await createRes.json();
+                throw new Error(data.message || "Registration failed");
             }
 
-            // 2. Login - POST /auth/customer/emailpass
-            console.log("Logging in...");
+            // 2. Login immediately (Cookie Session)
             const loginRes = await fetch(`${BACKEND_URL}/auth/customer/emailpass`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-publishable-api-key": MSG_KEY
+                    "x-publishable-api-key": PUBLISHABLE_KEY,
                 },
-                body: JSON.stringify({ email, password }),
-                credentials: "include",
+                credentials: "include", // REQUIRED
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
             });
 
             if (!loginRes.ok) {
-                const loginData = await loginRes.json();
-                throw new Error(loginData.message || "Registration successful but login failed.");
+                throw new Error("Account created but automatic login failed");
             }
 
-            // 3. Update Profile (Add Name) - POST /store/customers/me
-            // Now that we have the cookie, we can update the customer profile
-            console.log("Updating profile...");
-            const updateRes = await fetch(`${BACKEND_URL}/store/customers/me`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-publishable-api-key": MSG_KEY
-                },
-                body: JSON.stringify({
-                    first_name: name.split(" ")[0],
-                    last_name: name.split(" ").slice(1).join(" ") || ""
-                }),
-                credentials: "include",
-            });
-
-            if (!updateRes.ok) {
-                console.warn("Name update failed, but account created.");
-            }
-
+            // Success - cookie is set
             toast.success("Account created successfully!", {
                 description: "You have been signed in."
             });
 
-            // Force hard navigation to ensure cookies are picked up
+            // Force hard navigation
             window.location.href = "/account";
 
         } catch (error: any) {
