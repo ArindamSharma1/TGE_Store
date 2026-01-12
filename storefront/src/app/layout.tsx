@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google"; // Inter
 import "./globals.css";
-import SmoothScroll from "@/components/global/SmoothScroll";
 import { Header } from "@/components/global/Header";
 import { Footer } from "@/components/global/Footer";
 import { Toaster } from "@/components/ui/Toaster";
@@ -44,30 +43,28 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://tgestore.com'),
 };
 
+import { SmoothScroll } from "@/components/animations/SmoothScroll";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} antialiased font-sans bg-zinc-50`} suppressHydrationWarning>
-        <CartProvider>
-          <WishlistProvider>
-            <SearchProvider>
+    <html lang="en">
+      <body className={`${inter.className} bg-white text-zinc-900 antialiased`}>
+        <SearchProvider>
+          <CartProvider>
+            <WishlistProvider>
               <SmoothScroll>
                 <Header />
-                <CartDrawer />
-                <SearchOverlay />
-                <main className="min-h-screen">
-                  {children}
-                  <Toaster />
-                </main>
+                <main>{children}</main>
                 <Footer />
+                <Toaster position="top-right" />
               </SmoothScroll>
-            </SearchProvider>
-          </WishlistProvider>
-        </CartProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </SearchProvider>
       </body>
     </html>
   );

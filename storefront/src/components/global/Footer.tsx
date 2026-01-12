@@ -47,7 +47,7 @@ export function Footer() {
 
                     {/* Brand Column (Editorial) */}
                     <div className="md:col-span-4 lg:col-span-5 space-y-8">
-                        <Link href="/" className="block relative w-24 h-6 opacity-0 animate-in fade-in duration-700">
+                        <Link href="/" className="block relative w-24 h-6">
                             <Image
                                 src="/logo-main-white.svg"
                                 alt="TGE"
@@ -55,7 +55,7 @@ export function Footer() {
                                 className="object-contain brightness-0"
                             />
                         </Link>
-                        <p className="text-sm leading-relaxed text-zinc-500 max-w-sm font-medium opacity-0 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+                        <p className="text-sm leading-relaxed text-zinc-500 max-w-sm font-medium">
                             Engineering the new uniform for the modern creative class.
                             Silent design, loud impact.
                         </p>
@@ -64,7 +64,7 @@ export function Footer() {
                     {/* Navigation Columns */}
                     <div className="md:col-span-8 lg:col-span-7 grid grid-cols-2 md:grid-cols-3 gap-12">
                         {sections.map((section, idx) => (
-                            <div key={section.title} className="space-y-8 opacity-0 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${200 + idx * 100}ms` }}>
+                            <div key={section.title} className="space-y-8">
                                 <h3 className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-400 select-none">
                                     {section.title}
                                 </h3>
@@ -86,7 +86,7 @@ export function Footer() {
                 </div>
 
                 {/* Bottom Bar (Asymmetric) */}
-                <div className="flex flex-col md:flex-row justify-between items-end gap-6 pt-12 border-t border-zinc-100 opacity-0 animate-in fade-in duration-1000 delay-500">
+                <div className="flex flex-col md:flex-row justify-between items-end gap-6 pt-12 border-t border-zinc-100">
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>

@@ -81,23 +81,25 @@ export function Header() {
             <header className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
                 <div className="flex items-center justify-between w-full max-w-7xl pointer-events-auto">
 
-                    {/* Left: Navigation Pill */}
                     <nav
                         className={cn(
-                            "rounded-full px-2 py-2 flex items-center gap-1 transition-all duration-300",
-                            isScrolled ? "glass-heavy shadow-sm" : "glass-card"
+                            "rounded-2xl px-2 py-1.5 flex items-center gap-1 transition-all duration-300 backdrop-blur-xl border border-white/10",
+                            isScrolled ? "bg-white/80 shadow-sm border-zinc-200/50" : "bg-black/20 hover:bg-black/30 text-white"
                         )}
                     >
-                        <Button variant="ghost" size="icon" className="rounded-full md:hidden">
+                        <Button variant="ghost" size="icon" className="rounded-xl md:hidden text-current hover:bg-white/10">
                             <Menu className="w-5 h-5" />
                         </Button>
-                        <Link href="/" className="px-4 py-2 flex items-center">
+                        <Link href="/" className="px-3 py-1.5 flex items-center">
                             <Image
                                 src="/logo-main-white.svg"
                                 alt="TGE Store"
                                 width={80}
                                 height={24}
-                                className="h-6 w-auto object-contain brightness-0"
+                                className={cn(
+                                    "h-5 w-auto object-contain transition-all",
+                                    isScrolled ? "brightness-0 invert-0" : "brightness-0 invert"
+                                )}
                             />
                         </Link>
                         <div className="hidden md:flex items-center gap-1">
@@ -105,7 +107,10 @@ export function Header() {
                                 <Link
                                     key={link.name}
                                     href={link.href}
-                                    className="px-4 py-2 text-sm font-medium hover:bg-zinc-100/50 rounded-full transition-colors"
+                                    className={cn(
+                                        "px-3 py-1.5 text-[13px] font-medium rounded-lg transition-colors",
+                                        isScrolled ? "hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900" : "hover:bg-white/10 text-white/90 hover:text-white"
+                                    )}
                                 >
                                     {link.name}
                                 </Link>
@@ -113,24 +118,23 @@ export function Header() {
                         </div>
                     </nav>
 
-                    {/* Right: Utility Pills */}
                     <div className="flex items-center gap-3">
                         <div className={cn(
-                            "rounded-full p-1 flex items-center gap-1 transition-all duration-300",
-                            isScrolled ? "glass-heavy shadow-sm" : "glass-card"
+                            "rounded-2xl p-1 flex items-center gap-1 transition-all duration-300 backdrop-blur-xl border border-white/10",
+                            isScrolled ? "bg-white/80 shadow-sm border-zinc-200/50 text-zinc-900" : "bg-black/20 hover:bg-black/30 text-white"
                         )}>
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="rounded-full w-10 h-10 hover:bg-zinc-100/50"
+                                className="rounded-xl w-9 h-9 hover:bg-white/10 text-current"
                                 onClick={openSearch}
                             >
-                                <Search className="w-5 h-5" />
+                                <Search className="w-4 h-4" />
                             </Button>
                         </div>
                         <div className={cn(
-                            "rounded-full p-1 flex items-center gap-1 transition-all duration-300",
-                            isScrolled ? "glass-heavy shadow-sm" : "glass-card"
+                            "rounded-2xl p-1 flex items-center gap-1 transition-all duration-300 backdrop-blur-xl border border-white/10",
+                            isScrolled ? "bg-white/80 shadow-sm border-zinc-200/50 text-zinc-900" : "bg-black/20 hover:bg-black/30 text-white"
                         )}>
                             {/* Updated User Icon Logic */}
                             <Button
@@ -138,20 +142,20 @@ export function Header() {
                                 href={customer ? "/account" : "/login"}
                                 variant="ghost"
                                 size="icon"
-                                className="rounded-full w-10 h-10 hover:bg-zinc-100/50"
+                                className="rounded-xl w-9 h-9 hover:bg-white/10 text-current"
                             >
-                                <User className="w-5 h-5" />
+                                <User className="w-4 h-4" />
                             </Button>
 
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="rounded-full w-10 h-10 hover:bg-zinc-100/50 relative"
+                                className="rounded-xl w-9 h-9 hover:bg-white/10 text-current relative"
                                 onClick={openCart}
                             >
-                                <ShoppingBag className="w-5 h-5" />
+                                <ShoppingBag className="w-4 h-4" />
                                 {cartCount > 0 && (
-                                    <span className="absolute top-2 right-2 w-2 h-2 bg-zinc-900 rounded-full border border-white"></span>
+                                    <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-red-500 rounded-full border border-white"></span>
                                 )}
                             </Button>
                         </div>

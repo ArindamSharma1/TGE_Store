@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/Button";
 import Image from "next/image";
 import Link from "next/link";
 import { ProductCard } from "@/components/modules/ProductCard";
-import { Reveal } from "@/components/ui/Reveal";
+import { Reveal } from "@/components/animations/Reveal";
 import { Newsletter } from "@/components/modules/Newsletter";
 import { WhyTGE } from "@/components/modules/WhyTGE";
 import { NeedHelp } from "@/components/modules/NeedHelp";
@@ -42,46 +42,57 @@ export default async function Home() {
         subheading="The new standard for modern essentials. Built for daily wear."
       />
 
-      {/* SECTION 2: SHOP BY GENDER */}
-      <section className="mx-auto max-w-7xl px-4 py-8">
+      {/* SECTION 2: EDITORIAL CATEGORIES */}
+      <section className="mx-auto max-w-[1400px] px-4 py-12">
         <Reveal width="100%">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Men's Card - unchanged */}
-            <Link href="/collections/men" className="group relative h-[400px] md:h-[500px] w-full overflow-hidden rounded-[32px] bg-zinc-100">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            {/* Men's Editorial Card */}
+            <Link href="/collections/men" className="group relative h-[500px] md:h-[650px] w-full overflow-hidden rounded-[4px] bg-zinc-100 block">
               <Image
                 src="https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?q=80&w=1200&auto=format&fit=crop"
-                alt="Shop Men"
+                alt="Men's Collection"
                 fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                className="object-cover transition-transform duration-1000 group-hover:scale-[1.02]"
               />
-              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
-              <div className="absolute bottom-8 left-8">
-                <div className="inline-flex items-center justify-center rounded-full bg-white text-zinc-900 border-none font-bold px-8 h-12 shadow-sm transition-colors group-hover:bg-zinc-100">
-                  Shop Men
-                </div>
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-700" />
+
+              <div className="absolute bottom-10 left-10 text-white z-10">
+                <span className="block text-[10px] font-bold uppercase tracking-[0.2em] opacity-80 mb-2">
+                  Collections
+                </span>
+                <h2 className="text-3xl md:text-4xl font-serif italic mb-1">
+                  Men
+                </h2>
+                <p className="text-sm font-medium tracking-wide opacity-90">
+                  Refined Utility
+                </p>
               </div>
             </Link>
 
-            {/* Women's Card - unchanged */}
-            <Link href="/collections/women" className="group relative h-[400px] md:h-[500px] w-full overflow-hidden rounded-[32px] bg-zinc-100">
+            {/* Women's Editorial Card */}
+            <Link href="/collections/women" className="group relative h-[500px] md:h-[650px] w-full overflow-hidden rounded-[4px] bg-zinc-100 block">
               <Image
                 src="https://images.unsplash.com/photo-1618244972963-dbee1a7edc95?q=80&w=1200&auto=format&fit=crop"
-                alt="Shop Women"
+                alt="Women's Collection"
                 fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                className="object-cover transition-transform duration-1000 group-hover:scale-[1.02]"
               />
-              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
-              <div className="absolute bottom-8 left-8">
-                <div className="inline-flex items-center justify-center rounded-full bg-white text-zinc-900 border-none font-bold px-8 h-12 shadow-sm transition-colors group-hover:bg-zinc-100">
-                  Shop Women
-                </div>
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-700" />
+
+              <div className="absolute bottom-10 left-10 text-white z-10">
+                <span className="block text-[10px] font-bold uppercase tracking-[0.2em] opacity-80 mb-2">
+                  Collections
+                </span>
+                <h2 className="text-3xl md:text-4xl font-serif italic mb-1">
+                  Women
+                </h2>
+                <p className="text-sm font-medium tracking-wide opacity-90">
+                  Modern Silhouette
+                </p>
               </div>
             </Link>
-          </div>
-          <div className="mt-8 flex justify-center">
-            <Button asChild href="/collections/all" size="lg" className="rounded-full px-12 h-14 text-base font-bold bg-zinc-900 text-white hover:bg-zinc-800">
-              Shop All
-            </Button>
+
           </div>
         </Reveal>
       </section>
