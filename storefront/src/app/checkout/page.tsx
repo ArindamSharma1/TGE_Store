@@ -130,23 +130,31 @@ export default function CheckoutPage() {
             });
 
             // 2. Initialize Payment Sessions (Required before payment step)
-            // This pulls configured payment providers from Medusa backend
-            // Cast to any to bypass potential type definition mismatches in SDK
-            const { cart } = await (medusaClient.store.cart as any).createPaymentSessions(cartId);
+            // 2. Initialize Payment Collection (Direct Fetch to bypass SDK issues)
+            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
+            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
 
-            // Default to manual for now since we removed Razorpay
-            if (cart.payment_sessions?.length) {
-                const manualSession = cart.payment_sessions.find((s: any) => s.provider_id === "manual");
-                const selectedSession = manualSession || cart.payment_sessions[0];
+            const pcRes = await fetch(`${BACKEND_URL}/store/payment-collections`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-publishable-api-key": PUBLISHABLE_KEY,
+                },
+                body: JSON.stringify({ cart_id: cartId }),
+            });
 
-                if (selectedSession) {
-                    await (medusaClient.store.cart as any).setPaymentSession(cartId, {
-                        provider_id: selectedSession.provider_id
-                    });
-                    setPaymentSession(selectedSession);
-                }
-            } else {
-                console.warn("No payment providers found. Ensure 'manual' provider is enabled in Medusa.");
+            if (pcRes.ok) {
+                const { payment_collection } = await pcRes.json();
+
+                // Initialize 'pp_system_default' session (System Payment)
+                await fetch(`${BACKEND_URL}/store/payment-collections/${payment_collection.id}/payment-sessions`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "x-publishable-api-key": PUBLISHABLE_KEY,
+                    },
+                    body: JSON.stringify({ provider_id: "pp_system_default" }),
+                });
             }
 
             setStep(3);
@@ -161,16 +169,31 @@ export default function CheckoutPage() {
     const handleCompleteOrder = async () => {
         setIsLoading(true);
         try {
-            // Complete the cart
-            const { type, data } = await medusaClient.store.cart.complete(cartId);
+            // Complete the cart (Direct Fetch to bypass SDK validation)
+            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
+            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
 
-            if (type === "order" && data) {
-                // Success!
-                // Clear local cart ID because it's now an order
-                localStorage.removeItem("medusa_cart_id");
-                router.push(`/order/confirmed/${data.id}`);
+            const res = await fetch(`${BACKEND_URL}/store/carts/${cartId}/complete`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-publishable-api-key": PUBLISHABLE_KEY,
+                },
+                body: JSON.stringify({}),
+            });
+
+            if (res.ok) {
+                const { type, data } = await res.json();
+                if (type === "order" && data) {
+                    // Success!
+                    localStorage.removeItem("medusa_cart_id");
+                    router.push(`/order/confirmed/${data.id}`);
+                } else {
+                    toast.error("Order incomplete. Please check details.");
+                }
             } else {
-                toast.error("Order could not be completed. Please try again.");
+                const errData = await res.json();
+                throw new Error(errData.message || "Server Error");
             }
         } catch (error: any) {
             console.error(error);
@@ -179,6 +202,7 @@ export default function CheckoutPage() {
             setIsLoading(false);
         }
     };
+
 
     // Removed Razorpay logic completely
 

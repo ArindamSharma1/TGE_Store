@@ -34,7 +34,7 @@ const item = {
         y: 0,
         transition: {
             duration: 0.8,
-            ease: [0.16, 1, 0.3, 1] // The "Apple" Ease
+            ease: [0.16, 1, 0.3, 1] as const // The "Apple" Ease
         }
     }
 };
