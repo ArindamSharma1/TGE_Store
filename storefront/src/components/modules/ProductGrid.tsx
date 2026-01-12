@@ -6,12 +6,10 @@ import { motion } from "framer-motion";
 interface Product {
     id: string;
     title: string;
-    price: number;
+    price?: number; // Price might be missing or in variants
     handle: string;
-    images: {
-        main: string;
-        hover: string;
-    };
+    thumbnail?: string | null;
+    images?: { url: string }[] | null;
     variants: any[];
 }
 
@@ -50,20 +48,36 @@ export function ProductGrid({ products }: ProductGridProps) {
             whileInView="show"
             viewport={{ once: true, margin: "-100px" }}
         >
-            {products.map((product) => (
-                <motion.div key={product.id} variants={item}>
-                    <ProductCard
-                        id={product.id}
-                        title={product.title}
-                        thumbnail={product.images.main}
-                        handle={product.handle}
-                        price={product.price}
-                        currencyCode="INR"
-                        images={product.images}
-                        variants={product.variants}
-                    />
-                </motion.div>
-            ))}
+            {products.map((product) => {
+                const mainImg = product.thumbnail || product.images?.[0]?.url || "";
+                const hoverImg = product.images?.[1]?.url || mainImg;
+
+                // Calculate display price if root price is missing
+                let displayPrice = product.price;
+                if (!displayPrice && product.variants && product.variants.length > 0) {
+                    // Simple fallback - ProductCard handles more complex logic
+                    displayPrice = product.variants[0].prices?.[0]?.amount;
+                    if (displayPrice) displayPrice = displayPrice / 100;
+                }
+
+                return (
+                    <motion.div key={product.id} variants={item}>
+                        <ProductCard
+                            id={product.id}
+                            title={product.title}
+                            thumbnail={mainImg}
+                            handle={product.handle}
+                            price={displayPrice || 0} // ProductCard handles details
+                            currencyCode="INR"
+                            images={{
+                                main: mainImg,
+                                hover: hoverImg
+                            }}
+                            variants={product.variants}
+                        />
+                    </motion.div>
+                );
+            })}
         </motion.div>
     );
 }

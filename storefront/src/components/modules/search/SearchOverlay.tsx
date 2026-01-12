@@ -9,22 +9,24 @@ import { useSearch } from "@/context/SearchContext";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils/cn";
 
-// Mock Product Data for Search
-const SEARCH_PRODUCTS = [
-    { id: "p1", title: "Heavyweight Box Tee", price: 45, category: "Tops", image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=400&auto=format&fit=crop", handle: "heavyweight-box-tee" },
-    { id: "p2", title: "Technical Cargo Pant", price: 120, category: "Bottoms", image: "https://images.unsplash.com/photo-1552168324-d612d77725e3?q=80&w=400&auto=format&fit=crop", handle: "technical-cargo-pant" },
-    { id: "p3", title: "Oversized Puffer", price: 240, category: "Outerwear", image: "https://images.unsplash.com/photo-1544923246-77307dd654cb?q=80&w=400&auto=format&fit=crop", handle: "oversized-puffer" },
-    { id: "p4", title: "Mohair Knit Cardigan", price: 160, category: "Tops", image: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?q=80&w=400&auto=format&fit=crop", handle: "mohair-knit-cardigan" },
-    { id: "p5", title: "Relaxed Denim", price: 95, category: "Bottoms", image: "https://images.unsplash.com/photo-1582552938357-32b906df40cb?q=80&w=400&auto=format&fit=crop", handle: "relaxed-denim" },
-    { id: "p6", title: "Utility Vest", price: 110, category: "Outerwear", image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=400&auto=format&fit=crop", handle: "utility-vest" },
-    { id: "p7", title: "Constructed Blazer", price: 280, category: "Outerwear", image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=400&auto=format&fit=crop", handle: "constructed-blazer" },
-];
+import { medusaClient } from "@/lib/medusa/client";
 
-const TRENDING_SEARCHES = ["Oversized", "Cargo", "Denim", "Puffer", "Black"];
+// ... (keep other imports)
+
+const TRENDING_SEARCHES = [
+    "Dailywear",
+    "Outerwear",
+    "Partywear",
+    "College Wear",
+    "Men",
+    "Women"
+];
 
 export function SearchOverlay() {
     const { isOpen, closeSearch } = useSearch();
     const [query, setQuery] = useState("");
+    const [results, setResults] = useState<any[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Auto-focus input when opened
@@ -34,18 +36,36 @@ export function SearchOverlay() {
                 inputRef.current?.focus();
             }, 100);
         } else {
-            setQuery(""); // Reset query on close
+            setQuery("");
+            setResults([]);
         }
     }, [isOpen]);
 
-    // Filter Logic
-    const filteredProducts = useMemo(() => {
-        if (!query.trim()) return [];
-        const lowerQuery = query.toLowerCase();
-        return SEARCH_PRODUCTS.filter(p =>
-            p.title.toLowerCase().includes(lowerQuery) ||
-            p.category.toLowerCase().includes(lowerQuery)
-        ).slice(0, 4); // Limit to 4 results
+    // Real Search Logic
+    useEffect(() => {
+        const fetchResults = async () => {
+            if (!query.trim()) {
+                setResults([]);
+                return;
+            }
+
+            setIsSearching(true);
+            try {
+                const { products } = await medusaClient.store.product.list({
+                    q: query,
+                    limit: 6,
+                    fields: "title,handle,thumbnail,variants.prices,variants.calculated_price"
+                });
+                setResults(products);
+            } catch (error) {
+                console.error("Search failed", error);
+            } finally {
+                setIsSearching(false);
+            }
+        };
+
+        const debounce = setTimeout(fetchResults, 300);
+        return () => clearTimeout(debounce);
     }, [query]);
 
     return (
@@ -129,33 +149,47 @@ export function SearchOverlay() {
                             {/* State 2: Results */}
                             {query && (
                                 <div className="space-y-6">
-                                    <p className="text-sm font-bold text-zinc-400 uppercase tracking-widest">
-                                        {filteredProducts.length > 0 ? `Results for "${query}"` : `No results for "${query}"`}
+                                    <p className="text-sm font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2">
+                                        {isSearching ? (
+                                            "Searching..."
+                                        ) : (
+                                            results.length > 0 ? `Results for "${query}"` : `No results for "${query}"`
+                                        )}
                                     </p>
 
-                                    {filteredProducts.length > 0 ? (
+                                    {!isSearching && results.length > 0 ? (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {filteredProducts.map(product => (
-                                                <Link
-                                                    key={product.id}
-                                                    href={`/products/${product.handle}`}
-                                                    onClick={closeSearch}
-                                                    className="flex gap-4 p-4 rounded-2xl hover:bg-zinc-50 transition-colors group"
-                                                >
-                                                    <div className="relative w-24 h-32 bg-zinc-100 rounded-lg overflow-hidden flex-shrink-0">
-                                                        <Image src={product.image} alt={product.title} fill className="object-cover" />
-                                                    </div>
-                                                    <div className="flex flex-col justify-center">
-                                                        <span className="text-xs text-zinc-500 font-medium uppercase tracking-wide mb-1">{product.category}</span>
-                                                        <h4 className="text-lg font-bold text-zinc-900 group-hover:underline decoration-zinc-300 underline-offset-4">{product.title}</h4>
-                                                        <span className="text-zinc-900 font-medium mt-2">
-                                                            {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(product.price)}
-                                                        </span>
-                                                    </div>
-                                                </Link>
-                                            ))}
+                                            {results.map(product => {
+                                                // Resolve Price
+                                                let price = product.variants?.[0]?.calculated_price?.calculated_amount;
+                                                if (!price) price = product.variants?.[0]?.prices?.[0]?.amount;
+
+                                                return (
+                                                    <Link
+                                                        key={product.id}
+                                                        href={`/products/${product.handle}`}
+                                                        onClick={closeSearch}
+                                                        className="flex gap-4 p-4 rounded-2xl hover:bg-zinc-50 transition-colors group"
+                                                    >
+                                                        <div className="relative w-24 h-32 bg-zinc-100 rounded-lg overflow-hidden flex-shrink-0">
+                                                            <Image
+                                                                src={product.thumbnail || "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=400&auto=format&fit=crop"}
+                                                                alt={product.title}
+                                                                fill
+                                                                className="object-cover"
+                                                            />
+                                                        </div>
+                                                        <div className="flex flex-col justify-center">
+                                                            <h4 className="text-lg font-bold text-zinc-900 group-hover:underline decoration-zinc-300 underline-offset-4">{product.title}</h4>
+                                                            <span className="text-zinc-900 font-medium mt-2">
+                                                                {price ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(price / 100) : "Price N/A"}
+                                                            </span>
+                                                        </div>
+                                                    </Link>
+                                                );
+                                            })}
                                         </div>
-                                    ) : (
+                                    ) : !isSearching && (
                                         <div className="py-20 text-center">
                                             <p className="text-zinc-400 text-lg">We couldn&apos;t find any matches.</p>
                                             <button onClick={() => setQuery("")} className="text-zinc-900 font-bold underline mt-4 hover:opacity-70">Clear search</button>

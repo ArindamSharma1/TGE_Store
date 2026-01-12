@@ -28,50 +28,43 @@ export function Newsletter() {
     };
 
     return (
-        <section className="mx-auto max-w-7xl px-4 py-20 border-t border-zinc-100">
+        <section className="mx-auto max-w-[1400px] px-4 py-32 border-t border-zinc-100/50">
             <Reveal width="100%">
-                <div className="bg-zinc-900 rounded-[32px] p-8 md:p-16 text-center overflow-hidden relative">
-                    {/* Background pattern */}
-                    <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-                        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            <path d="M0 100 C 20 0 50 0 100 100 Z" fill="white" />
-                        </svg>
-                    </div>
+                <div className="max-w-xl mx-auto text-center">
 
-                    <div className="relative z-10 max-w-2xl mx-auto">
-                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/10 mb-6 backdrop-blur-sm">
-                            <Mail className="w-6 h-6 text-white" />
-                        </div>
+                    <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-900 mb-6">
+                        Join the Community
+                    </h2>
 
-                        <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-white mb-4">
-                            Join the Community
-                        </h2>
-                        <p className="text-zinc-400 text-lg mb-8 leading-relaxed">
-                            Get early access to new drops, exclusive offers, and weekly style edits directly to your inbox.
-                        </p>
+                    <p className="text-zinc-500 text-lg mb-12 leading-relaxed">
+                        Get early access to new drops, exclusive offers, and weekly style edits directly to your inbox.
+                    </p>
 
-                        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                            <Input
+                    <form onSubmit={handleSubmit} className="flex flex-col items-center gap-6 max-w-sm mx-auto group">
+                        <div className="relative w-full">
+                            <input
                                 type="email"
                                 placeholder="Enter your email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                className="h-12 bg-white/10 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-white/20 rounded-full px-6"
+                                className="w-full h-12 bg-transparent border-b border-zinc-200 text-zinc-900 text-center placeholder:text-zinc-300 focus:border-zinc-900 focus:outline-none transition-colors duration-300"
                             />
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="h-12 px-8 rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-bold whitespace-nowrap"
-                            >
-                                {loading ? "Subscribing..." : "Subscribe"}
-                            </Button>
-                        </form>
+                        </div>
 
-                        <p className="text-zinc-600 text-xs mt-6">
-                            By subscribing, you agree to our Terms and Privacy Policy.
-                        </p>
-                    </div>
+                        <Button
+                            type="submit"
+                            disabled={loading}
+                            variant="ghost"
+                            className="text-xs font-bold uppercase tracking-widest text-zinc-900 hover:bg-transparent hover:opacity-60 transition-opacity"
+                        >
+                            {loading ? "Joining..." : "Subscribe"}
+                        </Button>
+                    </form>
+
+                    <p className="text-zinc-300 text-[10px] uppercase tracking-wider mt-12">
+                        By subscribing, you agree to our Terms and Privacy Policy.
+                    </p>
                 </div>
             </Reveal>
         </section>

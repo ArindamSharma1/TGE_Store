@@ -60,6 +60,8 @@ export default function RootLayout({
                 <Header />
                 <main>{children}</main>
                 <Footer />
+                <CartDrawer />
+                <SearchOverlay />
                 <Toaster position="top-right" />
               </SmoothScroll>
             </WishlistProvider>
