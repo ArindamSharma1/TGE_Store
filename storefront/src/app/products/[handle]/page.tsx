@@ -20,7 +20,7 @@ export default function ProductPage() {
             try {
                 const { products } = await medusaClient.store.product.list({
                     handle: handle,
-                    fields: "+variants.prices,+variants.calculated_price,+options,+images"
+                    fields: "+variants.prices,+variants.calculated_price,+options,+images,+thumbnail"
                 });
 
                 if (products && products.length > 0) {
@@ -83,8 +83,8 @@ export default function ProductPage() {
                     </div>
 
                     {/* Right Column: Info (Sticky) */}
-                    <div className="w-full lg:w-[40%] relative">
-                        <div className="sticky top-32">
+                    <div className="w-full lg:w-[40%] relative pt-6 lg:pt-0">
+                        <div className="relative lg:sticky lg:top-32">
                             <ProductInfo
                                 title={product.title || ""}
                                 description={product.description || ""}

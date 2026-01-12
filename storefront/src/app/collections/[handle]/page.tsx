@@ -41,7 +41,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
     try {
         if (handle === "all") {
             const { products: fetchedProducts, count } = await medusaClient.store.product.list({
-                fields: "+variants.prices,+variants.calculated_price,+images",
+                fields: "+variants.prices,+variants.calculated_price,+images,+thumbnail",
                 limit: 50 // Initial limit
             });
             products = fetchedProducts.map(mapProduct);
@@ -62,7 +62,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
                 // 2. Get Products for this Collection
                 const { products: fetchedProducts, count } = await medusaClient.store.product.list({
                     collection_id: collection.id,
-                    fields: "+variants.prices,+variants.calculated_price,+images",
+                    fields: "+variants.prices,+variants.calculated_price,+images,+thumbnail",
                     limit: 50
                 });
 

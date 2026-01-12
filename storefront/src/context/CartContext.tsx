@@ -78,7 +78,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             productTitle: item.title,
             variantTitle: item.variant_title,
             price: item.unit_price / 100,
-            image: item.thumbnail,
+            image: item.thumbnail || item.variant?.product?.thumbnail || "",
             quantity: item.quantity,
             handle: item.variant?.product?.handle || "",
         })) || [];

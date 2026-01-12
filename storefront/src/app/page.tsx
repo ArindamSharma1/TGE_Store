@@ -28,7 +28,7 @@ export default async function Home() {
     // 1. Fetch Products directly (Server Side)
     const res = await medusaClient.store.product.list({
       limit: 8,
-      fields: "+variants.prices,+variants.calculated_price,+images"
+      fields: "+variants.prices,+variants.calculated_price,+images,+thumbnail"
     });
     products = res.products;
   } catch (error) {
