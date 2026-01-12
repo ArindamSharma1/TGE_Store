@@ -23,24 +23,27 @@ export function WhyTGE() {
     ];
 
     return (
-        <section className="bg-zinc-50 py-24 border-t border-zinc-200">
-            <div className="mx-auto max-w-7xl px-4">
-                <Reveal width="100%" className="overflow-visible">
-                    <div className="text-center mb-16">
-                        <span className="text-sm font-bold uppercase tracking-widest text-zinc-500 mb-4 block">The TGE Standard</span>
-                        <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-zinc-900">
-                            Why TGE?
-                        </h2>
+        <section className="bg-zinc-50 py-32 border-t border-zinc-200">
+            <div className="mx-auto max-w-[1400px] px-4">
+                <Reveal width="100%">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-6">
+                        <div className="max-w-xl">
+                            <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500 mb-6 block">The TGE Standard</span>
+                            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-zinc-900 leading-[0.9]">
+                                Why TGE?
+                            </h2>
+                        </div>
+                        <p className="text-zinc-500 max-w-sm text-lg font-medium leading-relaxed">
+                            We design for the modern uniform. Essential, deliberate, and built to last.
+                        </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-12">
                         {features.map((feature, i) => (
-                            <div key={i} className="group bg-white p-8 md:p-10 rounded-[32px] shadow-sm hover:shadow-xl transition-all duration-300 border border-zinc-100/50 hover:-translate-y-1">
-                                <div className="w-14 h-14 rounded-2xl bg-zinc-100 flex items-center justify-center mb-8 group-hover:bg-zinc-900 transition-colors duration-300">
-                                    <feature.icon className="w-6 h-6 text-zinc-900 group-hover:text-white transition-colors duration-300" strokeWidth={1.5} />
-                                </div>
-                                <h3 className="text-xl font-bold text-zinc-900 mb-4 uppercase tracking-tight">{feature.title}</h3>
-                                <p className="text-zinc-500 leading-relaxed font-medium">
+                            <div key={i} className="flex flex-col items-start pt-8 border-t border-zinc-200">
+                                <feature.icon className="w-6 h-6 text-zinc-900 mb-6" strokeWidth={1.5} />
+                                <h3 className="text-lg font-bold text-zinc-900 mb-3 uppercase tracking-wide">{feature.title}</h3>
+                                <p className="text-zinc-500 leading-relaxed text-base max-w-sm">
                                     {feature.text}
                                 </p>
                             </div>

@@ -29,6 +29,7 @@ export function Hero({
                     width={1000}
                     height={300}
                     className="w-full h-auto brightness-0"
+                    priority
                 />
             </div>
 

@@ -62,7 +62,7 @@ export function Header() {
     }, [pathname]);
 
     useEffect(() => {
-        return scrollY.onChange((latest) => {
+        return scrollY.on("change", (latest) => {
             setIsScrolled(latest > 20);
         });
     }, [scrollY]);

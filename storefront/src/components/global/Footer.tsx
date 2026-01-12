@@ -9,7 +9,7 @@ export function Footer() {
     const currentYear = new Date().getFullYear();
     const pathname = usePathname();
 
-    if (pathname === "/checkout") return null;
+    if (pathname === "/checkout" || pathname === "/login" || pathname === "/register") return null;
 
     const sections = [
         {

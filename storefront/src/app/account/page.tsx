@@ -91,7 +91,6 @@ export default function AccountPage() {
                 const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
                 const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY;
                 const token = localStorage.getItem("medusa_auth_token");
-                console.log("AccountPage: Checking Token:", token); // DEBUG
 
                 if (!token) {
                     throw new Error("No token found");
@@ -147,7 +146,7 @@ export default function AccountPage() {
 
                 // 3. Fetch Orders Separately
                 try {
-                    const ordersRes = await fetch(`${BACKEND_URL}/store/orders?limit=10&offset=0&customer_id=${baseCustomer.id}&fields=+items,+items.variant,+items.variant.product`, {
+                    const ordersRes = await fetch(`${BACKEND_URL}/store/orders?limit=10&offset=0&fields=items,items.variant,items.variant.product`, {
                         headers: {
                             "Content-Type": "application/json",
                             "x-publishable-api-key": PUBLISHABLE_KEY!,
