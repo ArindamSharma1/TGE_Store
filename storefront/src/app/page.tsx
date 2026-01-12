@@ -48,7 +48,7 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             {/* Men's Editorial Card */}
-            <Link href="/collections/men" className="group relative h-[500px] md:h-[650px] w-full overflow-hidden rounded-[4px] bg-zinc-100 block">
+            <Link href="/collections/men" className="group relative h-[400px] md:h-[500px] w-full overflow-hidden rounded-[16px] bg-zinc-100 block">
               <Image
                 src="https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?q=80&w=1200&auto=format&fit=crop"
                 alt="Men's Collection"
@@ -61,7 +61,7 @@ export default async function Home() {
                 <span className="block text-[10px] font-bold uppercase tracking-[0.2em] opacity-80 mb-2">
                   Collections
                 </span>
-                <h2 className="text-3xl md:text-4xl font-serif italic mb-1">
+                <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tight mb-2">
                   Men
                 </h2>
                 <p className="text-sm font-medium tracking-wide opacity-90">
@@ -71,7 +71,7 @@ export default async function Home() {
             </Link>
 
             {/* Women's Editorial Card */}
-            <Link href="/collections/women" className="group relative h-[500px] md:h-[650px] w-full overflow-hidden rounded-[4px] bg-zinc-100 block">
+            <Link href="/collections/women" className="group relative h-[400px] md:h-[500px] w-full overflow-hidden rounded-[16px] bg-zinc-100 block">
               <Image
                 src="https://images.unsplash.com/photo-1618244972963-dbee1a7edc95?q=80&w=1200&auto=format&fit=crop"
                 alt="Women's Collection"
@@ -84,7 +84,7 @@ export default async function Home() {
                 <span className="block text-[10px] font-bold uppercase tracking-[0.2em] opacity-80 mb-2">
                   Collections
                 </span>
-                <h2 className="text-3xl md:text-4xl font-serif italic mb-1">
+                <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tight mb-2">
                   Women
                 </h2>
                 <p className="text-sm font-medium tracking-wide opacity-90">
@@ -97,26 +97,37 @@ export default async function Home() {
         </Reveal>
       </section>
 
-      {/* SECTION 3: SHOP BY CATEGORY - unchanged (kept hardcoded) */}
-      <section className="mx-auto max-w-7xl px-4 py-16">
+      {/* SECTION 3: SHOP BY CATEGORY - EDITORIAL GRID */}
+      <section className="mx-auto max-w-[1400px] px-4 py-24">
         <Reveal width="100%">
-          <h2 className="text-2xl font-bold uppercase tracking-tight text-zinc-900 mb-8">Shop by Category</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="flex justify-between items-baseline mb-12">
+            <h2 className="text-2xl font-bold uppercase tracking-tight text-zinc-900">Shop by Category</h2>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-12">
             {[
               { name: "Dailywear", img: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop" },
               { name: "Outerwear", img: "https://images.unsplash.com/photo-1544923246-77307dd654cb?q=80&w=800&auto=format&fit=crop" },
               { name: "Partywear", img: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=800&auto=format&fit=crop" },
               { name: "College Wear", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800&auto=format&fit=crop" }
             ].map((cat) => (
-              <Link key={cat.name} href={`/collections/${cat.name.toLowerCase().replace(" ", "-")}`} className="group block relative aspect-[4/5] overflow-hidden rounded-[20px] bg-zinc-100">
-                <Image
-                  src={cat.img}
-                  alt={cat.name}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/60 to-transparent">
-                  <span className="text-white text-lg font-bold uppercase tracking-wide">{cat.name}</span>
+              <Link key={cat.name} href={`/collections/${cat.name.toLowerCase().replace(" ", "-")}`} className="group block">
+                <div className="relative aspect-[3/4] overflow-hidden bg-zinc-100 mb-6 rounded-3xl">
+                  <Image
+                    src={cat.img}
+                    alt={cat.name}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
+                </div>
+                <div className="flex flex-col items-start">
+                  <span className="text-zinc-900 text-lg font-bold uppercase tracking-wide group-hover:underline underline-offset-4 decoration-1">
+                    {cat.name}
+                  </span>
+                  <span className="text-xs text-zinc-400 mt-1 font-medium tracking-wide uppercase">
+                    View Collection
+                  </span>
                 </div>
               </Link>
             ))}
@@ -124,17 +135,17 @@ export default async function Home() {
         </Reveal>
       </section>
 
-      {/* SECTION 4: TRENDING NOW - SSR */}
-      <section className="mx-auto max-w-7xl px-4 py-16 border-t border-zinc-100">
+      {/* SECTION 4: TRENDING NOW - FLOATING GRID */}
+      <section className="mx-auto max-w-[1400px] px-4 pb-24">
         <Reveal width="100%">
-          <div className="flex justify-between items-end mb-10">
+          <div className="flex justify-between items-end mb-12">
             <h2 className="text-2xl font-bold uppercase tracking-tight text-zinc-900">Trending Now</h2>
-            <Button asChild href="/collections/all" variant="ghost" className="hover:bg-zinc-100 rounded-full">
+            <Button asChild href="/collections/all" variant="link" className="text-zinc-500 hover:text-zinc-900 font-medium tracking-wide uppercase text-xs p-0 h-auto">
               View All
             </Button>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-10">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-12">
             {products.map((product) => {
               const thumbnail = product.thumbnail || "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop";
               const hoverImage = product.images?.[1]?.url || thumbnail;
