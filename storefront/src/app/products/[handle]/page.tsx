@@ -57,26 +57,26 @@ export default function ProductPage() {
 
     return (
         <main className="min-h-screen pt-24 pb-20">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
+            <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
+                <div className="flex flex-col lg:flex-row gap-12 lg:gap-24">
 
                     {/* Left Column: Gallery (Scrollable) */}
                     <div className="w-full lg:w-[60%]">
                         <ProductGallery images={images} />
 
-                        {/* Additional Details (Description extension, specs, etc) below gallery */}
-                        <div className="mt-16 pt-16 border-t border-zinc-100 hidden lg:block">
-                            <h3 className="text-xl font-bold uppercase mb-6">Details & Specs</h3>
-                            <div className="grid grid-cols-2 gap-8 text-sm text-zinc-600">
-                                <ul className="space-y-3">
-                                    <li>• Heavyweight construction</li>
-                                    <li>• Relaxed, boxy fit</li>
-                                    <li>• Pre-shrunk fabric</li>
+                        {/* Additional Details - Integrated Flow */}
+                        <div className="mt-12 hidden lg:block">
+                            <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-900 mb-6">Details & Specs</h3>
+                            <div className="grid grid-cols-2 gap-8 text-sm text-zinc-500 font-medium leading-relaxed">
+                                <ul className="space-y-2">
+                                    <li>Heavyweight construction</li>
+                                    <li>Relaxed, boxy fit</li>
+                                    <li>Pre-shrunk fabric</li>
                                 </ul>
-                                <ul className="space-y-3">
-                                    <li>• Made in Portugal</li>
-                                    <li>• 100% Cotton</li>
-                                    <li>• Cold wash only</li>
+                                <ul className="space-y-2">
+                                    <li>Made in Portugal</li>
+                                    <li>100% Cotton</li>
+                                    <li>Cold wash only</li>
                                 </ul>
                             </div>
                         </div>

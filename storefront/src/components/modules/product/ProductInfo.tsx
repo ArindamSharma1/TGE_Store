@@ -186,7 +186,10 @@ export function ProductInfo({ title, description, options = [], image, handle, v
             </div>
 
             {/* Actions */}
-            <div className="pt-4 border-t border-zinc-100 flex flex-col gap-3">
+            <div className="pt-6 border-t border-zinc-100 flex flex-col gap-4">
+                <p className="text-xs font-medium text-zinc-400 italic">
+                    Crafted for the modern journey.
+                </p>
                 <Button
                     size="lg"
                     className={`w-full h-16 rounded-full text-lg font-bold flex items-center justify-center gap-2 transition-all
