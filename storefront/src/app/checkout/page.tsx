@@ -281,6 +281,8 @@ export default function CheckoutPage() {
                             </div>
                             <input
                                 required
+                                id="email"
+                                name="email"
                                 type="email"
                                 placeholder="Email address"
                                 value={email}
@@ -300,19 +302,19 @@ export default function CheckoutPage() {
                             <h2 className="text-lg font-bold text-zinc-900">Shipping Address</h2>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <input required type="text" placeholder="First name" value={address.first_name} onChange={e => setAddress({ ...address, first_name: e.target.value })} className="col-span-1 w-full h-12 px-4 rounded-lg border border-zinc-200 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400" />
-                                <input required type="text" placeholder="Last name" value={address.last_name} onChange={e => setAddress({ ...address, last_name: e.target.value })} className="col-span-1 w-full h-12 px-4 rounded-lg border border-zinc-200 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400" />
+                                <input required id="firstName" name="firstName" type="text" placeholder="First name" value={address.first_name} onChange={e => setAddress({ ...address, first_name: e.target.value })} className="col-span-1 w-full h-12 px-4 rounded-lg border border-zinc-200 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400" />
+                                <input required id="lastName" name="lastName" type="text" placeholder="Last name" value={address.last_name} onChange={e => setAddress({ ...address, last_name: e.target.value })} className="col-span-1 w-full h-12 px-4 rounded-lg border border-zinc-200 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400" />
                             </div>
 
-                            <input required type="text" placeholder="Address" value={address.address_1} onChange={e => setAddress({ ...address, address_1: e.target.value })} className="w-full h-12 px-4 rounded-lg border border-zinc-200 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400" />
+                            <input required id="address1" name="address1" type="text" placeholder="Address" value={address.address_1} onChange={e => setAddress({ ...address, address_1: e.target.value })} className="w-full h-12 px-4 rounded-lg border border-zinc-200 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400" />
 
                             <div className="grid grid-cols-3 gap-4">
-                                <input required type="text" placeholder="City" value={address.city} onChange={e => setAddress({ ...address, city: e.target.value })} className="col-span-1 w-full h-12 px-4 rounded-lg border border-zinc-200 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400" />
-                                <input required type="text" placeholder="State" value={address.state} onChange={e => setAddress({ ...address, state: e.target.value })} className="col-span-1 w-full h-12 px-4 rounded-lg border border-zinc-200 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400" />
-                                <input required type="text" placeholder="PIN code" value={address.postal_code} onChange={e => setAddress({ ...address, postal_code: e.target.value })} className="col-span-1 w-full h-12 px-4 rounded-lg border border-zinc-200 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400" />
+                                <input required id="city" name="city" type="text" placeholder="City" value={address.city} onChange={e => setAddress({ ...address, city: e.target.value })} className="col-span-1 w-full h-12 px-4 rounded-lg border border-zinc-200 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400" />
+                                <input required id="state" name="state" type="text" placeholder="State" value={address.state} onChange={e => setAddress({ ...address, state: e.target.value })} className="col-span-1 w-full h-12 px-4 rounded-lg border border-zinc-200 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400" />
+                                <input required id="postalCode" name="postalCode" type="text" placeholder="PIN code" value={address.postal_code} onChange={e => setAddress({ ...address, postal_code: e.target.value })} className="col-span-1 w-full h-12 px-4 rounded-lg border border-zinc-200 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400" />
                             </div>
 
-                            <input required type="tel" placeholder="Phone" value={address.phone} onChange={e => setAddress({ ...address, phone: e.target.value })} className="w-full h-12 px-4 rounded-lg border border-zinc-200 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400" />
+                            <input required id="phone" name="phone" type="tel" placeholder="Phone" value={address.phone} onChange={e => setAddress({ ...address, phone: e.target.value })} className="w-full h-12 px-4 rounded-lg border border-zinc-200 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400" />
 
                             <div className="flex gap-4 mt-8">
                                 <Button type="button" variant="outline" onClick={() => setStep(1)} className="rounded-full h-14 border-zinc-200">Back</Button>

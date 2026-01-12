@@ -43,6 +43,8 @@ export function Newsletter() {
                     <form onSubmit={handleSubmit} className="flex flex-col items-center gap-6 max-w-sm mx-auto group">
                         <div className="relative w-full">
                             <input
+                                id="newsletter-email"
+                                name="email"
                                 type="email"
                                 placeholder="Enter your email"
                                 value={email}
