@@ -147,7 +147,7 @@ export default function CheckoutPage() {
                 const { payment_collection } = await pcRes.json();
 
                 // Initialize 'pp_system_default' session (System Payment)
-                await fetch(`${BACKEND_URL}/store/payment-collections/${payment_collection.id}/payment-sessions`, {
+                const sessRes = await fetch(`${BACKEND_URL}/store/payment-collections/${payment_collection.id}/payment-sessions`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -155,6 +155,16 @@ export default function CheckoutPage() {
                     },
                     body: JSON.stringify({ provider_id: "pp_system_default" }),
                 });
+
+                if (!sessRes.ok) {
+                    console.error("Failed to init payment session", await sessRes.text());
+                    // Fallback: Try 'manual' just in case
+                    await fetch(`${BACKEND_URL}/store/payment-collections/${payment_collection.id}/payment-sessions`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", "x-publishable-api-key": PUBLISHABLE_KEY },
+                        body: JSON.stringify({ provider_id: "manual" }),
+                    });
+                }
             }
 
             setStep(3);

@@ -13,18 +13,4 @@ export default defineConfig({
       cookieSecret: process.env.COOKIE_SECRET || "supersecret",
     },
   },
-  modules: [
-    {
-      resolve: "@medusajs/medusa/payment",
-      options: {
-        providers: [
-          {
-            resolve: "@medusajs/medusa/payment-system",
-            id: "system",
-            options: {},
-          },
-        ],
-      },
-    },
-  ],
 })
