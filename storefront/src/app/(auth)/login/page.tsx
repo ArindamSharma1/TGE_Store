@@ -42,26 +42,22 @@ export default function LoginPage() {
         }
 
         try {
-            console.log("Logging in via client-side fetch (Cookie Flow)...");
+            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
+            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY;
 
-            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
-            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
-
-            const result = await fetch(`${BACKEND_URL}/auth/customer/emailpass`, {
+            const res = await fetch(`${BACKEND_URL}/auth/customer/emailpass`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-publishable-api-key": PUBLISHABLE_KEY,
+                    "x-publishable-api-key": PUBLISHABLE_KEY!,
                 },
-                credentials: "include", // REQUIRED for cookies
-                body: JSON.stringify({
-                    email,
-                    password
-                }),
+                credentials: "include",
+                body: JSON.stringify({ email, password }),
             });
 
-            if (!result.ok) {
-                const data = await result.json().catch(() => ({}));
+            if (!res.ok) {
+                // Try to parse error message if available
+                const data = await res.json().catch(() => ({}));
                 throw new Error(data.message || "Invalid email or password");
             }
 
@@ -70,7 +66,7 @@ export default function LoginPage() {
                 description: "You have been successfully logged in."
             });
 
-            // Force hard navigation to ensure cookies are picked up
+            // Force hard navigation to ensure cookies are picked up by middleware/server
             window.location.href = "/account";
 
         } catch (error: any) {

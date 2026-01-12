@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils/cn";
 import { useCart } from "@/context/CartContext";
 import { useSearch } from "@/context/SearchContext";
 import { usePathname } from "next/navigation";
-import { medusaClient } from "@/lib/medusa/client";
+// import { medusaClient } from "@/lib/medusa/client";
 export function Header() {
     const { scrollY } = useScroll();
     const [isScrolled, setIsScrolled] = useState(false);
