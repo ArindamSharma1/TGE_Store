@@ -20,41 +20,42 @@ function WishlistSection() {
     if (items.length === 0) return null;
 
     return (
-        <section>
-            <h2 className="text-xl font-bold uppercase tracking-tight text-zinc-900 mb-6 flex items-center gap-2">
-                <Heart className="w-5 h-5" />
-                My Wishlist
+        <section className="pt-8 border-t border-zinc-100">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-6 flex items-center gap-2">
+                <Heart className="w-4 h-4" />
+                Saved for later
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {items.map((item) => (
-                    <GlassCard key={item.id} className="p-4 bg-white border-zinc-200 relative group flex gap-4">
-                        <div className="relative w-20 h-24 flex-shrink-0 bg-zinc-100 rounded-md overflow-hidden flex items-center justify-center">
-                            {item.thumbnail ? (
-                                <Image src={item.thumbnail} alt={item.title} fill className="object-cover" />
-                            ) : (
-                                <Package className="w-8 h-8 text-zinc-300" />
-                            )}
-                        </div>
-                        <div className="flex flex-col justify-between flex-1 py-1">
+                    <div key={item.id} className="group relative">
+                        <Link href={`/products/${item.handle}`} className="block">
+                            <div className="relative aspect-[3/4] w-full bg-zinc-100 rounded-lg overflow-hidden mb-3">
+                                {item.thumbnail ? (
+                                    <Image src={item.thumbnail} alt={item.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                                ) : (
+                                    <div className="flex items-center justify-center h-full">
+                                        <Package className="w-6 h-6 text-zinc-300" />
+                                    </div>
+                                )}
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+                            </div>
                             <div>
-                                <Link href={`/products/${item.handle}`} className="font-bold text-zinc-900 hover:underline line-clamp-1">
-                                    {item.title}
-                                </Link>
-                                <p className="text-sm font-medium text-zinc-500">
+                                <h3 className="text-sm font-bold text-zinc-900 group-hover:underline underline-offset-4 line-clamp-1">{item.title}</h3>
+                                <p className="text-xs text-zinc-500 mt-1">
                                     {item.price ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(item.price) : "Price Varies"}
                                 </p>
                             </div>
-                            <Button asChild size="sm" className="w-fit h-8 text-xs rounded-full bg-zinc-900 text-white">
-                                <Link href={`/products/${item.handle}`}>View Product</Link>
-                            </Button>
-                        </div>
+                        </Link>
                         <button
-                            onClick={() => removeFromWishlist(item.id)}
-                            className="absolute top-2 right-2 p-2 text-zinc-400 hover:text-red-500 transition-colors"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                removeFromWishlist(item.id);
+                            }}
+                            className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 backdrop-blur-sm text-zinc-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100"
                         >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                         </button>
-                    </GlassCard>
+                    </div>
                 ))}
             </div>
         </section>
@@ -342,194 +343,182 @@ export default function AccountPage() {
     if (!customer) return null;
 
     return (
-        <div className="min-h-screen pt-32 pb-24 px-4 bg-zinc-50">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen pt-32 pb-32 px-4 bg-zinc-50">
+            <div className="max-w-[1400px] mx-auto">
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-                    <div>
-                        <h1 className="text-3xl font-black uppercase tracking-tighter text-zinc-900 mb-2">
-                            My Account
-                        </h1>
-                        <p className="text-zinc-500">Welcome back, {customer.first_name || "Guest"}.</p>
-                    </div>
-                    <Button
-                        variant="outline"
-                        className="rounded-full border-zinc-200 hover:bg-zinc-100 text-zinc-600 gap-2"
-                        onClick={handleLogout}
-                    >
-                        <LogOut className="w-4 h-4" />
-                        Sign Out
-                    </Button>
+                <div className="mb-24">
+                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-zinc-900 mb-4 leading-[0.9]">
+                        Overview
+                    </h1>
+                    <p className="text-zinc-500 text-lg font-medium tracking-tight">This space belongs to you.</p>
                 </div>
 
-                <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Main Content: Orders */}
-                    <div className="lg:col-span-2 space-y-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-start">
+
+                    {/* LEFT COLUMN: PRIMARY (Orders) - Span 7 */}
+                    <div className="lg:col-span-7 space-y-20">
+                        {/* Orders */}
                         <section>
-                            <h2 className="text-xl font-bold uppercase tracking-tight text-zinc-900 mb-6">Order History</h2>
+                            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-8">Order History</h2>
                             {orders.length === 0 ? (
-                                <div className="p-8 border border-dashed border-zinc-200 rounded-2xl text-center">
-                                    <Package className="w-8 h-8 text-zinc-300 mx-auto mb-3" />
-                                    <p className="text-zinc-500 font-medium">No orders yet</p>
-                                    <Button asChild variant="link" className="text-zinc-900">
-                                        <Link href="/collections/all">Start Shopping</Link>
+                                <div className="p-0 text-left">
+                                    <p className="text-zinc-900 font-medium text-lg mb-2">No orders yet.</p>
+                                    <Button asChild variant="link" className="text-zinc-500 p-0 h-auto underline underline-offset-4 hover:text-zinc-900">
+                                        <Link href="/collections/all">Start Building Your Wardrobe</Link>
                                     </Button>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
                                     {orders.map((order) => (
-                                        <GlassCard key={order.id} className="p-6 bg-white border-zinc-200">
-                                            <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+                                        <div key={order.id} className="group p-6 bg-white border border-zinc-100 rounded-xl hover:border-zinc-300 transition-colors">
+                                            <div className="flex flex-col sm:flex-row justify-between sm:items-baseline mb-6 gap-4">
                                                 <div className="space-y-1">
                                                     <div className="flex items-center gap-3">
                                                         <span className="font-bold text-lg text-zinc-900">#{order.display_id}</span>
-                                                        <span className={
-                                                            `px-3 py-1 text-xs font-bold rounded-full uppercase 
-                                                            ${order.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`
-                                                        }>
+                                                        <span className="text-[10px] font-bold uppercase tracking-wide text-zinc-400">
                                                             {order.status}
                                                         </span>
                                                     </div>
-                                                    <p className="text-zinc-500 text-sm">Placed on {new Date(order.created_at).toLocaleDateString()}</p>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="font-bold text-zinc-900">
-                                                        {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(order.total / 100)}
+                                                    <p className="text-zinc-400 text-xs uppercase tracking-wide">
+                                                        {new Date(order.created_at).toLocaleDateString()}
                                                     </p>
                                                 </div>
+                                                <p className="font-bold text-zinc-900">
+                                                    {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(order.total / 100)}
+                                                </p>
                                             </div>
-                                            {/* Order Items Simple List */}
-                                            <div className="space-y-2 border-t border-zinc-100 pt-4">
+                                            {/* Order Items */}
+                                            <div className="pt-4 border-t border-zinc-50">
                                                 {order.items.map((item: any) => (
-                                                    <div key={item.id} className="flex justify-between text-sm">
-                                                        <span className="text-zinc-600">{item.title} (x{item.quantity})</span>
+                                                    <div key={item.id} className="text-sm font-medium text-zinc-600">
+                                                        {item.title} <span className="text-zinc-300">x{item.quantity}</span>
                                                     </div>
                                                 ))}
                                             </div>
-                                        </GlassCard>
+                                        </div>
                                     ))}
                                 </div>
                             )}
-
                         </section>
 
-                        {/* Wishlist Section */}
-                        <WishlistSection />
+                        {/* Wishlist - Secondary */}
+                        <div className="opacity-80 hover:opacity-100 transition-opacity">
+                            <WishlistSection />
+                        </div>
                     </div>
 
-                    {/* Sidebar: Profile & Settings */}
-                    <div className="space-y-6">
+                    {/* RIGHT COLUMN: SECONDARY (Profile & Settings) - Span 5 */}
+                    <div className="lg:col-span-5 space-y-16 lg:sticky lg:top-32">
 
-                        {/* 1. Profile Details */}
-                        <GlassCard className="p-6 bg-white border-zinc-200">
+                        {/* Profile Details */}
+                        <div>
                             <div className="flex items-center justify-between mb-6">
-                                <div className="flex items-center gap-3 text-zinc-900">
-                                    <User className="w-5 h-5" />
-                                    <h3 className="font-bold uppercase text-sm">Profile</h3>
-                                </div>
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => setIsEditingProfile(!isEditingProfile)}
-                                    className="h-8 w-8 p-0 rounded-full hover:bg-zinc-100"
-                                >
-                                    <Edit2 className="w-4 h-4" />
-                                </Button>
+                                <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400">Profile</h3>
+                                <button onClick={() => setIsEditingProfile(!isEditingProfile)} className="text-xs font-bold text-zinc-900 underline underline-offset-4">
+                                    Edit
+                                </button>
                             </div>
 
                             {isEditingProfile ? (
-                                <form onSubmit={handleUpdateProfile} className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-2">
+                                <form onSubmit={handleUpdateProfile} className="space-y-4 bg-white p-6 rounded-xl border border-zinc-100">
+                                    <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1">
-                                            <label className="text-[10px] uppercase font-bold text-zinc-500">First Name</label>
-                                            <Input value={profileForm.first_name} onChange={e => setProfileForm({ ...profileForm, first_name: e.target.value })} className="h-9" />
+                                            <label className="text-[10px] uppercase font-bold text-zinc-400">First Name</label>
+                                            <Input value={profileForm.first_name} onChange={e => setProfileForm({ ...profileForm, first_name: e.target.value })} className="h-10 bg-zinc-50 border-transparent" />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[10px] uppercase font-bold text-zinc-500">Last Name</label>
-                                            <Input value={profileForm.last_name} onChange={e => setProfileForm({ ...profileForm, last_name: e.target.value })} className="h-9" />
+                                            <label className="text-[10px] uppercase font-bold text-zinc-400">Last Name</label>
+                                            <Input value={profileForm.last_name} onChange={e => setProfileForm({ ...profileForm, last_name: e.target.value })} className="h-10 bg-zinc-50 border-transparent" />
                                         </div>
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-[10px] uppercase font-bold text-zinc-500">Phone</label>
-                                        <Input value={profileForm.phone} onChange={e => setProfileForm({ ...profileForm, phone: e.target.value })} className="h-9" />
+                                        <label className="text-[10px] uppercase font-bold text-zinc-400">Phone</label>
+                                        <Input value={profileForm.phone} onChange={e => setProfileForm({ ...profileForm, phone: e.target.value })} className="h-10 bg-zinc-50 border-transparent" />
                                     </div>
-                                    <div className="flex gap-2">
-                                        <Button type="button" variant="outline" size="sm" onClick={() => setIsEditingProfile(false)} className="flex-1 rounded-full text-xs">Cancel</Button>
-                                        <Button type="submit" size="sm" className="flex-1 rounded-full bg-zinc-900 text-white text-xs">Save</Button>
+                                    <div className="flex gap-4 pt-2">
+                                        <button type="button" onClick={() => setIsEditingProfile(false)} className="text-xs font-bold text-zinc-400 hover:text-zinc-900">Cancel</button>
+                                        <button type="submit" className="text-xs font-bold text-zinc-900 underline underline-offset-4">Save Changes</button>
                                     </div>
                                 </form>
                             ) : (
-                                <div className="text-sm text-zinc-600 space-y-1">
-                                    <p><span className="text-zinc-400">Name:</span> {customer.first_name} {customer.last_name}</p>
-                                    <p><span className="text-zinc-400">Email:</span> {customer.email}</p>
-                                    <p><span className="text-zinc-400">Phone:</span> {customer.phone || "-"}</p>
+                                <div className="space-y-2">
+                                    <p className="text-lg font-bold text-zinc-900">{customer.first_name} {customer.last_name}</p>
+                                    <p className="text-zinc-500 font-medium">{customer.email}</p>
+                                    <p className="text-zinc-500 font-medium">{customer.phone || "No phone added"}</p>
                                 </div>
                             )}
-                        </GlassCard>
+                        </div>
 
-                        {/* 2. Addresses */}
-                        <GlassCard className="p-6 bg-white border-zinc-200">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-3 text-zinc-900">
-                                    <MapPin className="w-5 h-5" />
-                                    <h3 className="font-bold uppercase text-sm">Addresses</h3>
-                                </div>
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => setIsAddingAddress(!isAddingAddress)}
-                                    className="h-8 w-8 p-0 rounded-full hover:bg-zinc-100"
-                                >
-                                    <Plus className="w-4 h-4" />
-                                </Button>
+                        {/* Addresses */}
+                        <div>
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400">Addresses</h3>
+                                <button onClick={() => setIsAddingAddress(!isAddingAddress)} className="text-xs font-bold text-zinc-900 underline underline-offset-4">
+                                    Add New
+                                </button>
                             </div>
 
-                            <div className="space-y-4">
+                            <div className="space-y-6">
                                 {customer.shipping_addresses?.map((addr: any) => (
-                                    <div key={addr.id} className="p-3 rounded-lg bg-zinc-50 border border-zinc-100 relative group">
-                                        <p className="font-bold text-sm text-zinc-900">{addr.first_name} {addr.last_name}</p>
-                                        <p className="text-xs text-zinc-500">{addr.address_1}</p>
-                                        <p className="text-xs text-zinc-500">{addr.city}, {addr.postal_code}</p>
-                                        <button
-                                            onClick={() => handleDeleteAddress(addr.id)}
-                                            className="absolute top-2 right-2 text-zinc-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                                        >
-                                            <Trash2 className="w-3 h-3" />
+                                    <div key={addr.id} className="relative group">
+                                        <p className="font-bold text-zinc-900">{addr.first_name} {addr.last_name}</p>
+                                        <p className="text-zinc-500">{addr.address_1}</p>
+                                        <p className="text-zinc-500">{addr.city}, {addr.postal_code}</p>
+                                        <button onClick={() => handleDeleteAddress(addr.id)} className="text-[10px] font-bold text-red-500 mt-2 opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wide">
+                                            Remove
                                         </button>
                                     </div>
                                 ))}
                                 {customer.shipping_addresses?.length === 0 && !isAddingAddress && (
-                                    <p className="text-xs text-zinc-400 italic">No saved addresses.</p>
+                                    <p className="text-zinc-400 italic">No saved addresses.</p>
                                 )}
                             </div>
 
                             {isAddingAddress && (
-                                <form onSubmit={handleAddAddress} className="mt-4 pt-4 border-t border-zinc-100 space-y-3">
-                                    <p className="text-xs font-bold uppercase text-zinc-900">New Address</p>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <Input placeholder="First Name" value={addressForm.first_name} onChange={e => setAddressForm({ ...addressForm, first_name: e.target.value })} className="h-8 text-xs" />
-                                        <Input placeholder="Last Name" value={addressForm.last_name} onChange={e => setAddressForm({ ...addressForm, last_name: e.target.value })} className="h-8 text-xs" />
+                                <form onSubmit={handleAddAddress} className="mt-6 space-y-3 bg-white p-6 rounded-xl border border-zinc-100">
+                                    <p className="text-xs font-bold uppercase text-zinc-900 mb-4">New Destination</p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Input placeholder="First Name" value={addressForm.first_name} onChange={e => setAddressForm({ ...addressForm, first_name: e.target.value })} className="h-10 bg-zinc-50 border-transparent" />
+                                        <Input placeholder="Last Name" value={addressForm.last_name} onChange={e => setAddressForm({ ...addressForm, last_name: e.target.value })} className="h-10 bg-zinc-50 border-transparent" />
                                     </div>
-                                    <Input placeholder="Address" value={addressForm.address_1} onChange={e => setAddressForm({ ...addressForm, address_1: e.target.value })} className="h-8 text-xs" />
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <Input placeholder="City" value={addressForm.city} onChange={e => setAddressForm({ ...addressForm, city: e.target.value })} className="h-8 text-xs" />
-                                        <Input placeholder="PIN" value={addressForm.postal_code} onChange={e => setAddressForm({ ...addressForm, postal_code: e.target.value })} className="h-8 text-xs" />
+                                    <Input placeholder="Address" value={addressForm.address_1} onChange={e => setAddressForm({ ...addressForm, address_1: e.target.value })} className="h-10 bg-zinc-50 border-transparent" />
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Input placeholder="City" value={addressForm.city} onChange={e => setAddressForm({ ...addressForm, city: e.target.value })} className="h-10 bg-zinc-50 border-transparent" />
+                                        <Input placeholder="PIN" value={addressForm.postal_code} onChange={e => setAddressForm({ ...addressForm, postal_code: e.target.value })} className="h-10 bg-zinc-50 border-transparent" />
                                     </div>
-                                    <Button type="submit" size="sm" className="w-full rounded-full bg-zinc-900 text-white text-xs h-8">Add Address</Button>
+                                    <div className="flex gap-4 pt-2">
+                                        <button type="button" onClick={() => setIsAddingAddress(false)} className="text-xs font-bold text-zinc-400 hover:text-zinc-900">Cancel</button>
+                                        <button type="submit" className="text-xs font-bold text-zinc-900 underline underline-offset-4">Save Address</button>
+                                    </div>
                                 </form>
                             )}
-                        </GlassCard>
+                        </div>
 
-                        <div className="pt-2">
-                            <Link href="/contact" className="flex items-center justify-between p-4 rounded-xl hover:bg-zinc-100 transition-colors group border border-transparent hover:border-zinc-200">
-                                <span className="text-sm font-bold text-zinc-900">Need Help?</span>
-                                <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900" />
+                        {/* Support */}
+                        <div>
+                            <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-6">Concierge</h3>
+                            <Link href="/contact" className="text-lg font-bold text-zinc-900 hover:text-zinc-600 transition-colors">
+                                Need assistance?
                             </Link>
+                            <p className="text-zinc-400 mt-2 text-sm leading-relaxed">
+                                Our team is available Mon-Fri, 9am - 6pm EST for styling advice and order inquiries.
+                            </p>
+                        </div>
+
+                        <div className="pt-8 border-t border-zinc-200">
+                            <Button
+                                onClick={handleLogout}
+                                variant="outline"
+                                className="w-full h-12 rounded-xl border-zinc-200 hover:border-zinc-900 hover:bg-zinc-900 hover:text-white transition-all duration-300 flex items-center justify-between px-6 group"
+                            >
+                                <span className="text-xs font-bold uppercase tracking-widest">Sign Out</span>
+                                <LogOut className="w-4 h-4 text-zinc-400 group-hover:text-white transition-colors" />
+                            </Button>
                         </div>
 
                     </div>
                 </div>
             </div>
-        </div >
+        </div>
     );
 }
