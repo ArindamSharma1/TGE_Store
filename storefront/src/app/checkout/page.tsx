@@ -40,16 +40,38 @@ export default function CheckoutPage() {
     // Initial Load - Check for Session
     useEffect(() => {
         const init = async () => {
-            // 1. Get Customer to prefill email
-            const { customer } = await medusaClient.store.customer.retrieve().catch(() => ({ customer: null }));
-            if (customer) {
-                setEmail(customer.email);
-                setAddress(prev => ({
-                    ...prev,
-                    first_name: customer.first_name || "",
-                    last_name: customer.last_name || "",
-                    phone: customer.phone || ""
-                }));
+            // 1. Get Customer to prefill email (Manual Fetch for Auth)
+            try {
+                const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
+                const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY;
+                const token = localStorage.getItem("medusa_auth_token");
+
+                if (token) {
+                    const res = await fetch(`${BACKEND_URL}/store/customers/me`, {
+                        headers: {
+                            "Content-Type": "application/json",
+                            "x-publishable-api-key": PUBLISHABLE_KEY!,
+                            "Authorization": `Bearer ${token}`
+                        },
+                        cache: "no-store"
+                    });
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        const customer = data.customer;
+                        if (customer) {
+                            setEmail(customer.email);
+                            setAddress(prev => ({
+                                ...prev,
+                                first_name: customer.first_name || "",
+                                last_name: customer.last_name || "",
+                                phone: customer.phone || ""
+                            }));
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn("Failed to pre-fill customer checkout data", e);
             }
         };
         init();

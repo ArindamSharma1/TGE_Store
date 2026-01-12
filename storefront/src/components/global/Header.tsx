@@ -24,14 +24,22 @@ export function Header() {
         const checkAuth = async () => {
             const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
             const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
+            const token = localStorage.getItem("medusa_auth_token");
+
+            if (!token) {
+                setCustomer(null);
+                setIsLoggedIn(false);
+                return;
+            }
 
             try {
                 const res = await fetch(`${BACKEND_URL}/store/customers/me`, {
                     headers: {
                         "Content-Type": "application/json",
                         "x-publishable-api-key": PUBLISHABLE_KEY,
+                        "Authorization": `Bearer ${token}`
                     },
-                    credentials: "include", // REQUIRED
+                    credentials: "include",
                 });
 
                 if (res.ok) {
@@ -41,6 +49,8 @@ export function Header() {
                 } else {
                     setCustomer(null);
                     setIsLoggedIn(false);
+                    // If token is invalid, clear it
+                    localStorage.removeItem("medusa_auth_token");
                 }
             } catch (e) {
                 setCustomer(null);

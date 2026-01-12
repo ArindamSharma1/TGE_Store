@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils/cn";
 import { medusaClient } from "@/lib/medusa/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import useRazorpay from "react-razorpay";
+// import useRazorpay from "react-razorpay";
 
 // Types
 type CheckoutStep = 1 | 2 | 3; // 1: Info, 2: Shipping, 3: Payment
@@ -112,16 +112,10 @@ export default function CheckoutPage() {
             // Cast to any to bypass potential type definition mismatches in SDK
             const { cart } = await (medusaClient.store.cart as any).createPaymentSessions(cartId);
 
-            // For this implementation, we'll try to default to "manual" (Cash on Delivery) if available, 
-            // or just pick the first available one to proceed with the mockup flow.
-            // Ideally you list options. Here we'll simplify.
-
+            // Default to manual for now since we removed Razorpay
             if (cart.payment_sessions?.length) {
-                // Priority: Razorpay -> Manual -> First Available
-                const razorpaySession = cart.payment_sessions.find((s: any) => s.provider_id === "razorpay");
                 const manualSession = cart.payment_sessions.find((s: any) => s.provider_id === "manual");
-
-                const selectedSession = razorpaySession || manualSession || cart.payment_sessions[0];
+                const selectedSession = manualSession || cart.payment_sessions[0];
 
                 if (selectedSession) {
                     await (medusaClient.store.cart as any).setPaymentSession(cartId, {
@@ -130,8 +124,6 @@ export default function CheckoutPage() {
                     setPaymentSession(selectedSession);
                 }
             } else {
-                // If no payment providers are set up in backend, this will fail.
-                // We'll catch this.
                 console.warn("No payment providers found. Ensure 'manual' provider is enabled in Medusa.");
             }
 
@@ -153,12 +145,7 @@ export default function CheckoutPage() {
             if (type === "order" && data) {
                 // Success!
                 // Clear local cart ID because it's now an order
-                // The CartContext listens to localStorage changes? No, we might need to force refresh or context handles it.
-                // We'll just push to success page.
-
-                // NOTE: CartProvider might re-fetch based on cartId in localStorage if we don't clear it.
                 localStorage.removeItem("medusa_cart_id");
-
                 router.push(`/order/confirmed/${data.id}`);
             } else {
                 toast.error("Order could not be completed. Please try again.");
@@ -171,77 +158,8 @@ export default function CheckoutPage() {
         }
     };
 
-    const [Razorpay] = useRazorpay();
+    // Removed Razorpay logic completely
 
-    const handleRazorpayPayment = () => {
-        if (!Razorpay || !paymentSession) return;
-
-        // Ensure key is available
-        const key = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-        if (!key) {
-            toast.error("Razorpay Key not configured");
-            return;
-        }
-
-        setIsLoading(true);
-
-        const options = {
-            key: key,
-            amount: subtotal * 100,
-            currency: "INR",
-            name: "The Game Store",
-            description: "Order Payment",
-            image: "https://cdn.razorpay.com/logos/GhRQcyean79PqE_medium.png", // Replace with your logo URL
-            order_id: paymentSession.data?.id, // Expecting Razorpay Order ID here
-            handler: async (response: any) => {
-                try {
-                    // Update session with payment verification data
-                    // Casting to any to avoid TS issues with V2 SDK mismatches
-                    await (medusaClient.store.cart as any).updatePaymentSession(cartId, {
-                        provider_id: "razorpay",
-                        data: {
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_signature: response.razorpay_signature
-                        }
-                    });
-
-                    // Complete order
-                    await handleCompleteOrder();
-                } catch (error) {
-                    console.error(error);
-                    toast.error("Payment verification failed");
-                    setIsLoading(false);
-                }
-            },
-            prefill: {
-                name: `${address.first_name} ${address.last_name}`,
-                email: email,
-                contact: address.phone
-            },
-            notes: {
-                address: address.address_1
-            },
-            theme: {
-                color: "#18181b"
-            },
-            retry: {
-                enabled: true
-            },
-            modal: {
-                ondismiss: () => {
-                    setIsLoading(false);
-                }
-            }
-        };
-
-        const rzp1 = new Razorpay(options);
-        rzp1.on("payment.failed", function (response: any) {
-            toast.error(response.error.description || "Payment failed");
-            setIsLoading(false);
-        });
-        rzp1.open();
-    };
 
     // --- Empty State ---
     if (items.length === 0) {
@@ -371,12 +289,12 @@ export default function CheckoutPage() {
                             <div className="flex gap-4">
                                 <Button type="button" variant="outline" onClick={() => setStep(2)} className="rounded-full h-14 border-zinc-200">Back</Button>
                                 <Button
-                                    onClick={paymentSession?.provider_id === "razorpay" ? handleRazorpayPayment : handleCompleteOrder}
+                                    onClick={handleCompleteOrder}
                                     disabled={isLoading}
                                     size="lg"
                                     className="flex-1 rounded-full h-14 font-bold bg-zinc-900 hover:bg-zinc-800 text-white text-lg shadow-lg"
                                 >
-                                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (paymentSession?.provider_id === "razorpay" ? "Pay Now" : "Place Order")}
+                                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Place Order"}
                                 </Button>
                             </div>
                         </div>

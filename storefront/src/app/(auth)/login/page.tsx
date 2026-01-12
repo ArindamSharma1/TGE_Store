@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-import { medusaClient } from "@/lib/medusa/client";
+// import { medusaClient } from "@/lib/medusa/client";
 // import { loginAction } from "@/app/actions/auth";
 
 export default function LoginPage() {
@@ -51,22 +51,28 @@ export default function LoginPage() {
                     "Content-Type": "application/json",
                     "x-publishable-api-key": PUBLISHABLE_KEY!,
                 },
-                credentials: "include",
+                credentials: "include", // Good practice for CORS, even if using tokens
                 body: JSON.stringify({ email, password }),
             });
 
+            const data = await res.json();
+
             if (!res.ok) {
-                // Try to parse error message if available
-                const data = await res.json().catch(() => ({}));
                 throw new Error(data.message || "Invalid email or password");
             }
 
-            // Success - Cookie is set by the response
+            // Success - Store Token
+            if (data.token) {
+                localStorage.setItem("medusa_auth_token", data.token);
+            } else {
+                console.warn("Login successful but no token found in response:", data);
+            }
+
             toast.success("Welcome back!", {
                 description: "You have been successfully logged in."
             });
 
-            // Force hard navigation to ensure cookies are picked up by middleware/server
+            // Force hard navigation to ensure state is fresh
             window.location.href = "/account";
 
         } catch (error: any) {

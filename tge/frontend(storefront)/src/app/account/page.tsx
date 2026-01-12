@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { useWishlist } from "@/context/WishlistContext";
-import { logoutAction } from "@/app/actions/auth";
+// import { logoutAction } from "@/app/actions/auth";
 
 
 function WishlistSection() {
@@ -84,13 +84,13 @@ export default function AccountPage() {
         const checkAuth = async () => {
             try {
                 // Determine backend URL
-                const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
-                const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
+                const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
+                const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY;
 
                 const res = await fetch(`${BACKEND_URL}/store/customers/me?expand=billing_address,shipping_addresses,orders,orders.items`, {
                     headers: {
                         "Content-Type": "application/json",
-                        "x-publishable-api-key": PUBLISHABLE_KEY,
+                        "x-publishable-api-key": PUBLISHABLE_KEY!,
                     },
                     credentials: "include", // REQUIRED
                 });
@@ -121,12 +121,22 @@ export default function AccountPage() {
 
     const handleLogout = async () => {
         try {
-            await logoutAction();
-            localStorage.removeItem("medusa_auth_token");
-            router.push("/login");
-            router.refresh();
+            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
+            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY;
+
+            await fetch(`${BACKEND_URL}/auth/customer/logout`, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "x-publishable-api-key": PUBLISHABLE_KEY!,
+                },
+            });
+
+            window.location.href = "/login";
         } catch (error) {
             console.error("Logout failed", error);
+            // Even if the fetch fails, force redirect to login to clear client state
+            window.location.href = "/login";
         }
     };
 

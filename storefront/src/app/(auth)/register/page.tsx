@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-import { medusaClient } from "@/lib/medusa/client";
+// import { medusaClient } from "@/lib/medusa/client";
 // import { registerAction } from "@/app/actions/auth";
 
 export default function RegisterPage() {
@@ -99,7 +99,13 @@ export default function RegisterPage() {
                 throw new Error("Account created but automatic login failed. Please try logging in.");
             }
 
-            // Success - cookie is set
+            const loginData = await loginRes.json();
+
+            if (loginData.token) {
+                localStorage.setItem("medusa_auth_token", loginData.token);
+            }
+
+            // Success
             toast.success("Account created successfully!", {
                 description: "You have been signed in."
             });

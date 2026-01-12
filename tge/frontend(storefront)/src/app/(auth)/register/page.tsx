@@ -58,20 +58,18 @@ export default function RegisterPage() {
         }
 
         try {
-            console.log("Creating account via client-side fetch (Corrected Flow)...");
-
-            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
-            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
+            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
+            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY;
 
             const firstName = name.split(" ")[0];
             const lastName = name.split(" ").slice(1).join(" ") || "";
 
-            // 1. Register with Auth Endpoint (Proven to work)
-            const registerRes = await fetch(`${BACKEND_URL}/auth/customer/emailpass/register`, {
+            // 1. Create customer
+            const createRes = await fetch(`${BACKEND_URL}/store/customers`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-publishable-api-key": PUBLISHABLE_KEY,
+                    "x-publishable-api-key": PUBLISHABLE_KEY!,
                 },
                 body: JSON.stringify({
                     email,
@@ -81,47 +79,24 @@ export default function RegisterPage() {
                 }),
             });
 
-            if (!registerRes.ok) {
-                const data = await registerRes.json();
-                throw new Error(data.message || "Registration failed");
+            if (!createRes.ok) {
+                const err = await createRes.json().catch(() => ({}));
+                throw new Error(err.message || "Registration failed");
             }
 
-            // 2. Login immediately (Cookie Session)
+            // 2. Login immediately
             const loginRes = await fetch(`${BACKEND_URL}/auth/customer/emailpass`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-publishable-api-key": PUBLISHABLE_KEY,
+                    "x-publishable-api-key": PUBLISHABLE_KEY!,
                 },
-                credentials: "include", // REQUIRED
-                body: JSON.stringify({
-                    email,
-                    password,
-                }),
+                credentials: "include",
+                body: JSON.stringify({ email, password }),
             });
 
             if (!loginRes.ok) {
-                throw new Error("Account created but automatic login failed");
-            }
-
-            // 3. Create Customer Entity (Now that we are logged in)
-            const createCustomerRes = await fetch(`${BACKEND_URL}/store/customers`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-publishable-api-key": PUBLISHABLE_KEY,
-                },
-                credentials: "include", // REQUIRED to pass the new session
-                body: JSON.stringify({
-                    email,
-                    first_name: firstName,
-                    last_name: lastName,
-                }),
-            });
-
-            if (!createCustomerRes.ok) {
-                const msg = await createCustomerRes.text();
-                console.warn("Customer creation warning:", msg);
+                throw new Error("Account created but automatic login failed. Please try logging in.");
             }
 
             // Success - cookie is set
