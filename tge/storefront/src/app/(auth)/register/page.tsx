@@ -64,11 +64,12 @@ export default function RegisterPage() {
             const firstName = name.split(" ")[0];
             const lastName = name.split(" ").slice(1).join(" ") || "";
 
-            // 1. Create customer (via Proxy)
-            const createRes = await fetch("/api/auth/register", {
+            // 1. Create customer
+            const createRes = await fetch(`${BACKEND_URL}/store/customers`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "x-publishable-api-key": PUBLISHABLE_KEY!,
                 },
                 body: JSON.stringify({
                     email,
