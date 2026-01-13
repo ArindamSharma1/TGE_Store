@@ -10,57 +10,11 @@ import { Package, MapPin, CreditCard, LogOut, ChevronRight, Plus, Trash2, Edit2,
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/Input";
+// ... unchanged
 import { useWishlist } from "@/context/WishlistContext";
-// import { logoutAction } from "@/app/actions/auth";
+import { medusaFetch } from "@/lib/medusa/fetch";
 
-
-function WishlistSection() {
-    const { items, removeFromWishlist } = useWishlist();
-
-    if (items.length === 0) return null;
-
-    return (
-        <section className="pt-8 border-t border-zinc-100">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-6 flex items-center gap-2">
-                <Heart className="w-4 h-4" />
-                Saved for later
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {items.map((item) => (
-                    <div key={item.id} className="group relative">
-                        <Link href={`/products/${item.handle}`} className="block">
-                            <div className="relative aspect-[3/4] w-full bg-zinc-100 rounded-lg overflow-hidden mb-3">
-                                {item.thumbnail ? (
-                                    <Image src={item.thumbnail} alt={item.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                                ) : (
-                                    <div className="flex items-center justify-center h-full">
-                                        <Package className="w-6 h-6 text-zinc-300" />
-                                    </div>
-                                )}
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
-                            </div>
-                            <div>
-                                <h3 className="text-sm font-bold text-zinc-900 group-hover:underline underline-offset-4 line-clamp-1">{item.title}</h3>
-                                <p className="text-xs text-zinc-500 mt-1">
-                                    {item.price ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(item.price) : "Price Varies"}
-                                </p>
-                            </div>
-                        </Link>
-                        <button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                removeFromWishlist(item.id);
-                            }}
-                            className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 backdrop-blur-sm text-zinc-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100"
-                        >
-                            <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                    </div>
-                ))}
-            </div>
-        </section>
-    );
-}
+// ... unchanged until WishlistSection related code ... 
 
 export default function AccountPage() {
     const router = useRouter();
@@ -88,25 +42,9 @@ export default function AccountPage() {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                // Determine backend URL
-                const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
-                const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY;
-                const token = localStorage.getItem("medusa_auth_token");
-
-                if (!token) {
-                    throw new Error("No token found");
-                }
-
-                // 1. Fetch Base Customer (No params to avoid 400 Bad Request)
-                const customerRes = await fetch(`${BACKEND_URL}/store/customers/me`, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "x-publishable-api-key": PUBLISHABLE_KEY!,
-                        "Authorization": `Bearer ${token}`
-                    },
-                    credentials: "include",
-                    cache: "no-store"
-                });
+                // 1. Fetch Base Customer
+                // medusaFetch handles credentials: "include" and valid headers
+                const customerRes = await medusaFetch("/store/customers/me", { cache: "no-store" });
 
                 if (customerRes.status === 401) {
                     throw new Error("Unauthorized");
@@ -125,15 +63,7 @@ export default function AccountPage() {
 
                 // 2. Fetch Addresses Separately
                 try {
-                    const addressRes = await fetch(`${BACKEND_URL}/store/customers/me/addresses`, {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "x-publishable-api-key": PUBLISHABLE_KEY!,
-                            "Authorization": `Bearer ${token}`
-                        },
-                        cache: "no-store"
-                    });
-
+                    const addressRes = await medusaFetch("/store/customers/me/addresses", { cache: "no-store" });
                     if (addressRes.ok) {
                         const addrData = await addressRes.json();
                         finalCustomerData.shipping_addresses = addrData.addresses || [];
@@ -147,14 +77,8 @@ export default function AccountPage() {
 
                 // 3. Fetch Orders Separately
                 try {
-                    const ordersRes = await fetch(`${BACKEND_URL}/store/orders?limit=10&offset=0&fields=items,items.variant,items.variant.product`, {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "x-publishable-api-key": PUBLISHABLE_KEY!,
-                            "Authorization": `Bearer ${token}`
-                        },
-                        cache: "no-store"
-                    });
+                    // Use medusaFetch to ensure cookies are sent
+                    const ordersRes = await medusaFetch("/store/orders?limit=10&offset=0&fields=items,items.variant,items.variant.product", { cache: "no-store" });
                     if (ordersRes.ok) {
                         const oData = await ordersRes.json();
                         ordersData = oData.orders || [];
@@ -172,7 +96,11 @@ export default function AccountPage() {
                 setOrders(ordersData);
 
             } catch (error: any) {
-                console.error("Auth check failed:", error);
+                // Only log real errors, 401 is expected redirect
+                if (error.message !== "Unauthorized") {
+                    console.error("Auth check failed:", error);
+                }
+
                 if (error.message === "Unauthorized") {
                     localStorage.removeItem("medusa_auth_token");
                     router.replace("/login");
@@ -186,22 +114,10 @@ export default function AccountPage() {
 
     const handleLogout = async () => {
         try {
-            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
-            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY;
-            const token = localStorage.getItem("medusa_auth_token");
-
-            // Optional: Notify backend (though strictly client-side token removal is often enough for JWT)
-            // But Medusa might have a logout endpoint that invalidates the session if it was tracking it.
-            if (token) {
-                await fetch(`${BACKEND_URL}/auth/customer/logout`, {
-                    method: "POST",
-                    credentials: "include",
-                    headers: {
-                        "x-publishable-api-key": PUBLISHABLE_KEY!,
-                        "Authorization": `Bearer ${token}`
-                    },
-                }).catch(err => console.warn("Backend logout failed", err));
-            }
+            // Correct V2 Logout: DELETE /auth/session destroys the cookie
+            await medusaFetch("/auth/session", {
+                method: "DELETE",
+            }).catch(err => console.warn("Backend logout failed", err));
 
             localStorage.removeItem("medusa_auth_token");
             window.location.href = "/login";
@@ -211,24 +127,14 @@ export default function AccountPage() {
             window.location.href = "/login";
         }
     };
+    // ... unchanged
 
     // --- Profile Handlers ---
     const handleUpdateProfile = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
-            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY;
-            const token = localStorage.getItem("medusa_auth_token");
-
-            if (!token) throw new Error("No token found");
-
-            const res = await fetch(`${BACKEND_URL}/store/customers/me`, {
+            const res = await medusaFetch("/store/customers/me", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-publishable-api-key": PUBLISHABLE_KEY!,
-                    "Authorization": `Bearer ${token}`
-                },
                 body: JSON.stringify(profileForm),
             });
 
@@ -247,20 +153,9 @@ export default function AccountPage() {
     const handleAddAddress = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
-            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY;
-            const token = localStorage.getItem("medusa_auth_token");
-
-            if (!token) throw new Error("No token found");
-
             // 1. Create Address
-            const res = await fetch(`${BACKEND_URL}/store/customers/me/addresses`, {
+            const res = await medusaFetch("/store/customers/me/addresses", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-publishable-api-key": PUBLISHABLE_KEY!,
-                    "Authorization": `Bearer ${token}`
-                },
                 body: JSON.stringify({
                     ...addressForm,
                     company: "",
@@ -273,12 +168,7 @@ export default function AccountPage() {
             if (!res.ok) throw new Error("Failed to add address");
 
             // 2. Refetch Customer to get the updated list explicitly
-            const customerRes = await fetch(`${BACKEND_URL}/store/customers/me?expand=billing_address,shipping_addresses`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-publishable-api-key": PUBLISHABLE_KEY!,
-                    "Authorization": `Bearer ${token}`
-                },
+            const customerRes = await medusaFetch("/store/customers/me?expand=billing_address,shipping_addresses", {
                 cache: "no-store"
             });
 
@@ -296,29 +186,14 @@ export default function AccountPage() {
 
     const handleDeleteAddress = async (addressId: string) => {
         try {
-            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
-            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY;
-            const token = localStorage.getItem("medusa_auth_token");
-
-            if (!token) throw new Error("No token found");
-
-            const res = await fetch(`${BACKEND_URL}/store/customers/me/addresses/${addressId}`, {
+            const res = await medusaFetch(`/store/customers/me/addresses/${addressId}`, {
                 method: "DELETE",
-                headers: {
-                    "x-publishable-api-key": PUBLISHABLE_KEY!,
-                    "Authorization": `Bearer ${token}`
-                },
             });
 
             if (!res.ok) throw new Error("Failed to delete address");
 
             // Refetch Customer
-            const customerRes = await fetch(`${BACKEND_URL}/store/customers/me?expand=billing_address,shipping_addresses`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-publishable-api-key": PUBLISHABLE_KEY!,
-                    "Authorization": `Bearer ${token}`
-                },
+            const customerRes = await medusaFetch("/store/customers/me?expand=billing_address,shipping_addresses", {
                 cache: "no-store"
             });
 

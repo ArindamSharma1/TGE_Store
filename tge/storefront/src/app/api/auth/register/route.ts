@@ -6,13 +6,8 @@ export async function POST(req: Request) {
 
         // 1. Config
         const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
-        // Use env var source of truth
-        const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY;
-
-        if (!PUBLISHABLE_KEY) {
-            console.error("Missing NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY");
-            throw new Error("Missing NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY");
-        }
+        // Force the valid key confirmed by user admin screenshot
+        const PUBLISHABLE_KEY = "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
 
         // 2. Strict Headers (Allowlist Only)
         // We explicitly construct the headers object to ensure NO Authorization header leaks

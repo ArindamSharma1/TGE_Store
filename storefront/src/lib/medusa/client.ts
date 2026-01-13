@@ -1,7 +1,7 @@
 import Medusa from "@medusajs/js-sdk";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
-const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
+const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_86eea72d1d4f07c784cca360f15d29e549ce610def980ec55a33f79f786c6bde";
 
 // Singleton Default (Still used for public endpoints like products)
 export const medusaClient = new Medusa({

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { medusaFetch } from "@/lib/medusa/fetch";
 // import { medusaClient } from "@/lib/medusa/client";
 // import { registerAction } from "@/app/actions/auth";
 
@@ -64,12 +65,11 @@ export default function RegisterPage() {
             const firstName = name.split(" ")[0];
             const lastName = name.split(" ").slice(1).join(" ") || "";
 
-            // 1. Create customer
-            const createRes = await fetch(`${BACKEND_URL}/store/customers`, {
+            // 1. Create customer (via Proxy)
+            const createRes = await fetch("/api/auth/register", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-publishable-api-key": PUBLISHABLE_KEY!,
                 },
                 body: JSON.stringify({
                     email,
@@ -84,34 +84,39 @@ export default function RegisterPage() {
                 throw new Error(err.message || "Registration failed");
             }
 
-            // 2. Login immediately
-            const loginRes = await fetch(`${BACKEND_URL}/auth/customer/emailpass`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-publishable-api-key": PUBLISHABLE_KEY!,
-                },
-                credentials: "include",
-                body: JSON.stringify({ email, password }),
-            });
+            const data = await createRes.json();
 
-            if (!loginRes.ok) {
-                throw new Error("Account created but automatic login failed. Please try logging in.");
+            // 2. Login immediately to establish Session (Cookie)
+            // We use the same credentials we just registered with
+            try {
+                const loginRes = await medusaFetch("/auth/customer/emailpass", {
+                    method: "POST",
+                    body: JSON.stringify({ email, password }),
+                    cache: "no-store"
+                });
+
+                if (!loginRes.ok) {
+                    // If login fails, redirect to login page
+                    console.warn("Auto-login failed after registration");
+                    window.location.href = "/login?registered=true";
+                    return;
+                }
+
+                const loginData = await loginRes.json();
+                if (loginData.token) {
+                    localStorage.setItem("medusa_auth_token", loginData.token);
+                }
+
+                toast.success("Account created successfully!", {
+                    description: "You have been signed in."
+                });
+
+                window.location.href = "/account";
+
+            } catch (loginError) {
+                console.error("Auto-login error", loginError);
+                window.location.href = "/login?registered=true";
             }
-
-            const loginData = await loginRes.json();
-
-            if (loginData.token) {
-                localStorage.setItem("medusa_auth_token", loginData.token);
-            }
-
-            // Success
-            toast.success("Account created successfully!", {
-                description: "You have been signed in."
-            });
-
-            // Force hard navigation
-            window.location.href = "/account";
 
         } catch (error: any) {
             console.error("Registration Error:", error);

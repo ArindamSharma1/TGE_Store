@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-// import { medusaClient } from "@/lib/medusa/client";
-// import { loginAction } from "@/app/actions/auth";
+import { medusaFetch } from "@/lib/medusa/fetch";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -42,16 +41,9 @@ export default function LoginPage() {
         }
 
         try {
-            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
-            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY;
-
-            const res = await fetch(`${BACKEND_URL}/auth/customer/emailpass`, {
+            // Using centralized helper which enforces credentials: "include" and correct headers
+            const res = await medusaFetch("/auth/customer/emailpass", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-publishable-api-key": PUBLISHABLE_KEY!,
-                },
-                credentials: "include", // Good practice for CORS, even if using tokens
                 body: JSON.stringify({ email, password }),
             });
 
@@ -61,18 +53,16 @@ export default function LoginPage() {
                 throw new Error(data.message || "Invalid email or password");
             }
 
-            // Success - Store Token
+            // Success - Token (Optional strict local storage sync, though cookie is primary)
             if (data.token) {
                 localStorage.setItem("medusa_auth_token", data.token);
-            } else {
-                console.warn("Login successful but no token found in response:", data);
             }
 
             toast.success("Welcome back!", {
                 description: "You have been successfully logged in."
             });
 
-            // Force hard navigation to ensure state is fresh
+            // Force hard navigation to Account to ensure fresh state
             window.location.href = "/account";
 
         } catch (error: any) {
@@ -85,6 +75,7 @@ export default function LoginPage() {
             setIsLoading(false);
         }
     };
+    // ... unchanged
 
     return (
         <div className="w-full max-w-md p-8 md:p-12 bg-black/40 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-3xl">

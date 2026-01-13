@@ -6,6 +6,7 @@ import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/Button";
 import { ChevronRight, ChevronDown, Lock, ShoppingBag, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { medusaFetch } from "@/lib/medusa/fetch";
 import { cn } from "@/lib/utils/cn";
 import { medusaClient } from "@/lib/medusa/client";
 import { useRouter } from "next/navigation";
@@ -42,32 +43,19 @@ export default function CheckoutPage() {
         const init = async () => {
             // 1. Get Customer to prefill email (Manual Fetch for Auth)
             try {
-                const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
-                const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY;
-                const token = localStorage.getItem("medusa_auth_token");
+                const res = await medusaFetch("/store/customers/me", { cache: "no-store" });
 
-                if (token) {
-                    const res = await fetch(`${BACKEND_URL}/store/customers/me`, {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "x-publishable-api-key": PUBLISHABLE_KEY!,
-                            "Authorization": `Bearer ${token}`
-                        },
-                        cache: "no-store"
-                    });
-
-                    if (res.ok) {
-                        const data = await res.json();
-                        const customer = data.customer;
-                        if (customer) {
-                            setEmail(customer.email);
-                            setAddress(prev => ({
-                                ...prev,
-                                first_name: customer.first_name || "",
-                                last_name: customer.last_name || "",
-                                phone: customer.phone || ""
-                            }));
-                        }
+                if (res.ok) {
+                    const data = await res.json();
+                    const customer = data.customer;
+                    if (customer) {
+                        setEmail(customer.email);
+                        setAddress(prev => ({
+                            ...prev,
+                            first_name: customer.first_name || "",
+                            last_name: customer.last_name || "",
+                            phone: customer.phone || ""
+                        }));
                     }
                 }
             } catch (e) {
@@ -131,15 +119,8 @@ export default function CheckoutPage() {
 
             // 2. Initialize Payment Sessions (Required before payment step)
             // 2. Initialize Payment Collection (Direct Fetch to bypass SDK issues)
-            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
-            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
-
-            const pcRes = await fetch(`${BACKEND_URL}/store/payment-collections`, {
+            const pcRes = await medusaFetch("/store/payment-collections", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-publishable-api-key": PUBLISHABLE_KEY,
-                },
                 body: JSON.stringify({ cart_id: cartId }),
             });
 
@@ -147,21 +128,16 @@ export default function CheckoutPage() {
                 const { payment_collection } = await pcRes.json();
 
                 // Initialize 'pp_system_default' session (System Payment)
-                const sessRes = await fetch(`${BACKEND_URL}/store/payment-collections/${payment_collection.id}/payment-sessions`, {
+                const sessRes = await medusaFetch(`/store/payment-collections/${payment_collection.id}/payment-sessions`, {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "x-publishable-api-key": PUBLISHABLE_KEY,
-                    },
                     body: JSON.stringify({ provider_id: "pp_system_default" }),
                 });
 
                 if (!sessRes.ok) {
                     console.error("Failed to init payment session", await sessRes.text());
                     // Fallback: Try 'manual' just in case
-                    await fetch(`${BACKEND_URL}/store/payment-collections/${payment_collection.id}/payment-sessions`, {
+                    await medusaFetch(`/store/payment-collections/${payment_collection.id}/payment-sessions`, {
                         method: "POST",
-                        headers: { "Content-Type": "application/json", "x-publishable-api-key": PUBLISHABLE_KEY },
                         body: JSON.stringify({ provider_id: "manual" }),
                     });
                 }
@@ -180,15 +156,8 @@ export default function CheckoutPage() {
         setIsLoading(true);
         try {
             // Complete the cart (Direct Fetch to bypass SDK validation)
-            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
-            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_92932433455c59ad80b7c71deeab97d0c9cfc0cf7b97a1a1d1e9013d9b4ae94f";
-
-            const res = await fetch(`${BACKEND_URL}/store/carts/${cartId}/complete`, {
+            const res = await medusaFetch(`/store/carts/${cartId}/complete`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-publishable-api-key": PUBLISHABLE_KEY,
-                },
                 body: JSON.stringify({}),
             });
 
