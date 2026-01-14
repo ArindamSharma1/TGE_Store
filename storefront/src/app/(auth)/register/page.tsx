@@ -107,6 +107,19 @@ export default function RegisterPage() {
                     localStorage.setItem("medusa_auth_token", loginData.token);
                 }
 
+                // 3. Verify Store Binding (CRITICAL)
+                // We're logged in, but is the customer linked to the store?
+                const meRes = await medusaFetch("/store/customers/me", { cache: "no-store" });
+                if (!meRes.ok) {
+                    console.error("Account created & logged in, but Store Binding failed.", await meRes.text());
+                    // We don't block the user here because they ARE logged in, 
+                    // but this confirms the "split brain" state if it happens.
+                    // Ideally, we might want to logout or show a specific error.
+                    // For now, we proceed but log valid warning.
+                } else {
+                    console.log("Store binding verified.");
+                }
+
                 toast.success("Account created successfully!", {
                     description: "You have been signed in."
                 });

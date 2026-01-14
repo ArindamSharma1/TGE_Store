@@ -11,9 +11,11 @@ export default defineConfig({
       authCors: process.env.AUTH_CORS!,
       jwtSecret: process.env.JWT_SECRET || "supersecret",
       cookieSecret: process.env.COOKIE_SECRET || "supersecret",
-      // Force development friendly cookie settings
-      cookie_secure: false,
-      cookie_same_site: "lax",
+    },
+    // Force development friendly cookie settings
+    cookieOptions: {
+      secure: false, // strictly false for localhost
+      sameSite: "lax",
     },
   },
 })
