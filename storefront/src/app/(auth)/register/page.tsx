@@ -59,14 +59,12 @@ export default function RegisterPage() {
         }
 
         try {
-            const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
-            const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY;
-
             const firstName = name.split(" ")[0];
             const lastName = name.split(" ").slice(1).join(" ") || "";
 
-            // 1. Create customer (via Proxy)
-            const createRes = await fetch("/api/auth/register", {
+            // 1. Create Auth Identity (Directly via Medusa Auth API)
+            // We bypass the Next.js Proxy to ensure headers/cookies are handled natively by the browser
+            const createRes = await medusaFetch("/auth/customer/emailpass/register", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -80,14 +78,18 @@ export default function RegisterPage() {
             });
 
             if (!createRes.ok) {
-                const err = await createRes.json().catch(() => ({}));
+                let err = {};
+                const textBody = await createRes.text();
+                try {
+                    err = JSON.parse(textBody);
+                } catch (e) {
+                    err = { message: textBody || "No response body" };
+                }
+                console.error("Registration Error (Status " + createRes.status + "):", err);
                 throw new Error(err.message || "Registration failed");
             }
 
-            const data = await createRes.json();
-
             // 2. Login immediately to establish Session (Cookie)
-            // We use the same credentials we just registered with
             try {
                 const loginRes = await medusaFetch("/auth/customer/emailpass", {
                     method: "POST",
@@ -96,7 +98,6 @@ export default function RegisterPage() {
                 });
 
                 if (!loginRes.ok) {
-                    // If login fails, redirect to login page
                     console.warn("Auto-login failed after registration");
                     window.location.href = "/login?registered=true";
                     return;
@@ -107,17 +108,22 @@ export default function RegisterPage() {
                     localStorage.setItem("medusa_auth_token", loginData.token);
                 }
 
-                // 3. Verify Store Binding (CRITICAL)
-                // We're logged in, but is the customer linked to the store?
-                const meRes = await medusaFetch("/store/customers/me", { cache: "no-store" });
+                // 3. Verify Store Binding (Polling)
+                // The subscriber is async, so we might need to wait a moment for the Customer to be created
+                let meRes = await medusaFetch("/store/customers/me", { cache: "no-store" });
+                let retries = 0;
+                while (!meRes.ok && retries < 3) {
+                    console.log(`Waiting for customer creation... (${retries + 1}/3)`);
+                    await new Promise(r => setTimeout(r, 1000)); // Wait 1s
+                    meRes = await medusaFetch("/store/customers/me", { cache: "no-store" });
+                    retries++;
+                }
+
                 if (!meRes.ok) {
-                    console.error("Account created & logged in, but Store Binding failed.", await meRes.text());
-                    // We don't block the user here because they ARE logged in, 
-                    // but this confirms the "split brain" state if it happens.
-                    // Ideally, we might want to logout or show a specific error.
-                    // For now, we proceed but log valid warning.
+                    console.error("Critical: Customer entity missing after retries.", await meRes.text());
+                    // Fallback: Still redirect, but warn
                 } else {
-                    console.log("Store binding verified.");
+                    console.log("Registration & Customer Binding Confirmed!");
                 }
 
                 toast.success("Account created successfully!", {
@@ -132,7 +138,7 @@ export default function RegisterPage() {
             }
 
         } catch (error: any) {
-            console.error("Registration Error:", error);
+            console.error("Registration Logic Error:", error);
             setErrors(prev => ({
                 ...prev,
                 general: error.message || "An unexpected error occurred."

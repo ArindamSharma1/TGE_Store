@@ -1,9 +1,0 @@
-      PID    PPID    PGID     WINPID   TTY         UID    STIME COMMAND
-      988     980     980      17168  cons1     197609 11:19:45 /c/nvm4w/nodejs/node
-      954     827     954      15664  cons0     197609 11:16:24 /usr/bin/bash
-      827       1     827      10788  cons0     197609 11:13:13 /usr/bin/bash
-     1053     989    1053       8344  cons2     197609 12:36:36 /usr/bin/PS
-      828       1     828      13780  cons1     197609 11:13:13 /usr/bin/bash
-      980     828     980      16216  cons1     197609 11:19:44 /usr/bin/bash
-      989       1     989      14884  cons2     197609 12:36:15 /usr/bin/bash
-      962     954     954      12560  cons0     197609 11:16:26 /c/nvm4w/nodejs/node

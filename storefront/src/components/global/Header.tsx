@@ -24,20 +24,25 @@ export function Header() {
     useEffect(() => {
         const checkAuth = async () => {
             try {
+                // Silently check for session
                 const res = await medusaFetch("/store/customers/me", { cache: "no-store" });
 
                 if (res.ok) {
                     const data = await res.json();
                     setCustomer(data.customer);
                     setIsLoggedIn(true);
-                } else {
+                } else if (res.status === 401) {
+                    // Normal behavior for guest, do nothing
                     setCustomer(null);
                     setIsLoggedIn(false);
-                    if (res.status === 401) {
-                        localStorage.removeItem("medusa_auth_token");
-                    }
+                    localStorage.removeItem("medusa_auth_token"); // Ensure token is removed if 401
+                } else {
+                    // Other non-ok responses
+                    setCustomer(null);
+                    setIsLoggedIn(false);
                 }
             } catch (e) {
+                // Ignore network/fetch errors during header check
                 setCustomer(null);
                 setIsLoggedIn(false);
             }

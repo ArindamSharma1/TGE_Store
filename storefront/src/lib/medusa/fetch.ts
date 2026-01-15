@@ -1,5 +1,5 @@
 const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
-const PUBLISHABLE_KEY = "pk_fe5c9a3efe63600ecd8e5442857f33d665324907e9ed7e60449d5647d1a0e5df";
+const PUBLISHABLE_KEY = "pk_74fbba9d0546038c7e8816c68dc182d4e823778d5a1250347c41279a01854363";
 
 export async function medusaFetch(path: string, options: RequestInit = {}) {
     const url = path.startsWith("http") ? path : `${BACKEND_URL}${path}`;

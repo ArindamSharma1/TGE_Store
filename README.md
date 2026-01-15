@@ -1,2 +1,2 @@
-# TGS
+# TGE Store
 E-Commerce Store
