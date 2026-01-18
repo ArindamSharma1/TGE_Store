@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/Input";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { shopifyFetch } from "@/lib/shopify";
-import { createCustomerMutation } from "@/lib/shopify/mutations";
+import { createCustomerMutation, createCustomerAccessTokenMutation } from "@/lib/shopify/mutations";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -55,7 +55,31 @@ export default function RegisterPage() {
             }
 
             if (customer?.id) {
-                toast.success("Account created successfully. Please sign in.");
+                // Auto-Login
+                try {
+                    const loginRes = await shopifyFetch<any>({
+                        query: createCustomerAccessTokenMutation,
+                        variables: {
+                            input: { email, password }
+                        },
+                        cache: 'no-store'
+                    });
+
+                    const { customerAccessToken } = loginRes?.customerAccessTokenCreate || {};
+
+                    if (customerAccessToken?.accessToken) {
+                        localStorage.setItem("shopify_customer_token", customerAccessToken.accessToken);
+                        toast.success("Account created! Logging you in...");
+                        // Use hard redirect to sync header
+                        window.location.href = "/account";
+                        return;
+                    }
+                } catch (err) {
+                    console.error("Auto-login failed", err);
+                }
+
+                // Fallback if auto-login fails
+                toast.success("Account created! Please sign in.");
                 router.push("/login");
             } else {
                 toast.error("Failed to create account. Please try again.");
