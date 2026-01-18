@@ -44,8 +44,6 @@ export const getCartQuery = /* GraphQL */ `
   }
   ${cartFragment}
 `;
-  ${ cartFragment }
-`;
 
 export const getCustomerQuery = /* GraphQL */ `
   query getCustomer($customerAccessToken: String!) {

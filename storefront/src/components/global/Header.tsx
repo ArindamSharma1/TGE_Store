@@ -11,7 +11,7 @@ import { useCart } from "@/context/CartContext";
 import { useSearch } from "@/context/SearchContext";
 import { usePathname } from "next/navigation";
 
-// import { medusaClient } from "@/lib/medusa/client";
+// import { medusaClient } from '@/lib/medusa/client';
 export function Header() {
     const { scrollY } = useScroll();
     const [isScrolled, setIsScrolled] = useState(false);
@@ -66,6 +66,7 @@ export function Header() {
                                 alt="TGE Store"
                                 width={80}
                                 height={24}
+                                priority
                                 className={cn(
                                     "h-5 w-auto object-contain transition-all",
                                     isScrolled ? "brightness-0 invert-0" : "brightness-0 invert"

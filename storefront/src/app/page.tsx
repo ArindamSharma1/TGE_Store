@@ -18,7 +18,7 @@ export default async function Home() {
   let products = [];
 
   try {
-    const { body } = await shopifyFetch<{ data: { products: { edges: any[] } } }>({
+    const res = await shopifyFetch<{ products: { edges: any[] } }>({
       query: getProductsQuery,
       variables: {
         sortKey: 'CREATED_AT',
@@ -26,7 +26,7 @@ export default async function Home() {
       }
     });
 
-    products = body.data.products.edges.map((edge) => edge.node);
+    products = res?.products?.edges?.map((edge) => edge.node) || [];
   } catch (error) {
     console.error("Failed to fetch home products:", error);
   }

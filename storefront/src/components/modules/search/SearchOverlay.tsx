@@ -52,7 +52,7 @@ export function SearchOverlay() {
             setIsSearching(true);
             try {
                 // Fetch from Shopify
-                const { body } = await shopifyFetch<{ data: { products: { edges: any[] } } }>({
+                const res = await shopifyFetch<{ products: { edges: any[] } }>({
                     query: getProductsQuery,
                     variables: {
                         query: `title:${query}*`, // Simple wildcard search
@@ -61,7 +61,7 @@ export function SearchOverlay() {
                     cache: 'no-store' // Always fresh for search
                 });
 
-                const products = body.data?.products?.edges?.map((edge: any) => edge.node) || [];
+                const products = res?.products?.edges?.map((edge: any) => edge.node) || [];
                 setResults(products);
             } catch (error) {
                 console.error("Search failed", error);

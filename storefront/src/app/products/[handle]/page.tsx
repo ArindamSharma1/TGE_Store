@@ -10,14 +10,14 @@ type Props = {
 }
 
 async function getProduct(handle: string) {
-    const { body } = await shopifyFetch<{ data: { product: any } }>({
+    const res = await shopifyFetch<{ product: any }>({
         query: getProductQuery,
         variables: {
             handle: handle
         }
     });
 
-    return body.data.product;
+    return res?.product;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

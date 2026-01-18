@@ -1,3 +1,5 @@
+"use server";
+
 const domain = process.env.SHOPIFY_STORE_DOMAIN;
 const storefrontAccessToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
 
@@ -11,7 +13,7 @@ export async function shopifyFetch<T>({
     variables?: Record<string, unknown>;
     headers?: Record<string, string>;
     cache?: RequestCache;
-}): Promise<{ status: number; body: T } | never> {
+}): Promise<T> {
     const endpoint = `https://${domain}/api/2023-10/graphql.json`;
     const key = storefrontAccessToken;
 
@@ -37,10 +39,7 @@ export async function shopifyFetch<T>({
             throw body.errors[0];
         }
 
-        return {
-            status: result.status,
-            body,
-        };
+        return body.data;
     } catch (e) {
         console.error('Error connecting to Shopify:', e);
         throw {
