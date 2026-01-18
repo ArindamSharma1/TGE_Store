@@ -86,7 +86,7 @@ export function Hero({
                             variant="link"
                             className="text-white hover:text-white/80 p-0 h-auto font-medium text-sm underline decoration-1 underline-offset-4 decoration-white/50 hover:decoration-white"
                         >
-                            <span>Explore</span>
+                            <span>About Us</span>
                         </Button>
                     </div>
                 </Reveal>

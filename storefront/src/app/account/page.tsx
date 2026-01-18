@@ -51,7 +51,9 @@ export default function AccountPage() {
                 }
 
                 if (!customerRes.ok) {
-                    throw new Error("Failed to fetch customer");
+                    const errBody = await customerRes.text();
+                    console.error("Fetch Customer Failed:", customerRes.status, errBody);
+                    throw new Error(`Failed to fetch customer: ${customerRes.status} ${errBody}`);
                 }
 
                 const customerResponseBody = await customerRes.json();

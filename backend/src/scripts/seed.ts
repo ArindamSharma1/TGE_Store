@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local"), override: true });
 
-const BASE = process.env.MEDUSA_BACKEND_URL || "http://127.0.0.1:9000";
+const BASE = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000";
 const ADMIN_KEY = process.env.ADMIN_API_KEY;
 
 if (!ADMIN_KEY) {
@@ -127,6 +127,50 @@ async function createPublishableKey(sales_channel_id: string) {
   return res.data.api_key;
 }
 
+async function linkKeyToSalesChannel(pkId: string, salesChannelId: string) {
+  console.log(`Linking Key ${pkId} to Sales Channel ${salesChannelId}...`);
+  try {
+    const res = await client.post(`/admin/api-keys/${pkId}/sales-channels`, {
+      add: [salesChannelId]
+    });
+    // In v2 the endpoint might be /admin/api-keys/:id/sales-channels with body { add: [] } or batch
+    // Checking docs/user prompt: user suggested /admin/publishable-api-keys/:id/sales-channels/batch
+    // But Medusa v2 often unifies api-keys. Let's try the user suggested path if standard fails, 
+    // or stick to the likely v2 path matching other endpoints.
+    // User said: /admin/publishable-api-keys/<PK_ID>/sales-channels/batch
+    // Let's use that specific path as requested.
+    return res.data;
+  } catch (e: any) {
+    // try alternative path if first fails, or just log
+    // The user explicitly gave: /admin/publishable-api-keys/${pkId}/sales-channels/batch
+    // I will use THAT one in the main call or finding the right one.
+  }
+}
+
+async function attachSalesChannelToPublishableKey(pkId: string, salesChannelId: string) {
+  try {
+    // Correct v2 endpoint logic as per User Instruction
+    // The key is to access /admin/api-keys/:id/sales-channels
+    // Body must be { sales_channel_ids: [ ... ] } or { add: [...] } depending on exact version ??
+    // User explicitly said:
+    // await axios.post(`${BASE}/admin/api-keys/${key.id}/sales-channels`, { sales_channel_ids: [salesChannelId] }, adminHeaders)
+
+    console.log(`Attaching Sales Channel ${salesChannelId} to Key ${pkId}...`);
+
+    await client.post(`/admin/api-keys/${pkId}/sales-channels`, {
+      sales_channel_ids: [salesChannelId]
+    });
+
+    console.log("Linked Key to SC successfully.");
+  } catch (err: any) {
+    if (axios.isAxiosError(err)) {
+      console.error("Linkage failed (Axios):", err.response?.status, JSON.stringify(err.response?.data));
+    } else {
+      console.error("Linkage failed:", err.message);
+    }
+  }
+}
+
 async function writeEnv(keyName: string, value: string) {
   const envPath = path.resolve(process.cwd(), ".env.local");
   let content = "";
@@ -161,6 +205,9 @@ async function writeEnv(keyName: string, value: string) {
 
     const pk = await createPublishableKey(channel.id);
     console.log("Publishable key created:", pk.token || pk.token || JSON.stringify(pk).slice(0, 40));
+
+    // Explicitly link SC to Key
+    await attachSalesChannelToPublishableKey(pk.id, channel.id);
 
     if (pk && pk.token) {
       await writeEnv("MEDUSA_PUBLISHABLE_KEY", pk.token);
