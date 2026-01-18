@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { Reveal } from "@/components/animations/Reveal";
 
 interface HeroProps {
     heading?: string;
@@ -33,10 +32,8 @@ export function Hero({
                 />
             </div>
 
-            {/* Main Image (Layer 1) - Mask Reveal? No, let's keep it immersive but maybe scale it? 
-                Actually, let's just keep it simple for now, the revealing text is the hero.
-            */}
-            <div className="absolute inset-0 z-0">
+            {/* Main Image (Layer 1) */}
+            <div className="absolute inset-0 z-0" data-animate="parallax">
                 <Image
                     src={imageUrl}
                     alt="Campaign Hero"
@@ -53,43 +50,39 @@ export function Hero({
             <div className="relative z-20 flex flex-col items-center justify-center text-center px-4 max-w-3xl mx-auto">
 
                 {/* Headline: Mask & Skew Reveal */}
-                <Reveal delay={0.1}>
-                    <h1 className="text-5xl md:text-8xl font-black text-white uppercase tracking-tight leading-[0.9] mb-8">
-                        {heading}
-                    </h1>
-                </Reveal>
+                <h1 className="text-5xl md:text-8xl font-black text-white uppercase tracking-tight leading-[0.9] mb-8" data-animate="text">
+                    {heading}
+                </h1>
 
                 {/* Subheadline: Staggered Reveal */}
                 {subheading && (
-                    <Reveal delay={0.3}>
-                        <p className="text-xs md:text-sm tracking-[0.2em] font-bold uppercase text-white/90 mb-10">
-                            {subheading}
-                        </p>
-                    </Reveal>
+                    <p className="text-xs md:text-sm tracking-[0.2em] font-bold uppercase text-white/90 mb-10">
+                        {subheading}
+                    </p>
                 )}
 
                 {/* CTAs: Reveal Only */}
-                <Reveal delay={0.5}>
-                    <div className="flex flex-col sm:flex-row items-center gap-6 md:gap-8">
-                        <Button
-                            asChild
-                            href={ctaLink}
-                            size="lg"
-                            className="rounded-full h-12 px-8 text-sm font-bold bg-white text-zinc-900 hover:bg-zinc-100 border-none min-w-[160px]"
-                        >
-                            <span>{ctaText}</span>
-                        </Button>
+                <div className="flex flex-col sm:flex-row items-center gap-6 md:gap-8">
+                    <Button
+                        asChild
+                        href={ctaLink}
+                        size="lg"
+                        className="rounded-full h-12 px-8 text-sm font-bold bg-white text-zinc-900 hover:bg-zinc-100 border-none min-w-[160px]"
+                        data-animate="button"
+                    >
+                        <span>{ctaText}</span>
+                    </Button>
 
-                        <Button
-                            asChild
-                            href="/about"
-                            variant="link"
-                            className="text-white hover:text-white/80 p-0 h-auto font-medium text-sm underline decoration-1 underline-offset-4 decoration-white/50 hover:decoration-white"
-                        >
-                            <span>About Us</span>
-                        </Button>
-                    </div>
-                </Reveal>
+                    <Button
+                        asChild
+                        href="/about"
+                        variant="link"
+                        className="text-white hover:text-white/80 p-0 h-auto font-medium text-sm underline decoration-1 underline-offset-4 decoration-white/50 hover:decoration-white"
+                        data-animate="button"
+                    >
+                        <span>About Us</span>
+                    </Button>
+                </div>
             </div>
         </section>
     );
