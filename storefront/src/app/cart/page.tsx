@@ -8,7 +8,7 @@ import { ArrowLeft, ShoppingBag, Trash2 } from "lucide-react";
 import { ProductCard } from "@/components/modules/ProductCard";
 
 export default function CartPage() {
-    const { items, subtotal, removeItem, addItem } = useCart();
+    const { items, subtotal, removeItem, addItem, checkoutUrl } = useCart();
 
     // Mock Trending Products for Empty State
     const TRENDING_PRODUCTS = [
@@ -140,9 +140,15 @@ export default function CartPage() {
                     </div>
 
                     <div className="mt-8">
-                        <Button size="lg" className="w-full h-14 text-base font-bold rounded-full" asChild>
-                            <Link href="/checkout">Proceed to Checkout</Link>
-                        </Button>
+                        {checkoutUrl ? (
+                            <Button size="lg" className="w-full h-14 text-base font-bold rounded-full" asChild>
+                                <a href={checkoutUrl}>Proceed to Checkout</a>
+                            </Button>
+                        ) : (
+                            <Button size="lg" disabled className="w-full h-14 text-base font-bold rounded-full opacity-50 cursor-not-allowed">
+                                Loading Checkout...
+                            </Button>
+                        )}
                         <p className="mt-4 text-xs text-center text-zinc-400">
                             Secure Checkout - Taxes calculated at next step
                         </p>

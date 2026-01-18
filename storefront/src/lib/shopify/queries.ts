@@ -1,4 +1,4 @@
-import { productFragment } from './fragments';
+import { productFragment, cartFragment } from './fragments';
 
 export const getProductsQuery = /* GraphQL */ `
   query getProducts($sortKey: ProductSortKeys, $reverse: Boolean, $query: String) {
@@ -35,4 +35,84 @@ export const getCollectionsQuery = /* GraphQL */ `
       }
     }
   }
+`;
+export const getCartQuery = /* GraphQL */ `
+  query getCart($cartId: ID!) {
+    cart(id: $cartId) {
+      ...cart
+    }
+  }
+  ${cartFragment}
+`;
+  ${ cartFragment }
+`;
+
+export const getCustomerQuery = /* GraphQL */ `
+  query getCustomer($customerAccessToken: String!) {
+  customer(customerAccessToken: $customerAccessToken) {
+    id
+    firstName
+    lastName
+    displayName
+    email
+    phone
+    orders(first: 10, sortKey: PROCESSED_AT, reverse: true) {
+        edges {
+          node {
+          id
+          orderNumber
+          processedAt
+          financialStatus
+          fulfillmentStatus
+            totalPrice {
+            amount
+            currencyCode
+          }
+          lineItems(first: 5) {
+              edges {
+                node {
+                title
+                quantity
+                  originalTotalPrice {
+                  amount
+                  currencyCode
+                }
+                  variant {
+                    image {
+                    url
+                    altText
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+      defaultAddress {
+      id
+      address1
+      address2
+      city
+      province
+      zip
+      country
+      phone
+    }
+    addresses(first: 10) {
+        edges {
+          node {
+          id
+          address1
+          address2
+          city
+          province
+          zip
+          country
+          phone
+        }
+      }
+    }
+  }
+}
 `;

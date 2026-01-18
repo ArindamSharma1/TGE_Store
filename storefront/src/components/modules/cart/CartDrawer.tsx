@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils/cn";
 import { AnimatePresence, motion } from "framer-motion";
 
 export function CartDrawer() {
-    const { isOpen, closeCart, items, subtotal } = useCart();
+    const { isOpen, closeCart, items, subtotal, checkoutUrl } = useCart();
 
     return (
         <AnimatePresence>
@@ -88,14 +88,24 @@ export function CartDrawer() {
                                     Shipping and taxes calculated at checkout.
                                 </p>
                                 <div className="mt-6">
-                                    <Link href="/checkout" onClick={closeCart}>
+                                    {checkoutUrl ? (
+                                        <a href={checkoutUrl}>
+                                            <Button
+                                                size="lg"
+                                                className="w-full rounded-full bg-zinc-900 hover:bg-zinc-800 text-white h-14 font-bold text-lg"
+                                            >
+                                                Checkout
+                                            </Button>
+                                        </a>
+                                    ) : (
                                         <Button
                                             size="lg"
-                                            className="w-full rounded-full bg-zinc-900 hover:bg-zinc-800 text-white h-14 font-bold text-lg"
+                                            disabled
+                                            className="w-full rounded-full bg-zinc-900 hover:bg-zinc-800 text-white h-14 font-bold text-lg opacity-50 cursor-not-allowed"
                                         >
-                                            Checkout
+                                            Loading Checkout...
                                         </Button>
-                                    </Link>
+                                    )}
                                 </div>
                                 <div className="mt-6 flex justify-center text-center text-sm text-zinc-500">
                                     <p>

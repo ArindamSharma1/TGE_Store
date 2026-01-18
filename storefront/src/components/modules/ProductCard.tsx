@@ -48,19 +48,9 @@ export function ProductCard({
     // If prop price is 0 or suspicious, try resolving from variants
     if (!displayPrice && variants.length > 0) {
         const variant = variants[0];
-        let amount = variant.calculated_price?.calculated_amount;
-
-        if (amount === undefined) {
-            const inrPrice = variant.prices?.find((p: any) => p.currency_code?.toLowerCase() === "inr");
-            if (inrPrice) amount = inrPrice.amount;
-        }
-
-        if (amount === undefined) {
-            amount = variant.prices?.[0]?.amount;
-        }
-
-        if (amount !== undefined) {
-            displayPrice = amount / 100; // Convert cents to units
+        // Shopify Variant Price Check
+        if (variant.price?.amount) {
+            displayPrice = parseFloat(variant.price.amount);
         }
     }
 
