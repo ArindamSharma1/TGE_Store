@@ -35,7 +35,6 @@ export default function RegisterPage() {
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
 
-        // Basic Validation
         let hasError = false;
         const newErrors = { name: "", email: "", password: "", general: "" };
 
@@ -53,10 +52,10 @@ export default function RegisterPage() {
             const firstName = name.split(" ")[0];
             const lastName = name.split(" ").slice(1).join(" ") || "";
 
-            // 1. Create Customer via Server Proxy (avoids mixed content/CORS issues for creation)
-            const createRes = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            // 1. Direct Registration (Identity)
+            // Creates the AuthIdentity in Medusa (e.g. user@example.com + password)
+            const createRes = await medusaFetch("/auth/customer/emailpass/register", {
+                method: "POST",
                 body: JSON.stringify({
                     email,
                     password,
@@ -65,35 +64,54 @@ export default function RegisterPage() {
                 })
             });
 
-            const createData = await createRes.json();
-
             if (!createRes.ok) {
-                throw new Error(createData.message || "Registration failed");
+                const data = await createRes.json();
+                throw new Error(data.message || "Registration failed");
             }
 
-            // 2. Login immediately on CLIENT to establish Session Cookie (connect.sid)
+            // 2. Direct Login (Session)
+            // Gets the connect.sid cookie
             const loginRes = await medusaFetch("/auth/customer/emailpass", {
                 method: "POST",
                 body: JSON.stringify({ email, password }),
             });
 
             if (!loginRes.ok) {
-                throw new Error("Account created, but auto-login failed. Please sign in manually.");
+                throw new Error("Registration successful, but login failed.");
             }
 
-            // 3. Success
-            toast.success("Account created successfully!", {
-                description: "You have been signed in."
-            });
+            // 3. Poll for Customer Scope
+            // The 'account-created' subscriber needs time to run.
+            console.log("Verifying account setup...");
+            let attempts = 0;
+            let ready = false;
 
-            // Force reload/navigation to Account
+            // Poll for up to 5 seconds
+            while (attempts < 5 && !ready) {
+                await new Promise(res => setTimeout(res, 1000));
+                const meRes = await medusaFetch("/store/customers/me", { cache: "no-store" });
+                if (meRes.ok) {
+                    ready = true;
+                } else {
+                    console.log("Waiting for profile...");
+                }
+                attempts++;
+            }
+
+            if (!ready) {
+                // Even if polling times out, we try to go to account. 
+                // It might just be a slow subscriber or network glitch.
+                console.warn("Profile polling timed out.");
+            }
+
+            toast.success("Welcome!", { description: "You are now signed in." });
             window.location.href = "/account";
 
         } catch (error: any) {
-            console.error("Registration Logic Error:", error);
+            console.error("Register Error:", error);
             setErrors(prev => ({
                 ...prev,
-                general: error.message || "An unexpected error occurred."
+                general: error.message || "Something went wrong."
             }));
         } finally {
             setIsLoading(false);
