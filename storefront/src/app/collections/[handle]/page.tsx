@@ -22,7 +22,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
     try {
         if (handle === "all") {
             // Fetch All Products directly
-            const { products: fetchedProducts } = await shopifyFetch<{ products: any[] }>({
+            const { products: fetchedProducts } = await shopifyFetch<{ products: { edges: any[] } }>({
                 query: getProductsQuery,
                 variables: {
                     query: "" // Empty query fetches all

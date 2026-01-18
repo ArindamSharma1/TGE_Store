@@ -36,6 +36,24 @@ export const getCollectionsQuery = /* GraphQL */ `
     }
   }
 `;
+
+export const getCollectionProductsQuery = /* GraphQL */ `
+  query getCollectionProducts($handle: String!) {
+    collection(handle: $handle) {
+      id
+      title
+      handle
+      products(first: 100, sortKey: CREATED, reverse: true) {
+        edges {
+          node {
+            ...product
+          }
+        }
+      }
+    }
+  }
+  ${productFragment}
+`;
 export const getCartQuery = /* GraphQL */ `
   query getCart($cartId: ID!) {
     cart(id: $cartId) {
