@@ -9,9 +9,6 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-import { medusaFetch } from "@/lib/medusa/fetch";
-// import { medusaClient } from "@/lib/medusa/client";
-// import { registerAction } from "@/app/actions/auth";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -28,94 +25,11 @@ export default function RegisterPage() {
     const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLoading(true);
-        setErrors({ name: "", email: "", password: "", general: "" });
-
-        const formData = new FormData(e.currentTarget);
-        const name = formData.get("name") as string;
-        const email = formData.get("email") as string;
-        const password = formData.get("password") as string;
-
-        let hasError = false;
-        const newErrors = { name: "", email: "", password: "", general: "" };
-
-        if (!name) { newErrors.name = "Full Name is required"; hasError = true; }
-        if (!email) { newErrors.email = "Email is required"; hasError = true; }
-        if (!password || password.length < 8) { newErrors.password = "Password must be at least 8 characters"; hasError = true; }
-
-        if (hasError) {
-            setErrors(newErrors);
+        // Temporary Stub
+        setTimeout(() => {
+            toast.info("Registration is being migrated to Shopify.");
             setIsLoading(false);
-            return;
-        }
-
-        try {
-            const firstName = name.split(" ")[0];
-            const lastName = name.split(" ").slice(1).join(" ") || "";
-
-            // 1. Direct Registration (Identity)
-            // Creates the AuthIdentity in Medusa (e.g. user@example.com + password)
-            const createRes = await medusaFetch("/auth/customer/emailpass/register", {
-                method: "POST",
-                body: JSON.stringify({
-                    email,
-                    password,
-                    first_name: firstName,
-                    last_name: lastName,
-                })
-            });
-
-            if (!createRes.ok) {
-                const data = await createRes.json();
-                throw new Error(data.message || "Registration failed");
-            }
-
-            // 2. Direct Login (Session)
-            // Gets the connect.sid cookie
-            const loginRes = await medusaFetch("/auth/customer/emailpass", {
-                method: "POST",
-                body: JSON.stringify({ email, password }),
-            });
-
-            if (!loginRes.ok) {
-                throw new Error("Registration successful, but login failed.");
-            }
-
-            // 3. Poll for Customer Scope
-            // The 'account-created' subscriber needs time to run.
-            console.log("Verifying account setup...");
-            let attempts = 0;
-            let ready = false;
-
-            // Poll for up to 5 seconds
-            while (attempts < 5 && !ready) {
-                await new Promise(res => setTimeout(res, 1000));
-                const meRes = await medusaFetch("/store/customers/me", { cache: "no-store" });
-                if (meRes.ok) {
-                    ready = true;
-                } else {
-                    console.log("Waiting for profile...");
-                }
-                attempts++;
-            }
-
-            if (!ready) {
-                // Even if polling times out, we try to go to account. 
-                // It might just be a slow subscriber or network glitch.
-                console.warn("Profile polling timed out.");
-            }
-
-            toast.success("Welcome!", { description: "You are now signed in." });
-            window.location.href = "/account";
-
-        } catch (error: any) {
-            console.error("Register Error:", error);
-            setErrors(prev => ({
-                ...prev,
-                general: error.message || "Something went wrong."
-            }));
-        } finally {
-            setIsLoading(false);
-        }
+        }, 1000);
     };
 
     return (
@@ -130,28 +44,6 @@ export default function RegisterPage() {
             </div>
 
             <form className="space-y-6" onSubmit={handleRegister}>
-                {errors.general && (
-                    <div className={cn(
-                        "p-4 text-sm rounded-xl border flex flex-col gap-2 transition-all duration-300",
-                        errors.general.includes("already exists")
-                            ? "bg-zinc-800/50 border-zinc-700 text-zinc-300"
-                            : "bg-red-500/10 border-red-500/20 text-red-400"
-                    )}>
-                        <p className="leading-relaxed">
-                            {errors.general}
-                        </p>
-                        {errors.general.includes("already exists") && (
-                            <Link
-                                href="/login"
-                                className="flex items-center gap-1.5 font-bold text-white hover:text-zinc-300 transition-colors self-start group"
-                            >
-                                <span>Sign in now</span>
-                                <span className="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
-                            </Link>
-                        )}
-                    </div>
-                )}
-
                 <div className="space-y-2">
                     <label htmlFor="name" className="text-sm font-bold text-zinc-200 uppercase tracking-wide">
                         Full Name
@@ -213,11 +105,6 @@ export default function RegisterPage() {
                             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                     </div>
-                    {errors.password ? (
-                        <p className="text-xs text-red-400 font-medium">{errors.password}</p>
-                    ) : (
-                        <p className="text-xs text-zinc-500">Must be at least 8 characters.</p>
-                    )}
                 </div>
 
                 <Button

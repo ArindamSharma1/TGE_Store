@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils/cn";
 import { useCart } from "@/context/CartContext";
 import { useSearch } from "@/context/SearchContext";
 import { usePathname } from "next/navigation";
-import { medusaFetch } from "@/lib/medusa/fetch";
+
 // import { medusaClient } from "@/lib/medusa/client";
 export function Header() {
     const { scrollY } = useScroll();
@@ -21,35 +21,15 @@ export function Header() {
     const [customer, setCustomer] = useState<any>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+    // TODO: Implement Shopify Auth Check
+    /*
     useEffect(() => {
         const checkAuth = async () => {
-            try {
-                // Silently check for session
-                const res = await medusaFetch("/store/customers/me", { cache: "no-store" });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    setCustomer(data.customer);
-                    setIsLoggedIn(true);
-                } else if (res.status === 401) {
-                    // Normal behavior for guest, do nothing
-                    setCustomer(null);
-                    setIsLoggedIn(false);
-                    localStorage.removeItem("medusa_auth_token"); // Ensure token is removed if 401
-                } else {
-                    // Other non-ok responses
-                    setCustomer(null);
-                    setIsLoggedIn(false);
-                }
-            } catch (e) {
-                // Ignore network/fetch errors during header check
-                setCustomer(null);
-                setIsLoggedIn(false);
-            }
+             // Shopify implementation to go here
         };
-
         checkAuth();
     }, [pathname]);
+    */
 
     useEffect(() => {
         return scrollY.on("change", (latest) => {
@@ -156,3 +136,4 @@ export function Header() {
         </>
     );
 }
+

@@ -8,8 +8,8 @@ import { X, Search as SearchIcon, ChevronRight, ArrowRight } from "lucide-react"
 import { useSearch } from "@/context/SearchContext";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils/cn";
-
-import { medusaClient } from "@/lib/medusa/client";
+import { shopifyFetch } from "@/lib/shopify";
+import { getProductsQuery } from "@/lib/shopify/queries";
 
 // ... (keep other imports)
 
@@ -51,11 +51,17 @@ export function SearchOverlay() {
 
             setIsSearching(true);
             try {
-                const { products } = await medusaClient.store.product.list({
-                    q: query,
-                    limit: 6,
-                    fields: "title,handle,thumbnail,variants.prices,variants.calculated_price"
+                // Fetch from Shopify
+                const { body } = await shopifyFetch<{ data: { products: { edges: any[] } } }>({
+                    query: getProductsQuery,
+                    variables: {
+                        query: `title:${query}*`, // Simple wildcard search
+                        first: 6
+                    },
+                    cache: 'no-store' // Always fresh for search
                 });
+
+                const products = body.data?.products?.edges?.map((edge: any) => edge.node) || [];
                 setResults(products);
             } catch (error) {
                 console.error("Search failed", error);
@@ -160,9 +166,8 @@ export function SearchOverlay() {
                                     {!isSearching && results.length > 0 ? (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {results.map(product => {
-                                                // Resolve Price
-                                                let price = product.variants?.[0]?.calculated_price?.calculated_amount;
-                                                if (!price) price = product.variants?.[0]?.prices?.[0]?.amount;
+                                                const price = parseFloat(product.priceRange?.minVariantPrice?.amount || "0");
+                                                const currencyCode = product.priceRange?.minVariantPrice?.currencyCode || "INR";
 
                                                 return (
                                                     <Link
@@ -173,7 +178,7 @@ export function SearchOverlay() {
                                                     >
                                                         <div className="relative w-24 h-32 bg-zinc-100 rounded-lg overflow-hidden flex-shrink-0">
                                                             <Image
-                                                                src={product.thumbnail || "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=400&auto=format&fit=crop"}
+                                                                src={product.featuredImage?.url || "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=400&auto=format&fit=crop"}
                                                                 alt={product.title}
                                                                 fill
                                                                 className="object-cover"
@@ -182,7 +187,7 @@ export function SearchOverlay() {
                                                         <div className="flex flex-col justify-center">
                                                             <h4 className="text-lg font-bold text-zinc-900 group-hover:underline decoration-zinc-300 underline-offset-4">{product.title}</h4>
                                                             <span className="text-zinc-900 font-medium mt-2">
-                                                                {price ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(price / 100) : "Price N/A"}
+                                                                {price ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: currencyCode }).format(price) : "Price N/A"}
                                                             </span>
                                                         </div>
                                                     </Link>
@@ -205,3 +210,4 @@ export function SearchOverlay() {
         </AnimatePresence>
     );
 }
+

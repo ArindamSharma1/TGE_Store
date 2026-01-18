@@ -14,16 +14,14 @@ interface ProductOption {
 
 interface ProductInfoProps {
     title: string;
-    price?: string; // Optional, deprecated
     description: string;
     options?: ProductOption[];
-    image: string; // Main image for cart
+    image: string;
     handle: string;
-    variants?: any[];
-    productOptions?: any[]; // Medusa options with IDs
+    variants?: any[]; // Shopify Variants
 }
 
-export function ProductInfo({ title, description, options = [], image, handle, variants = [], productOptions = [] }: ProductInfoProps) {
+export function ProductInfo({ title, description, options = [], image, handle, variants = [] }: ProductInfoProps) {
     const [selections, setSelections] = useState<Record<string, string>>({});
     const { addItem } = useCart();
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
@@ -39,67 +37,35 @@ export function ProductInfo({ title, description, options = [], image, handle, v
         if (variants.length === 0) return undefined;
         if (variants.length === 1 && options.length === 0) return variants[0];
 
-        // Map selections to option IDs
-        const selectionMap = new Map<string, string>();
-        Object.entries(selections).forEach(([name, value]) => {
-            const opt = productOptions.find(o => o.title === name);
-            if (opt) selectionMap.set(opt.id, value);
-        });
-
-        // Find match
+        // Find match based on Shopify Structure: selectedOptions: { name, value }[]
         return variants.find(v => {
-            return v.options.every((vo: any) => selectionMap.get(vo.option_id) === vo.value);
-        }) || variants[0]; // Fallback to first variant (e.g. for "starting at" price)
-    }, [variants, options, selections, productOptions]);
+            return v.selectedOptions.every((vo: any) => selections[vo.name] === vo.value);
+        }) || variants[0];
+    }, [variants, options, selections]);
 
     // Resolve Price
     const resolvedPrice = useMemo(() => {
         if (!selectedVariant) return null;
 
-        // Priority 1: Calculated Price (Medusa context)
-        let amount = selectedVariant.calculated_price?.calculated_amount;
+        const amount = selectedVariant.price?.amount;
+        const currencyCode = selectedVariant.price?.currencyCode || 'INR';
 
-        // Priority 2: Fallback to INR price in prices array
-        if (amount === undefined || amount === null) {
-            const inrPrice = selectedVariant.prices?.find((p: any) => p.currency_code?.toLowerCase() === "inr");
-            if (inrPrice) amount = inrPrice.amount;
-        }
-
-        // Priority 3: Fallback to first available price
-        if (amount === undefined || amount === null) {
-            amount = selectedVariant.prices?.[0]?.amount;
-        }
-
-        if (amount === undefined || amount === null) return null;
+        if (!amount) return "Price Unavailable";
 
         return new Intl.NumberFormat('en-IN', {
             style: 'currency',
-            currency: 'INR'
-        }).format(amount / 100);
+            currency: currencyCode
+        }).format(amount);
     }, [selectedVariant]);
 
-    // Stock Logic
+    // Stock Logic (Simplified for Shopify)
     const isOutOfStock = useMemo(() => {
         if (!selectedVariant) return false;
-        if (selectedVariant.allow_backorder) return false;
-        if (!selectedVariant.manage_inventory) return false;
-        return selectedVariant.inventory_quantity < 1;
+        return selectedVariant.availableForSale === false;
     }, [selectedVariant]);
 
     // Wishlist Logic
-    const isSaved = selectedVariant ? isInWishlist(selectedVariant.product_id || selectedVariant.id) : false;
-    // Note: Items usually tracked by Product ID, not Variant ID for wishlist, but Medusa structure varies.
-    // Assuming Product ID for now (using handle for link).
-    // Actually, `variants` usually have `product_id`. If not, we might need `product.id` passed in props?
-    // Wait, ProductInfo doesn't receive `id`. It receives `handle`.
-    // Let's use `handle` as unique key for now or just check if we can pass ID.
-    // The previous implementation used "items" as { id, handle, ... }.
-    // Let's rely on handle if ID is missing from variants (which is unlikely).
-    // BETTER: Recieve `id` as prop. But for now, let's use `variants[0].product_id` if available.
-
-    const productId = variants?.[0]?.product_id;
-
-    // Safe wishlist check
+    const productId = selectedVariant?.id; // Shopify Global ID
     const inWishlist = productId ? isInWishlist(productId) : false;
 
     const toggleWishlist = () => {
@@ -107,9 +73,7 @@ export function ProductInfo({ title, description, options = [], image, handle, v
         if (inWishlist) {
             removeFromWishlist(productId);
         } else {
-            // Need a valid price number for the wishlist item
-            // Let's strip the currency symbol from resolvedPrice or verify raw amount
-            const priceVal = selectedVariant?.prices?.[0]?.amount ? selectedVariant.prices[0].amount / 100 : 0;
+            const priceVal = selectedVariant?.price?.amount ? parseFloat(selectedVariant.price.amount) : 0;
 
             addToWishlist({
                 id: productId,
@@ -133,7 +97,7 @@ export function ProductInfo({ title, description, options = [], image, handle, v
         }
 
         if (isOutOfStock) {
-            return; // Should be disabled in UI, but safety check
+            return;
         }
 
         try {

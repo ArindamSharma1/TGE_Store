@@ -1,4 +1,5 @@
-import { medusaClient } from "@/lib/medusa/client";
+import { shopifyFetch } from "@/lib/shopify";
+import { getProductQuery } from "@/lib/shopify/queries";
 import { ProductGallery } from "@/components/modules/product/ProductGallery";
 import { ProductInfo } from "@/components/modules/product/ProductInfo";
 import { notFound } from "next/navigation";
@@ -9,16 +10,14 @@ type Props = {
 }
 
 async function getProduct(handle: string) {
-    const { products } = await medusaClient.store.product.list({
-        handle: handle,
-        fields: "+variants.prices,+variants.calculated_price,+options,+images,+thumbnail"
+    const { body } = await shopifyFetch<{ data: { product: any } }>({
+        query: getProductQuery,
+        variables: {
+            handle: handle
+        }
     });
 
-    if (!products || products.length === 0) {
-        return null;
-    }
-
-    return products[0];
+    return body.data.product;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -37,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         openGraph: {
             title: `${product.title} | TGE`,
             description: product.description || `Buy ${product.title} at TGE Store.`,
-            images: product.thumbnail ? [product.thumbnail] : [],
+            images: product.featuredImage?.url ? [product.featuredImage.url] : [],
         },
     };
 }
@@ -51,16 +50,19 @@ export default async function ProductPage({ params }: Props) {
     }
 
     // Helper to format images for Gallery
-    const galleryImages = product.images?.map((img: any) => img.url) || [];
-    if (product.thumbnail && !galleryImages.includes(product.thumbnail)) {
-        galleryImages.unshift(product.thumbnail);
-    }
+    // Shopify images are in edges { node { url } }
+    const galleryImages = [
+        ...(product.featuredImage?.url ? [product.featuredImage.url] : []),
+        ...(product.images?.edges?.map((edge: any) => edge.node.url) || [])
+    ].filter((value, index, self) => self.indexOf(value) === index); // Unique
 
     // Map options for ProductInfo
     const options = product.options?.map((opt: any) => ({
-        name: opt.title,
-        values: opt.values?.map((v: any) => v.value) || []
+        name: opt.name,
+        values: opt.values
     })) || [];
+
+    const variants = product.variants?.edges?.map((e: any) => e.node) || [];
 
     return (
         <div className="container mx-auto px-4 py-8 lg:py-16">
@@ -76,9 +78,9 @@ export default async function ProductPage({ params }: Props) {
                         title={product.title}
                         description={product.description}
                         options={options}
-                        image={product.thumbnail}
+                        image={product.featuredImage?.url}
                         handle={product.handle}
-                        variants={product.variants}
+                        variants={variants}
                     />
                 </div>
             </div>
@@ -101,9 +103,9 @@ export default async function ProductPage({ params }: Props) {
                         offers: {
                             "@type": "Offer",
                             url: `https://tge.store/products/${product.handle}`,
-                            priceCurrency: "INR",
-                            price: product.variants?.[0]?.calculated_price?.calculated_amount / 100 || 0,
-                            availability: "https://schema.org/InStock",
+                            priceCurrency: product.priceRange?.minVariantPrice?.currencyCode || "INR",
+                            price: product.priceRange?.minVariantPrice?.amount || 0,
+                            availability: product.availableForSale ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
                         }
                     })
                 }}

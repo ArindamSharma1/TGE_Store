@@ -2,14 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-import { medusaFetch } from "@/lib/medusa/fetch";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -24,58 +22,12 @@ export default function LoginPage() {
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLoading(true);
-        setErrors({ email: "", password: "", general: "" });
-
-        const formData = new FormData(e.currentTarget);
-        const email = formData.get("email") as string;
-        const password = formData.get("password") as string;
-
-        if (!email || !password) {
-            setErrors(prev => ({
-                ...prev,
-                email: !email ? "Email is required" : "",
-                password: !password ? "Password is required" : ""
-            }));
+        // Temporary Stub
+        setTimeout(() => {
+            toast.info("Authentication is being migrated to Shopify.");
             setIsLoading(false);
-            return;
-        }
-
-        try {
-            // Using centralized helper which enforces credentials: "include" and correct headers
-            const res = await medusaFetch("/auth/customer/emailpass", {
-                method: "POST",
-                body: JSON.stringify({ email, password }),
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.message || "Invalid email or password");
-            }
-
-            // Success - Token (Optional strict local storage sync, though cookie is primary)
-            if (data.token) {
-                localStorage.setItem("medusa_auth_token", data.token);
-            }
-
-            toast.success("Welcome back!", {
-                description: "You have been successfully logged in."
-            });
-
-            // Force hard navigation to Account to ensure fresh state
-            window.location.href = "/account";
-
-        } catch (error: any) {
-            console.error("Login Error:", error);
-            setErrors(prev => ({
-                ...prev,
-                general: error?.message || "Invalid email or password"
-            }));
-        } finally {
-            setIsLoading(false);
-        }
+        }, 1000);
     };
-    // ... unchanged
 
     return (
         <div className="w-full max-w-md p-8 md:p-12 bg-black/40 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-3xl">
@@ -89,12 +41,6 @@ export default function LoginPage() {
             </div>
 
             <form className="space-y-6" onSubmit={handleLogin}>
-                {errors.general && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium rounded-lg">
-                        {errors.general}
-                    </div>
-                )}
-
                 <div className="space-y-2">
                     <label htmlFor="email" className="text-sm font-bold text-zinc-200 uppercase tracking-wide">
                         Email
@@ -105,12 +51,10 @@ export default function LoginPage() {
                         type="email"
                         placeholder="name@example.com"
                         className={cn(
-                            "h-12 rounded-lg border-white/10 bg-white/5 text-white placeholder:text-zinc-500 focus:border-white/20 focus:bg-white/10 transition-all",
-                            errors.email && "border-red-500/50 focus:border-red-500"
+                            "h-12 rounded-lg border-white/10 bg-white/5 text-white placeholder:text-zinc-500 focus:border-white/20 focus:bg-white/10 transition-all"
                         )}
                         disabled={isLoading}
                     />
-                    {errors.email && <p className="text-xs text-red-400 font-medium">{errors.email}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -129,8 +73,7 @@ export default function LoginPage() {
                             type={showPassword ? "text" : "password"}
                             placeholder="••••••••"
                             className={cn(
-                                "h-12 rounded-lg border-white/10 bg-white/5 text-white placeholder:text-zinc-500 pr-10 focus:border-white/20 focus:bg-white/10 transition-all",
-                                errors.password && "border-red-500/50 focus:border-red-500"
+                                "h-12 rounded-lg border-white/10 bg-white/5 text-white placeholder:text-zinc-500 pr-10 focus:border-white/20 focus:bg-white/10 transition-all"
                             )}
                             disabled={isLoading}
                         />
@@ -143,7 +86,6 @@ export default function LoginPage() {
                             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                     </div>
-                    {errors.password && <p className="text-xs text-red-400 font-medium">{errors.password}</p>}
                 </div>
 
                 <Button
