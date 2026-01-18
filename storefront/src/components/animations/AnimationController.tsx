@@ -95,22 +95,25 @@ export default function AnimationController() {
                     const items = container.children;
                     if (items.length === 0) return;
 
-                    gsap.fromTo(items,
-                        { y: 50, scale: 0.9 },
-                        {
-                            y: 0,
-                            scale: 1,
-                            duration: 0.8,
-                            stagger: 0.1, // Fixed rhythmic stagger
-                            ease: "power3.out",
-                            force3D: true, // Keep texture stable
-                            scrollTrigger: {
-                                trigger: container,
-                                start: "top 85%", // Trigger when top of container hits bottom-15% of viewport
-                                toggleActions: "play none none reverse"
-                            }
-                        }
-                    );
+                    // Use ScrollTrigger.batch for better performance on long lists
+                    ScrollTrigger.batch(items, {
+                        onEnter: (batch) => {
+                            gsap.fromTo(batch,
+                                { y: 50, scale: 0.9 },
+                                {
+                                    y: 0,
+                                    scale: 1,
+                                    duration: 0.8,
+                                    stagger: 0.1,
+                                    ease: "power3.out",
+                                    force3D: true, // Keep texture stable
+                                    overwrite: true // Ensure fresh animation
+                                }
+                            );
+                        },
+                        start: "top 90%", // Start slightly earlier
+                        once: true // Animate only once per batch
+                    });
                 });
 
                 // Recipe: Button Micro-interactions
