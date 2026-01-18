@@ -90,29 +90,28 @@ export default function AnimationController() {
                 });
 
                 // Recipe: Grid Stagger (Optimized with Batch)
-                // Selects all direct children of the grid container for batching
-                const gridItems = document.querySelectorAll('[data-animate="grid"] > *');
+                const gridContainers = document.querySelectorAll('[data-animate="grid"]');
+                gridContainers.forEach((container) => {
+                    const items = container.children;
+                    if (items.length === 0) return;
 
-                if (gridItems.length > 0) {
-                    ScrollTrigger.batch(gridItems, {
-                        onEnter: (batch) => {
-                            gsap.fromTo(batch,
-                                { y: 20, opacity: 0 },
-                                {
-                                    y: 0,
-                                    opacity: 1,
-                                    duration: 0.6,
-                                    stagger: 0.1,
-                                    ease: "power2.out",
-                                    overwrite: true,
-                                    force3D: true
-                                }
-                            );
-                        },
-                        start: "top 90%",
-                        once: true // Only animate once for better performance
-                    });
-                }
+                    gsap.fromTo(items,
+                        { y: 50, scale: 0.9 },
+                        {
+                            y: 0,
+                            scale: 1,
+                            duration: 0.8,
+                            stagger: 0.1, // Fixed rhythmic stagger
+                            ease: "power3.out",
+                            force3D: true, // Keep texture stable
+                            scrollTrigger: {
+                                trigger: container,
+                                start: "top 85%", // Trigger when top of container hits bottom-15% of viewport
+                                toggleActions: "play none none reverse"
+                            }
+                        }
+                    );
+                });
 
                 // Recipe: Button Micro-interactions
                 const buttons = document.querySelectorAll('[data-animate="button"]');
