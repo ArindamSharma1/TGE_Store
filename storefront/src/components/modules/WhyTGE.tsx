@@ -1,6 +1,5 @@
 "use client";
 
-import { Reveal } from "@/components/ui/Reveal";
 import { Shirt, Layers, Zap } from "lucide-react";
 
 export function WhyTGE() {
@@ -25,11 +24,11 @@ export function WhyTGE() {
     return (
         <section className="bg-zinc-50 py-32 border-t border-zinc-200">
             <div className="mx-auto max-w-[1400px] px-4">
-                <Reveal width="100%">
+                <div className="mx-auto max-w-[1400px] px-4">
                     <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-6">
                         <div className="max-w-xl">
                             <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500 mb-6 block">The TGE Standard</span>
-                            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-zinc-900 leading-[0.9]">
+                            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-zinc-900 leading-[0.9]" data-animate="text">
                                 Why TGE?
                             </h2>
                         </div>
@@ -38,7 +37,7 @@ export function WhyTGE() {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-12">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-12" data-animate="grid">
                         {features.map((feature, i) => (
                             <div key={i} className="flex flex-col items-start pt-8 border-t border-zinc-200">
                                 <feature.icon className="w-6 h-6 text-zinc-900 mb-6" strokeWidth={1.5} />
@@ -49,7 +48,7 @@ export function WhyTGE() {
                             </div>
                         ))}
                     </div>
-                </Reveal>
+                </div>
             </div>
         </section>
     );

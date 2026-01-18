@@ -50,6 +50,7 @@ export function Hero({
             <div className="relative z-20 flex flex-col items-center justify-center text-center px-4 max-w-3xl mx-auto">
 
                 {/* Headline: Mask & Skew Reveal */}
+                {/* Headline: Mask & Skew Reveal */}
                 <h1 className="text-5xl md:text-8xl font-black text-white uppercase tracking-tight leading-[0.9] mb-8" data-animate="text">
                     {heading}
                 </h1>
