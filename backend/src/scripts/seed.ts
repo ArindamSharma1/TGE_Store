@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local"), override: true });
 
-const BASE = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000";
+const BASE = process.env.MEDUSA_BACKEND_URL || "http://127.0.0.1:9000";
 const ADMIN_KEY = process.env.ADMIN_API_KEY;
 
 if (!ADMIN_KEY) {
@@ -42,38 +42,63 @@ interface Region {
 }
 
 async function ensureRegions() {
+  console.log("Ensuring India Region...");
   const { data } = await client.get("/admin/regions?limit=100");
   const existingRegions = data.regions || [];
 
-  const regionsToCreate = [
-    { name: "India", currency_code: "inr", countries: ["in"] },
-  ];
-
-  const results: Region[] = [];
-  for (const reg of regionsToCreate) {
-    const match = existingRegions.find((r: any) => r.currency_code === reg.currency_code);
-    if (match) {
-      results.push(match);
-      continue;
-    }
-    const res = await client.post("/admin/regions", reg);
-    results.push(res.data.region);
+  let india = existingRegions.find((r: any) => r.currency_code === "inr");
+  if (!india) {
+    console.log("Creating India region...");
+    const res = await client.post("/admin/regions", {
+      name: "India",
+      currency_code: "inr",
+      countries: ["in"],
+      // mid_code: "in" - not needed usually
+    });
+    india = res.data.region;
   }
-  return results[0]; // Return first as default for store
+  console.log("India Region ID:", india.id);
+  // Return india and list of all for cleanup
+  return { india, all: existingRegions };
+}
+
+async function cleanupRegions(keepId: string) {
+  console.log("Cleaning up old regions...");
+  const { data } = await client.get("/admin/regions?limit=100");
+  for (const r of data.regions) {
+    if (r.id !== keepId) {
+      console.log(`Deleting region: ${r.name} (${r.id})`);
+      try {
+        await client.delete(`/admin/regions/${r.id}`);
+      } catch (e: any) {
+        console.warn(`Failed to delete ${r.id}: ${e.message}`);
+      }
+    }
+  }
 }
 
 async function ensureStore(regionId: string) {
   const { data } = await client.get("/admin/stores?limit=1");
   let store = data.stores?.[0];
   if (store) {
-    // metadata check or simple return
-    return store;
+    console.log("Updating Store default region...");
+    try {
+      const update = await client.post(`/admin/stores/${store.id}`, {
+        default_region_id: regionId,
+        supported_currencies: [{ currency_code: "inr", is_default: true }]
+      });
+      return update.data.store;
+    } catch (e: any) {
+      console.error("Store Update Failed:", e.response?.data || e.message);
+      return store;
+    }
   }
-  // If no store exists (unlikely in v2), try create
+
+  console.log("Creating Default Store with India region...");
   const res = await client.post("/admin/stores", {
     name: "Default Store",
-    supported_currencies: [{ currency_code: "usd", is_default: true }],
-    default_sales_channel_id: null, // Optional
+    supported_currencies: [{ currency_code: "inr", is_default: true }],
+    default_sales_channel_id: null,
     default_region_id: regionId,
     default_location_id: null
   });
@@ -92,7 +117,6 @@ async function ensureSalesChannel(storeId: string) {
 }
 
 async function createPublishableKey(sales_channel_id: string) {
-  // Look for an existing publishable key
   const { data: list } = await client.get("/admin/api-keys?type=publishable&limit=100");
   if (list.api_keys && list.api_keys.length) return list.api_keys[0];
   const res = await client.post("/admin/api-keys", {
@@ -107,7 +131,6 @@ async function writeEnv(keyName: string, value: string) {
   const envPath = path.resolve(process.cwd(), ".env.local");
   let content = "";
   if (fs.existsSync(envPath)) content = fs.readFileSync(envPath, "utf8");
-  // replace or append
   const re = new RegExp(`^${keyName}=.*$`, "m");
   if (re.test(content)) {
     content = content.replace(re, `${keyName}=${value}`);
@@ -126,7 +149,7 @@ async function writeEnv(keyName: string, value: string) {
     // 1. Ensure India
     const { india } = await ensureRegions();
 
-    // 2. Update Store to use India (Critical before deleting others)
+    // 2. Update Store to use India
     const store = await ensureStore(india.id);
     console.log("Store updated:", store.id);
 
@@ -138,13 +161,14 @@ async function writeEnv(keyName: string, value: string) {
 
     const pk = await createPublishableKey(channel.id);
     console.log("Publishable key created:", pk.token || pk.token || JSON.stringify(pk).slice(0, 40));
-    // write MEDUSA_PUBLISHABLE_KEY to backend/.env.local
+
     if (pk && pk.token) {
       await writeEnv("MEDUSA_PUBLISHABLE_KEY", pk.token);
       console.log("Publishable key saved; copy this to storefront env as NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY");
     } else {
       console.warn("Could not obtain token; check admin API permissions");
     }
+
     // Verify Regions
     console.log("\n----- Verifying Regions -----");
     const { data: verifyData } = await client.get("/admin/regions?limit=100");
@@ -157,7 +181,13 @@ async function writeEnv(keyName: string, value: string) {
     process.exit(0);
   } catch (err: any) {
     if (axios.isAxiosError(err)) {
-      console.error("Seed failed (Axios):", err.response?.status, err.response?.data);
+      console.error("Seed failed (Axios):");
+      console.error("  Message:", err.message);
+      console.error("  Code:", err.code);
+      console.error("  Status:", err.response?.status);
+      if (err.response?.data) {
+        console.error("  Data:", JSON.stringify(err.response.data, null, 2));
+      }
     } else {
       console.error("Seed failed:", err.message, err);
     }

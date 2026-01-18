@@ -29,7 +29,7 @@ export default async function Home() {
     const res = await medusaClient.store.product.list({
       limit: 8,
       fields: "+variants.prices,+variants.calculated_price,+images,+thumbnail",
-      country_code: "gb", // Required for pricing in Medusa v2 (Seed data has 'gb')
+      country_code: "in", // Updated to 'in' for India region
     });
     products = res.products;
   } catch (error) {
