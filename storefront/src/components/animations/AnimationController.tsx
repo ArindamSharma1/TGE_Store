@@ -89,23 +89,30 @@ export default function AnimationController() {
                     });
                 });
 
-                // Recipe: Grid Stagger
-                const gridContainers = document.querySelectorAll('[data-animate="grid"]');
-                gridContainers.forEach((el) => {
-                    const children = el.children;
-                    gsap.from(children, {
-                        y: 40,
-                        opacity: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: el,
-                            start: "top 80%",
-                            toggleActions: "play none none reverse"
-                        }
+                // Recipe: Grid Stagger (Optimized with Batch)
+                // Selects all direct children of the grid container for batching
+                const gridItems = document.querySelectorAll('[data-animate="grid"] > *');
+
+                if (gridItems.length > 0) {
+                    ScrollTrigger.batch(gridItems, {
+                        onEnter: (batch) => {
+                            gsap.fromTo(batch,
+                                { y: 20, opacity: 0 },
+                                {
+                                    y: 0,
+                                    opacity: 1,
+                                    duration: 0.6,
+                                    stagger: 0.1,
+                                    ease: "power2.out",
+                                    overwrite: true,
+                                    force3D: true
+                                }
+                            );
+                        },
+                        start: "top 90%",
+                        once: true // Only animate once for better performance
                     });
-                });
+                }
 
                 // Recipe: Button Micro-interactions
                 const buttons = document.querySelectorAll('[data-animate="button"]');
