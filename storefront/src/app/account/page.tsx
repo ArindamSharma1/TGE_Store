@@ -42,51 +42,41 @@ export default function AccountPage() {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                // 1. Fetch Base Customer
-                // medusaFetch handles credentials: "include" and valid headers
+                // Simplified strict check: /store/customers/me
+                // If 401/400, redirect. Do not throw.
                 const customerRes = await medusaFetch("/store/customers/me", { cache: "no-store" });
 
-                if (customerRes.status === 401) {
-                    throw new Error("Unauthorized");
+                if (customerRes.status === 401 || customerRes.status === 400) {
+                    // Not authenticated or missing context -> Login
+                    // window.location.href = "/login"; // Force reload to clear state
+                    router.push("/login"); // router.push is smoother if state allows
+                    return;
                 }
 
                 if (!customerRes.ok) {
-                    const errBody = await customerRes.text();
-                    console.error("Fetch Customer Failed:", customerRes.status, errBody);
-                    throw new Error(`Failed to fetch customer: ${customerRes.status} ${errBody}`);
+                    console.error("Account fetch failed with status:", customerRes.status);
+                    // Optional: toast error?
+                    return;
                 }
 
                 const customerResponseBody = await customerRes.json();
                 const baseCustomer = customerResponseBody.customer;
 
-                // Initialize customer object with base data
                 let finalCustomerData = { ...baseCustomer };
                 let ordersData: any[] = [];
 
-                // 2. Fetch Addresses Separately
-                try {
-                    const addressRes = await medusaFetch("/store/customers/me/addresses", { cache: "no-store" });
-                    if (addressRes.ok) {
-                        const addrData = await addressRes.json();
-                        finalCustomerData.shipping_addresses = addrData.addresses || [];
-                    } else {
-                        finalCustomerData.shipping_addresses = [];
-                    }
-                } catch (e) {
-                    console.warn("Failed to fetch addresses separate", e);
-                    finalCustomerData.shipping_addresses = [];
+                // Fetch Addresses
+                const addressRes = await medusaFetch("/store/customers/me/addresses", { cache: "no-store" });
+                if (addressRes.ok) {
+                    const addrData = await addressRes.json();
+                    finalCustomerData.shipping_addresses = addrData.addresses || [];
                 }
 
-                // 3. Fetch Orders Separately
-                try {
-                    // Use medusaFetch to ensure cookies are sent
-                    const ordersRes = await medusaFetch("/store/orders?limit=10&offset=0&fields=items,items.variant,items.variant.product", { cache: "no-store" });
-                    if (ordersRes.ok) {
-                        const oData = await ordersRes.json();
-                        ordersData = oData.orders || [];
-                    }
-                } catch (err) {
-                    console.warn("Failed to fetch orders separate", err);
+                // Fetch Orders
+                const ordersRes = await medusaFetch("/store/orders?limit=10&offset=0&fields=items,items.variant,items.variant.product", { cache: "no-store" });
+                if (ordersRes.ok) {
+                    const oData = await ordersRes.json();
+                    ordersData = oData.orders || [];
                 }
 
                 setCustomer(finalCustomerData);
@@ -97,16 +87,8 @@ export default function AccountPage() {
                 });
                 setOrders(ordersData);
 
-            } catch (error: any) {
-                // Only log real errors, 401 is expected redirect
-                if (error.message !== "Unauthorized") {
-                    console.error("Auth check failed:", error);
-                }
-
-                if (error.message === "Unauthorized") {
-                    localStorage.removeItem("medusa_auth_token");
-                    router.replace("/login");
-                }
+            } catch (error) {
+                console.error("Auth check internal error", error);
             } finally {
                 setIsLoading(false);
             }

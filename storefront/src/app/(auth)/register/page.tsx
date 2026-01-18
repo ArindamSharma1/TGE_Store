@@ -39,18 +39,9 @@ export default function RegisterPage() {
         let hasError = false;
         const newErrors = { name: "", email: "", password: "", general: "" };
 
-        if (!name) {
-            newErrors.name = "Full Name is required";
-            hasError = true;
-        }
-        if (!email) {
-            newErrors.email = "Email is required";
-            hasError = true;
-        }
-        if (!password || password.length < 8) {
-            newErrors.password = "Password must be at least 8 characters";
-            hasError = true;
-        }
+        if (!name) { newErrors.name = "Full Name is required"; hasError = true; }
+        if (!email) { newErrors.email = "Email is required"; hasError = true; }
+        if (!password || password.length < 8) { newErrors.password = "Password must be at least 8 characters"; hasError = true; }
 
         if (hasError) {
             setErrors(newErrors);
@@ -62,80 +53,41 @@ export default function RegisterPage() {
             const firstName = name.split(" ")[0];
             const lastName = name.split(" ").slice(1).join(" ") || "";
 
-            // 1. Create Auth Identity (Directly via Medusa Auth API)
-            // We bypass the Next.js Proxy to ensure headers/cookies are handled natively by the browser
-            const createRes = await medusaFetch("/auth/customer/emailpass/register", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+            // 1. Create Customer via Server Proxy (avoids mixed content/CORS issues for creation)
+            const createRes = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email,
                     password,
                     first_name: firstName,
                     last_name: lastName,
-                }),
+                })
             });
 
+            const createData = await createRes.json();
+
             if (!createRes.ok) {
-                let err = {};
-                const textBody = await createRes.text();
-                try {
-                    err = JSON.parse(textBody);
-                } catch (e) {
-                    err = { message: textBody || "No response body" };
-                }
-                console.error("Registration Error (Status " + createRes.status + "):", err);
-                throw new Error(err.message || "Registration failed");
+                throw new Error(createData.message || "Registration failed");
             }
 
-            // 2. Login immediately to establish Session (Cookie)
-            try {
-                const loginRes = await medusaFetch("/auth/customer/emailpass", {
-                    method: "POST",
-                    body: JSON.stringify({ email, password }),
-                    cache: "no-store"
-                });
+            // 2. Login immediately on CLIENT to establish Session Cookie (connect.sid)
+            const loginRes = await medusaFetch("/auth/customer/emailpass", {
+                method: "POST",
+                body: JSON.stringify({ email, password }),
+            });
 
-                if (!loginRes.ok) {
-                    console.warn("Auto-login failed after registration");
-                    window.location.href = "/login?registered=true";
-                    return;
-                }
-
-                const loginData = await loginRes.json();
-                if (loginData.token) {
-                    localStorage.setItem("medusa_auth_token", loginData.token);
-                }
-
-                // 3. Verify Store Binding (Polling)
-                // The subscriber is async, so we might need to wait a moment for the Customer to be created
-                let meRes = await medusaFetch("/store/customers/me", { cache: "no-store" });
-                let retries = 0;
-                while (!meRes.ok && retries < 3) {
-                    console.log(`Waiting for customer creation... (${retries + 1}/3)`);
-                    await new Promise(r => setTimeout(r, 1000)); // Wait 1s
-                    meRes = await medusaFetch("/store/customers/me", { cache: "no-store" });
-                    retries++;
-                }
-
-                if (!meRes.ok) {
-                    console.error("Critical: Customer entity missing after retries.", await meRes.text());
-                    // Fallback: Still redirect, but warn
-                } else {
-                    console.log("Registration & Customer Binding Confirmed!");
-                }
-
-                toast.success("Account created successfully!", {
-                    description: "You have been signed in."
-                });
-
-                window.location.href = "/account";
-
-            } catch (loginError) {
-                console.error("Auto-login error", loginError);
-                window.location.href = "/login?registered=true";
+            if (!loginRes.ok) {
+                throw new Error("Account created, but auto-login failed. Please sign in manually.");
             }
+
+            // 3. Success
+            toast.success("Account created successfully!", {
+                description: "You have been signed in."
+            });
+
+            // Force reload/navigation to Account
+            window.location.href = "/account";
 
         } catch (error: any) {
             console.error("Registration Logic Error:", error);
