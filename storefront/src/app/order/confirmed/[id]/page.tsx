@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { medusaClient } from "@/lib/medusa/client";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
-import { CheckCircle, Loader2, ShoppingBag } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
 import { useParams } from "next/navigation";
 
 export default function OrderConfirmedPage() {
@@ -13,21 +12,17 @@ export default function OrderConfirmedPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchOrder = async () => {
-            // In a real app, you might want to protect this or just rely on the ID being hard to guess
-            // For simplicity, we just fetch it.
-            if (params.id) {
-                try {
-                    const { order } = await medusaClient.store.orders.retrieve(params.id as string);
-                    setOrder(order);
-                } catch (e) {
-                    console.error("Failed to fetch order", e);
-                } finally {
-                    setLoading(false);
-                }
-            }
-        };
-        fetchOrder();
+        // Stub: Emulate successful load or display static success
+        setTimeout(() => {
+            // Mock Order for display
+            setOrder({
+                display_id: params.id || "1001",
+                created_at: new Date().toISOString(),
+                email: "demo@tge.store",
+                total: 0 // Mock
+            });
+            setLoading(false);
+        }, 1000);
     }, [params.id]);
 
     if (loading) {
@@ -42,7 +37,6 @@ export default function OrderConfirmedPage() {
         return (
             <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center p-4 text-center">
                 <h1 className="text-2xl font-bold text-zinc-900 mb-4">Order Not Found</h1>
-                <p className="text-zinc-500 mb-8">We couldn't locate the order you're looking for.</p>
                 <Button asChild size="lg" className="rounded-full">
                     <Link href="/">Return Home</Link>
                 </Button>
@@ -79,23 +73,10 @@ export default function OrderConfirmedPage() {
                             <span className="text-zinc-500">Email</span>
                             <span className="font-medium text-zinc-900">{order.email}</span>
                         </div>
-                        <div className="flex justify-between border-t border-zinc-200 pt-3 mt-3">
-                            <span className="text-zinc-900 font-bold">Total</span>
-                            <span className="font-bold text-zinc-900">
-                                {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(order.total / 100)}
-                            </span>
-                        </div>
                     </div>
                 </div>
 
-                <p className="text-sm text-zinc-400 mb-8">
-                    We've sent a confirmation email to {order.email} with your order details and tracking info.
-                </p>
-
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Button asChild variant="outline" size="lg" className="rounded-full h-14 font-bold border-zinc-200">
-                        <Link href="/account">View Order History</Link>
-                    </Button>
                     <Button asChild size="lg" className="rounded-full h-14 px-8 font-bold bg-zinc-900 text-white">
                         <Link href="/collections/all">Continue Shopping</Link>
                     </Button>
@@ -104,3 +85,4 @@ export default function OrderConfirmedPage() {
         </div>
     );
 }
+

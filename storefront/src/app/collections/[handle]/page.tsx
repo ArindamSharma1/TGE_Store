@@ -3,7 +3,8 @@ import { CollectionHeader } from "@/components/modules/CollectionHeader";
 import { FilterBar } from "@/components/modules/FilterBar";
 import { ProductGrid } from "@/components/modules/ProductGrid";
 import { Button } from "@/components/ui/Button";
-import { medusaClient } from "@/lib/medusa/client";
+import { shopifyFetch } from "@/lib/shopify";
+import { getCollectionProductsQuery, getProductsQuery } from "@/lib/shopify/queries";
 
 interface CollectionPageProps {
     params: Promise<{
@@ -14,60 +15,74 @@ interface CollectionPageProps {
 export default async function CollectionPage({ params }: CollectionPageProps) {
     const { handle } = await params;
 
-    // Helper: Map Medusa Product to UI Product
-    const mapProduct = (p: any) => {
-        // Fallback price logic still useful for initial SSR, but ProductCard will refine it
-        const lowestPrice = p.variants?.[0]?.calculated_price?.calculated_amount ||
-            p.variants?.[0]?.prices?.[0]?.amount || 0;
-
-        return {
-            id: p.id,
-            title: p.title,
-            price: lowestPrice / 100, // Medusa stores in cents
-            handle: p.handle,
-            images: {
-                main: p.thumbnail || "",
-                // Fallback to second image if available, else thumbnail
-                hover: p.images?.[1]?.url || p.images?.[0]?.url || p.thumbnail || ""
-            },
-            variants: p.variants // Pass variants
-        };
-    };
-
-    let products = [];
+    let products: any[] = [];
     let collectionTitle = "All Products";
     let collectionCount = 0;
 
     try {
         if (handle === "all") {
-            const { products: fetchedProducts, count } = await medusaClient.store.product.list({
-                fields: "+variants.prices,+variants.calculated_price,+images,+thumbnail",
-                limit: 50 // Initial limit
-            });
-            products = fetchedProducts.map(mapProduct);
-            collectionCount = count;
-        } else {
-            // 1. Get Collection ID by Handle
-            // Medusa V2: List collections and filter by handle
-            const { collections } = await medusaClient.store.collection.list({
-                handle: handle,
-                limit: 1
+            // Fetch All Products directly
+            const { products: fetchedProducts } = await shopifyFetch<{ products: any[] }>({
+                query: getProductsQuery,
+                variables: {
+                    query: "" // Empty query fetches all
+                }
             });
 
-            const collection = collections[0];
+            // Mapping
+            products = fetchedProducts.edges.map((item: any) => {
+                const p = item.node;
+                const thumbnail = p.featuredImage?.url || p.images?.edges?.[0]?.node?.url;
+                const hoverImage = p.images?.edges?.[1]?.node?.url || thumbnail;
+                const price = parseFloat(p.priceRange?.minVariantPrice?.amount || "0");
+
+                return {
+                    id: p.id,
+                    title: p.title,
+                    price: price,
+                    currencyCode: p.priceRange?.minVariantPrice?.currencyCode || "INR",
+                    handle: p.handle,
+                    thumbnail: thumbnail,
+                    images: { main: thumbnail, hover: hoverImage },
+                    defaultVariantId: p.variants?.edges?.[0]?.node?.id,
+                    variants: p.variants?.edges?.map((e: any) => e.node) || []
+                };
+            });
+            collectionCount = products.length; // Approximate for now
+
+        } else {
+            // Fetch Collection by Handle
+            const res = await shopifyFetch<any>({
+                query: getCollectionProductsQuery,
+                variables: {
+                    handle: handle
+                }
+            });
+
+            const collection = res?.collection;
 
             if (collection) {
                 collectionTitle = collection.title;
 
-                // 2. Get Products for this Collection
-                const { products: fetchedProducts, count } = await medusaClient.store.product.list({
-                    collection_id: collection.id,
-                    fields: "+variants.prices,+variants.calculated_price,+images,+thumbnail",
-                    limit: 50
-                });
+                products = collection.products.edges.map((item: any) => {
+                    const p = item.node;
+                    const thumbnail = p.featuredImage?.url || p.images?.edges?.[0]?.node?.url;
+                    const hoverImage = p.images?.edges?.[1]?.node?.url || thumbnail;
+                    const price = parseFloat(p.priceRange?.minVariantPrice?.amount || "0");
 
-                products = fetchedProducts.map(mapProduct);
-                collectionCount = count;
+                    return {
+                        id: p.id,
+                        title: p.title,
+                        price: price,
+                        currencyCode: p.priceRange?.minVariantPrice?.currencyCode || "INR",
+                        handle: p.handle,
+                        thumbnail: thumbnail,
+                        images: { main: thumbnail, hover: hoverImage },
+                        defaultVariantId: p.variants?.edges?.[0]?.node?.id,
+                        variants: p.variants?.edges?.map((e: any) => e.node) || []
+                    };
+                });
+                collectionCount = products.length;
             } else {
                 collectionTitle = "Collection Not Found";
             }
@@ -104,23 +119,10 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
                             <p className="text-sm text-zinc-400 mt-2">Try checking back later!</p>
                         </div>
                     )}
-
-                    {/* Load More (Hidden if no more products - for now static check) */}
-                    {collectionCount > 50 && (
-                        <div className="mt-20 flex flex-col items-center gap-4">
-                            <span className="text-xs text-zinc-400 font-medium">Showing {products.length} of {collectionCount} products</span>
-                            <div className="w-48 h-1 bg-zinc-200 rounded-full overflow-hidden">
-                                <div className="w-1/4 h-full bg-zinc-900 rounded-full"></div>
-                            </div>
-                            <Button variant="outline" size="lg" className="rounded-full px-8 mt-2">
-                                Load More
-                            </Button>
-                        </div>
-                    )}
-
                 </div>
             </main>
 
         </div>
     );
 }
+

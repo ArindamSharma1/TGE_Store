@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
-import { medusaClient } from "@/lib/medusa/client";
 
 // Define a simpler WishlistItem to store in local storage
 // We only really need the ID to fetch details, but storing minimal data helps immediate UI

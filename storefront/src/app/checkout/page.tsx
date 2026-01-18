@@ -4,11 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/Button";
-import { ChevronRight, ChevronDown, Lock, ShoppingBag, Loader2 } from "lucide-react";
+import { ChevronRight, ShoppingBag, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { medusaFetch } from "@/lib/medusa/fetch";
 import { cn } from "@/lib/utils/cn";
-import { medusaClient } from "@/lib/medusa/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 // import useRazorpay from "react-razorpay";
@@ -36,33 +34,9 @@ export default function CheckoutPage() {
         phone: ""
     });
 
-    const [paymentSession, setPaymentSession] = useState<any>(null);
-
     // Initial Load - Check for Session
     useEffect(() => {
-        const init = async () => {
-            // 1. Get Customer to prefill email (Manual Fetch for Auth)
-            try {
-                const res = await medusaFetch("/store/customers/me", { cache: "no-store" });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    const customer = data.customer;
-                    if (customer) {
-                        setEmail(customer.email);
-                        setAddress(prev => ({
-                            ...prev,
-                            first_name: customer.first_name || "",
-                            last_name: customer.last_name || "",
-                            phone: customer.phone || ""
-                        }));
-                    }
-                }
-            } catch (e) {
-                console.warn("Failed to pre-fill customer checkout data", e);
-            }
-        };
-        init();
+        // Placeholder auth check
     }, []);
 
     const currency = "INR";
@@ -83,13 +57,10 @@ export default function CheckoutPage() {
         e.preventDefault();
         setIsLoading(true);
         try {
-            await medusaClient.store.cart.update(cartId, {
-                email: email
-            });
+            // Stubbed
             setStep(2);
         } catch (error) {
             console.error(error);
-            toast.error("Failed to update email.");
         } finally {
             setIsLoading(false);
         }
@@ -107,46 +78,10 @@ export default function CheckoutPage() {
         }
 
         try {
-            // 1. Add Shipping Address
-            await medusaClient.store.cart.update(cartId, {
-                shipping_address: {
-                    ...address,
-                    company: "", // optional
-                    province: address.state, // mapped
-                    metadata: {}
-                }
-            });
-
-            // 2. Initialize Payment Sessions (Required before payment step)
-            // 2. Initialize Payment Collection (Direct Fetch to bypass SDK issues)
-            const pcRes = await medusaFetch("/store/payment-collections", {
-                method: "POST",
-                body: JSON.stringify({ cart_id: cartId }),
-            });
-
-            if (pcRes.ok) {
-                const { payment_collection } = await pcRes.json();
-
-                // Initialize 'pp_system_default' session (System Payment)
-                const sessRes = await medusaFetch(`/store/payment-collections/${payment_collection.id}/payment-sessions`, {
-                    method: "POST",
-                    body: JSON.stringify({ provider_id: "pp_system_default" }),
-                });
-
-                if (!sessRes.ok) {
-                    console.error("Failed to init payment session", await sessRes.text());
-                    // Fallback: Try 'manual' just in case
-                    await medusaFetch(`/store/payment-collections/${payment_collection.id}/payment-sessions`, {
-                        method: "POST",
-                        body: JSON.stringify({ provider_id: "manual" }),
-                    });
-                }
-            }
-
+            // Stubbed
             setStep(3);
         } catch (error: any) {
             console.error(error);
-            toast.error("Failed to proceed. " + (error?.message || ""));
         } finally {
             setIsLoading(false);
         }
@@ -155,28 +90,10 @@ export default function CheckoutPage() {
     const handleCompleteOrder = async () => {
         setIsLoading(true);
         try {
-            // Complete the cart (Direct Fetch to bypass SDK validation)
-            const res = await medusaFetch(`/store/carts/${cartId}/complete`, {
-                method: "POST",
-                body: JSON.stringify({}),
-            });
-
-            if (res.ok) {
-                const { type, data } = await res.json();
-                if (type === "order" && data) {
-                    // Success!
-                    localStorage.removeItem("medusa_cart_id");
-                    router.push(`/order/confirmed/${data.id}`);
-                } else {
-                    toast.error("Order incomplete. Please check details.");
-                }
-            } else {
-                const errData = await res.json();
-                throw new Error(errData.message || "Server Error");
-            }
+            toast.info("Checkout disabled during migration.");
         } catch (error: any) {
             console.error(error);
-            toast.error("Failed to place order. " + (error?.message || ""));
+            toast.error("Failed to place order.");
         } finally {
             setIsLoading(false);
         }
