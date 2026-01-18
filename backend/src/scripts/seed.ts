@@ -33,15 +33,33 @@ const client = axios.create({
   timeout: 20000,
 });
 
-async function ensureRegion() {
-  const { data } = await client.get("/admin/regions?limit=1");
-  if (data.regions && data.regions.length) return data.regions[0];
-  const res = await client.post("/admin/regions", {
-    name: "Seed Region",
-    currency_code: "USD",
-    countries: ["US"],
-  });
-  return res.data.region;
+interface Region {
+  id: string;
+  name: string;
+  currency_code: string;
+  countries: any[];
+  [key: string]: any;
+}
+
+async function ensureRegions() {
+  const { data } = await client.get("/admin/regions?limit=100");
+  const existingRegions = data.regions || [];
+
+  const regionsToCreate = [
+    { name: "India", currency_code: "inr", countries: ["in"] },
+  ];
+
+  const results: Region[] = [];
+  for (const reg of regionsToCreate) {
+    const match = existingRegions.find((r: any) => r.currency_code === reg.currency_code);
+    if (match) {
+      results.push(match);
+      continue;
+    }
+    const res = await client.post("/admin/regions", reg);
+    results.push(res.data.region);
+  }
+  return results[0]; // Return first as default for store
 }
 
 async function ensureStore(regionId: string) {
@@ -104,12 +122,20 @@ async function writeEnv(keyName: string, value: string) {
 (async function main() {
   try {
     console.log("Connected to", BASE);
-    const region = await ensureRegion();
-    console.log("Region ok:", region.id || region);
-    const store = await ensureStore(region.id);
-    console.log("Store ok:", store.id || store);
+
+    // 1. Ensure India
+    const { india } = await ensureRegions();
+
+    // 2. Update Store to use India (Critical before deleting others)
+    const store = await ensureStore(india.id);
+    console.log("Store updated:", store.id);
+
+    // 3. Delete others
+    await cleanupRegions(india.id);
+
     const channel = await ensureSalesChannel(store.id);
     console.log("Sales channel ok:", channel.id || channel);
+
     const pk = await createPublishableKey(channel.id);
     console.log("Publishable key created:", pk.token || pk.token || JSON.stringify(pk).slice(0, 40));
     // write MEDUSA_PUBLISHABLE_KEY to backend/.env.local
@@ -119,10 +145,22 @@ async function writeEnv(keyName: string, value: string) {
     } else {
       console.warn("Could not obtain token; check admin API permissions");
     }
+    // Verify Regions
+    console.log("\n----- Verifying Regions -----");
+    const { data: verifyData } = await client.get("/admin/regions?limit=100");
+    verifyData.regions?.forEach((r: any) => {
+      console.log(`Region: ${r.name} (${r.currency_code}) - Countries: ${r.countries?.map((c: any) => c.iso_2).join(", ")}`);
+    });
+    console.log("-----------------------------");
+
     console.log("Seed complete.");
     process.exit(0);
   } catch (err: any) {
-    console.error("Seed failed:", err.response?.data || err.message || err);
+    if (axios.isAxiosError(err)) {
+      console.error("Seed failed (Axios):", err.response?.status, err.response?.data);
+    } else {
+      console.error("Seed failed:", err.message, err);
+    }
     process.exit(1);
   }
 })();
