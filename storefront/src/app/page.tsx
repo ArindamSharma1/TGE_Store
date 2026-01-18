@@ -8,30 +8,25 @@ import { Reveal } from "@/components/animations/Reveal";
 import { Newsletter } from "@/components/modules/Newsletter";
 import { WhyTGE } from "@/components/modules/WhyTGE";
 import { NeedHelp } from "@/components/modules/NeedHelp";
-import { medusaClient } from "@/lib/medusa/client";
+import { shopifyFetch } from "@/lib/shopify";
+import { getProductsQuery } from "@/lib/shopify/queries";
 
 // Revalidate every hour
 export const revalidate = 3600;
 
-interface Product {
-  id: string;
-  title: string;
-  handle: string;
-  thumbnail?: string;
-  images?: { url: string }[];
-  variants: any[];
-}
-
 export default async function Home() {
-  let products: Product[] = [];
+  let products = [];
+
   try {
-    // 1. Fetch Products directly (Server Side)
-    const res = await medusaClient.store.product.list({
-      limit: 8,
-      fields: "+variants.prices,+variants.calculated_price,+images,+thumbnail",
-      country_code: "in", // Updated to 'in' for India region
+    const { body } = await shopifyFetch<{ data: { products: { edges: any[] } } }>({
+      query: getProductsQuery,
+      variables: {
+        sortKey: 'CREATED_AT',
+        reverse: true
+      }
     });
-    products = res.products;
+
+    products = body.data.products.edges.map((edge) => edge.node);
   } catch (error) {
     console.error("Failed to fetch home products:", error);
   }
@@ -147,22 +142,24 @@ export default async function Home() {
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-12">
-            {products.map((product) => {
-              const thumbnail = product.thumbnail || "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop";
-              const hoverImage = product.images?.[1]?.url || thumbnail;
+            {products.map((product: any) => {
+              const thumbnail = product.featuredImage?.url || product.images?.edges?.[0]?.node?.url;
+              const hoverImage = product.images?.edges?.[1]?.node?.url || thumbnail;
+              const price = parseFloat(product.priceRange?.minVariantPrice?.amount || "0");
+              const currencyCode = product.priceRange?.minVariantPrice?.currencyCode || "INR";
 
               return (
                 <ProductCard
                   key={product.id}
                   id={product.id}
                   title={product.title}
-                  price={0} // Let ProductCard resolve from variants
-                  currencyCode={"INR"}
+                  price={price}
+                  currencyCode={currencyCode}
                   handle={product.handle}
                   thumbnail={thumbnail}
                   images={{ main: thumbnail, hover: hoverImage }}
-                  defaultVariantId={product.variants[0]?.id}
-                  variants={product.variants}
+                  defaultVariantId={product.variants?.edges?.[0]?.node?.id}
+                  variants={product.variants?.edges?.map((e: any) => e.node) || []}
                 />
               );
             })}
