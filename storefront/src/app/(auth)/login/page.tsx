@@ -8,25 +8,56 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { shopifyFetch } from "@/lib/shopify";
+import { createCustomerAccessTokenMutation } from "@/lib/shopify/mutations";
 
 export default function LoginPage() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [errors, setErrors] = useState({
-        email: "",
-        password: "",
-        general: ""
-    });
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLoading(true);
-        // Temporary Stub
-        setTimeout(() => {
-            toast.info("Authentication is being migrated to Shopify.");
+
+        const formData = new FormData(e.currentTarget);
+        const email = formData.get("email") as string;
+        const password = formData.get("password") as string;
+
+        try {
+            const res = await shopifyFetch<any>({
+                query: createCustomerAccessTokenMutation,
+                variables: {
+                    input: {
+                        email,
+                        password,
+                    },
+                },
+                cache: 'no-store'
+            });
+
+            const { customerAccessToken, customerUserErrors } = res?.customerAccessTokenCreate || {};
+
+            if (customerUserErrors && customerUserErrors.length > 0) {
+                toast.error(customerUserErrors[0].message);
+                return;
+            }
+
+            if (customerAccessToken?.accessToken) {
+                localStorage.setItem("shopify_customer_token", customerAccessToken.accessToken);
+                toast.success("Welcome back!");
+                // Force reload to update Header and avoid Router hang
+                window.location.href = "/account";
+            } else {
+                toast.error("Invalid credentials.");
+            }
+
+        } catch (error) {
+            console.error("Login failed", error);
+            toast.error("Something went wrong. Please try again.");
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
 
     return (
@@ -54,6 +85,7 @@ export default function LoginPage() {
                             "h-12 rounded-lg border-white/10 bg-white/5 text-white placeholder:text-zinc-500 focus:border-white/20 focus:bg-white/10 transition-all"
                         )}
                         disabled={isLoading}
+                        required
                     />
                 </div>
 
@@ -76,6 +108,7 @@ export default function LoginPage() {
                                 "h-12 rounded-lg border-white/10 bg-white/5 text-white placeholder:text-zinc-500 pr-10 focus:border-white/20 focus:bg-white/10 transition-all"
                             )}
                             disabled={isLoading}
+                            required
                         />
                         <button
                             type="button"

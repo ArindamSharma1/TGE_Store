@@ -30,7 +30,7 @@ export async function shopifyFetch<T>({
                 ...(variables && { variables }),
             }),
             cache,
-            next: { revalidate: 900 }, // 15 minutes
+            ...(cache !== 'no-store' && { next: { revalidate: 900 } }), // Only revalidate if caching is enabled
         });
 
         const body = await result.json();

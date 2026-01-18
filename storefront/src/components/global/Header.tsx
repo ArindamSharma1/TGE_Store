@@ -21,15 +21,21 @@ export function Header() {
     const [customer, setCustomer] = useState<any>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    // TODO: Implement Shopify Auth Check
-    /*
     useEffect(() => {
-        const checkAuth = async () => {
-             // Shopify implementation to go here
+        const checkAuth = () => {
+            const token = localStorage.getItem("shopify_customer_token");
+            if (token) {
+                setCustomer({ dummy: true }); // Just needs to be truthy to show Account link
+            } else {
+                setCustomer(null);
+            }
         };
         checkAuth();
+
+        // Listen for storage events to sync across tabs/components
+        window.addEventListener('storage', checkAuth);
+        return () => window.removeEventListener('storage', checkAuth);
     }, [pathname]);
-    */
 
     useEffect(() => {
         return scrollY.on("change", (latest) => {

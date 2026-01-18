@@ -2,34 +2,71 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { shopifyFetch } from "@/lib/shopify";
+import { createCustomerMutation } from "@/lib/shopify/mutations";
 
 export default function RegisterPage() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    const [errors, setErrors] = useState({
-        name: "",
-        email: "",
-        password: "",
-        general: ""
-    });
+    // Simple Error State
+    const [errors, setErrors] = useState<any>({});
 
     const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLoading(true);
-        // Temporary Stub
-        setTimeout(() => {
-            toast.info("Registration is being migrated to Shopify.");
+        setErrors({});
+
+        const formData = new FormData(e.currentTarget);
+        const name = formData.get("name") as string;
+        const email = formData.get("email") as string;
+        const password = formData.get("password") as string;
+
+        // Splitting name for firstName and lastName logic
+        const [firstName, ...rest] = name.split(" ");
+        const lastName = rest.join(" ") || "";
+
+        try {
+            const res = await shopifyFetch<any>({
+                query: createCustomerMutation,
+                variables: {
+                    input: {
+                        firstName,
+                        lastName,
+                        email,
+                        password
+                    }
+                },
+                cache: 'no-store'
+            });
+
+            const { customer, customerUserErrors } = res?.customerCreate || {};
+
+            if (customerUserErrors && customerUserErrors.length > 0) {
+                toast.error(customerUserErrors[0].message);
+                return;
+            }
+
+            if (customer?.id) {
+                toast.success("Account created successfully. Please sign in.");
+                router.push("/login");
+            } else {
+                toast.error("Failed to create account. Please try again.");
+            }
+
+        } catch (error) {
+            console.error("Registration failed", error);
+            toast.error("Something went wrong.");
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
 
     return (
@@ -58,8 +95,8 @@ export default function RegisterPage() {
                             errors.name && "border-red-500/50 focus:border-red-500"
                         )}
                         disabled={isLoading}
+                        required
                     />
-                    {errors.name && <p className="text-xs text-red-400 font-medium">{errors.name}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -76,8 +113,8 @@ export default function RegisterPage() {
                             errors.email && "border-red-500/50 focus:border-red-500"
                         )}
                         disabled={isLoading}
+                        required
                     />
-                    {errors.email && <p className="text-xs text-red-400 font-medium">{errors.email}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -95,6 +132,7 @@ export default function RegisterPage() {
                                 errors.password && "border-red-500/50 focus:border-red-500"
                             )}
                             disabled={isLoading}
+                            required
                         />
                         <button
                             type="button"
