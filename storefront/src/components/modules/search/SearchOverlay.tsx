@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Search as SearchIcon, ChevronRight, ArrowRight } from "lucide-react";
+import { X, Search as SearchIcon, ChevronRight, ArrowRight, Loader2 } from "lucide-react";
 import { useSearch } from "@/context/SearchContext";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils/cn";
