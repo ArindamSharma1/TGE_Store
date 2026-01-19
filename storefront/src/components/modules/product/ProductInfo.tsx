@@ -121,13 +121,16 @@ export function ProductInfo({ title, description, options = [], image, handle, v
                 <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-zinc-900 leading-[0.9]">
                     {title}
                 </h1>
-                <div className="flex items-center gap-4">
-                    <p className="text-2xl font-medium text-zinc-900">{resolvedPrice || "Price Unavailable"}</p>
-                    {isOutOfStock && (
-                        <span className="px-3 py-1 bg-zinc-100 text-zinc-500 text-xs font-bold uppercase rounded-full">
-                            Sold Out
-                        </span>
-                    )}
+                <div className="flex flex-col items-start gap-1">
+                    <div className="flex items-center gap-4">
+                        <p className="text-2xl font-medium text-zinc-900">{resolvedPrice || "Price Unavailable"}</p>
+                        {isOutOfStock && (
+                            <span className="px-3 py-1 bg-zinc-100 text-zinc-500 text-xs font-bold uppercase rounded-full">
+                                Sold Out
+                            </span>
+                        )}
+                    </div>
+                    <p className="text-xs text-zinc-400 font-medium uppercase tracking-wide">Inclusive of all taxes</p>
                 </div>
             </div>
 
