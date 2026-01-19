@@ -88,10 +88,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 if (!node || !node.merchandise) return null;
 
                 const merchandise = node.merchandise;
-                const quantity = node.quantity || 0;
-
-                // Safety check: Filter out invalid quantities early to avoid math errors
-                if (quantity <= 0) return null;
+                const quantity = node.quantity || 1; // Default to 1 if missing
 
                 let unitPrice = 0;
                 if (node.cost?.totalAmount?.amount) {
