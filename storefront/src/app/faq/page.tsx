@@ -28,7 +28,7 @@ export default function FAQPage() {
                     />
                     <FAQItem
                         question="What is your return policy?"
-                        answer="We accept returns within 30 days of delivery. Items must be unworn, unwashed, and in their original packaging with tags attached."
+                        answer="We accept returns within 30 days of delivery. Items must be unworn, unwashed and with tags attached."
                     />
                     <FAQItem
                         question="Do you ship internationally?"
@@ -40,7 +40,7 @@ export default function FAQPage() {
                     />
                     <FAQItem
                         question="Where are your clothes sourced?"
-                        answer="We are a proud 100% Indian brand. We do not manufacture in-house; instead, we source premium surplus and factory-direct inventory from top manufacturers across India. This allows us to offer high-quality garments at exceptional value."
+                        answer="We are a proud 100% Indian brand. We do not manufacture in-house; instead, we source premium surplus and factory-direct inventory from top manufacturers across India and International. This allows us to offer high-quality garments at exceptional value."
                     />
                 </div>
             </div>
