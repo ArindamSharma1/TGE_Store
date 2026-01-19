@@ -3,13 +3,13 @@
 @theme {
   --font-sans: var(--font-inter);
 
-  --color-background: #FAFAFA;
-  /* zinc-50 */
+  --color-background: #F5F5F7;
+  /* Soft Smoke White (Premium/Apple-like) */
   --color-foreground: #09090B;
   /* zinc-950 */
 
-  --color-zinc-50: #FAFAFA;
-  --color-zinc-100: #F4F4F5;
+  --color-zinc-50: #F5F5F7;
+  --color-zinc-100: #EBEBEF;
   --color-zinc-200: #E4E4E7;
   --color-zinc-300: #D4D4D8;
   --color-zinc-400: #A1A1AA;

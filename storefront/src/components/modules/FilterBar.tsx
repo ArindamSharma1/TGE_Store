@@ -82,11 +82,11 @@ export function FilterBar() {
             <div className="relative shrink-0" ref={sortRef}>
                 <button
                     onClick={() => setIsSortOpen(!isSortOpen)}
-                    className="flex items-center gap-2 text-sm font-medium text-zinc-900 hover:text-zinc-600 transition-colors"
+                    className="flex items-center gap-2 h-10 px-5 bg-white border border-zinc-200 rounded-full text-sm font-medium text-zinc-900 hover:border-zinc-300 transition-colors shadow-sm"
                 >
-                    <span className="uppercase tracking-wide text-xs">Sort:</span>
-                    <span className="underline decoration-zinc-300 underline-offset-4">{activeLabel}</span>
-                    <ChevronDown className={cn("w-4 h-4 transition-transform", isSortOpen && "rotate-180")} />
+                    <span className="text-zinc-500">Sort by:</span>
+                    <span>{activeLabel}</span>
+                    <ChevronDown className={cn("w-4 h-4 text-zinc-400 transition-transform ml-1", isSortOpen && "rotate-180")} />
                 </button>
 
                 {/* Dropdown Menu */}

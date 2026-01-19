@@ -24,11 +24,6 @@ export function CollectionHeader({ title, description, count }: CollectionHeader
             </div>
 
             <div className="flex items-center gap-3">
-                <Button variant="outline" className="rounded-full border-zinc-200 gap-2 px-5 group">
-                    <span className="text-sm font-medium">Sort by: Recommended</span>
-                    <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
-                </Button>
-
                 <Button variant="outline" size="icon" className="rounded-full border-zinc-200 w-10 h-10 md:hidden">
                     <SlidersHorizontal className="w-4 h-4" />
                 </Button>

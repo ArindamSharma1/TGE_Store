@@ -70,7 +70,7 @@ export function SearchOverlay() {
             }
         };
 
-        const debounce = setTimeout(fetchResults, 300);
+        const debounce = setTimeout(fetchResults, 200);
         return () => clearTimeout(debounce);
     }, [query]);
 
@@ -102,7 +102,13 @@ export function SearchOverlay() {
                             transition={{ delay: 0.1 }}
                             className="relative border-b-2 border-zinc-100 focus-within:border-zinc-900 transition-colors duration-300 pb-4 mb-12"
                         >
-                            <SearchIcon className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 text-zinc-300" />
+                            {isSearching ? (
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2">
+                                    <Loader2 className="w-8 h-8 text-zinc-900 animate-spin" />
+                                </div>
+                            ) : (
+                                <SearchIcon className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 text-zinc-300" />
+                            )}
                             <input
                                 ref={inputRef}
                                 type="text"

@@ -84,7 +84,8 @@ export default function AnimationController() {
                         scrollTrigger: {
                             trigger: el,
                             start: "top 85%",
-                            toggleActions: "play none none reverse"
+                            toggleActions: "play none none none", // Do not reverse
+                            once: true // Ensure it happens only once
                         }
                     });
                 });
