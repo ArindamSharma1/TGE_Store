@@ -8,10 +8,6 @@ import { getCollectionProductsQuery, getProductsQuery } from "@/lib/shopify/quer
 
 import { Metadata } from "next";
 
-// ... (imports remain)
-
-// ... imports
-
 interface CollectionPageProps {
     params: Promise<{
         handle: string;
@@ -19,7 +15,45 @@ interface CollectionPageProps {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-// Metadata generation... (omitted for brevity in replacement, focusing on component)
+export async function generateMetadata({ params }: CollectionPageProps): Promise<Metadata> {
+    const { handle } = await params;
+
+    if (handle === "all") {
+        return {
+            title: "All Products | TGE Store",
+            description: "Explore our complete collection of premium essentials. Dailywear redefined.",
+            openGraph: {
+                title: "All Products | TGE Store",
+                description: "Explore our complete collection of premium essentials. Dailywear redefined.",
+                type: "website"
+            }
+        };
+    }
+
+    const res = await shopifyFetch<any>({
+        query: getCollectionProductsQuery,
+        variables: { handle }
+    });
+
+    const collection = res?.collection;
+
+    if (!collection) {
+        return {
+            title: "Collection Not Found | TGE Store"
+        };
+    }
+
+    return {
+        title: `${collection.title} | TGE Store`,
+        description: collection.description || `Explore our ${collection.title} collection. Quality essentials for the modern wardrobe.`,
+        openGraph: {
+            title: `${collection.title} | TGE Store`,
+            description: collection.description || `Explore our ${collection.title} collection. Quality essentials for the modern wardrobe.`,
+            images: collection.image?.url ? [{ url: collection.image.url }] : [],
+            type: "website"
+        }
+    };
+}
 
 export default async function CollectionPage({ params, searchParams }: CollectionPageProps) {
     const { handle } = await params;
