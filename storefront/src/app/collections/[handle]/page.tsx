@@ -6,28 +6,61 @@ import { Button } from "@/components/ui/Button";
 import { shopifyFetch } from "@/lib/shopify";
 import { getCollectionProductsQuery, getProductsQuery } from "@/lib/shopify/queries";
 
+import { Metadata } from "next";
+
+// ... (imports remain)
+
+// ... imports
+
 interface CollectionPageProps {
     params: Promise<{
         handle: string;
-    }>
+    }>;
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default async function CollectionPage({ params }: CollectionPageProps) {
+// Metadata generation... (omitted for brevity in replacement, focusing on component)
+
+export default async function CollectionPage({ params, searchParams }: CollectionPageProps) {
     const { handle } = await params;
+    const { sort } = await searchParams;
+
+    // Helper to resolve Sort Key based on context (All vs Collection) and URL param
+    const getSortValues = (sortParam: string | undefined, isAllProducts: boolean) => {
+        switch (sortParam) {
+            case 'price-asc':
+                return { sortKey: 'PRICE', reverse: false };
+            case 'price-desc':
+                return { sortKey: 'PRICE', reverse: true };
+            case 'best-selling':
+                return { sortKey: 'BEST_SELLING', reverse: false };
+            case 'created-desc':
+            default:
+                return { sortKey: isAllProducts ? 'CREATED_AT' : 'CREATED', reverse: true };
+        }
+    };
+
+    const isAll = handle === "all";
+    const { sortKey, reverse } = getSortValues(sort as string, isAll);
 
     let products: any[] = [];
     let collectionTitle = "All Products";
+    let collectionDescription = "";
     let collectionCount = 0;
 
     try {
-        if (handle === "all") {
+        if (isAll) {
             // Fetch All Products directly
             const { products: fetchedProducts } = await shopifyFetch<{ products: { edges: any[] } }>({
                 query: getProductsQuery,
                 variables: {
-                    query: "" // Empty query fetches all
+                    query: "",
+                    sortKey,
+                    reverse
                 }
             });
+
+            collectionDescription = "Explore our complete collection of premium essentials. Dailywear redefined.";
 
             // Mapping
             products = fetchedProducts.edges.map((item: any) => {
@@ -55,7 +88,9 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
             const res = await shopifyFetch<any>({
                 query: getCollectionProductsQuery,
                 variables: {
-                    handle: handle
+                    handle: handle,
+                    sortKey,
+                    reverse
                 }
             });
 
@@ -63,6 +98,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
 
             if (collection) {
                 collectionTitle = collection.title;
+                collectionDescription = collection.description || `Explore our ${collection.title} collection. Quality essentials for the modern wardrobe.`;
 
                 products = collection.products.edges.map((item: any) => {
                     const p = item.node;
@@ -101,7 +137,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
                     {/* Header Section */}
                     <CollectionHeader
                         title={collectionTitle}
-                        description={`Explore our ${collectionTitle} collection. Quality essentials for the modern wardrobe.`}
+                        description={collectionDescription}
                         count={collectionCount}
                     />
 

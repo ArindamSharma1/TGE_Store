@@ -38,12 +38,17 @@ export const getCollectionsQuery = /* GraphQL */ `
 `;
 
 export const getCollectionProductsQuery = /* GraphQL */ `
-  query getCollectionProducts($handle: String!) {
+  query getCollectionProducts($handle: String!, $sortKey: ProductCollectionSortKeys, $reverse: Boolean) {
     collection(handle: $handle) {
       id
       title
+      description
+      image {
+        url
+        altText
+      }
       handle
-      products(first: 100, sortKey: CREATED, reverse: true) {
+      products(first: 100, sortKey: $sortKey, reverse: $reverse) {
         edges {
           node {
             ...product
