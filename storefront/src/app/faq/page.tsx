@@ -39,8 +39,8 @@ export default function FAQPage() {
                         answer="Orders can be modified or cancelled within 1 hour of placement. Please contact our support team immediately if you need to make changes."
                     />
                     <FAQItem
-                        question="Where are your clothes made?"
-                        answer="We work with ethically certified factories in India and Vietnam. We visit our partners regularly to ensure fair working conditions and high-quality production."
+                        question="Where are your clothes sourced?"
+                        answer="We are a proud 100% Indian brand. We do not manufacture in-house; instead, we source premium surplus and factory-direct inventory from top manufacturers across India. This allows us to offer high-quality garments at exceptional value."
                     />
                 </div>
             </div>
