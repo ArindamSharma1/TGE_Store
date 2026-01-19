@@ -6,13 +6,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             {/* Background Image */}
             <div className="absolute inset-0 z-0 h-full w-full">
                 <Image
-                    src="https://images.unsplash.com/photo-1464618663641-bbdd760ae84a?q=80&w=2560&auto=format&fit=crop"
+                    src="/auth-bg.png"
                     alt="Background"
                     fill
                     className="object-cover opacity-60"
                     priority
-                    quality={100}
-                    sizes="100vw"
+                    unoptimized // Bypass Next.js optimization to serve original file quality
                 />
             </div>
 
