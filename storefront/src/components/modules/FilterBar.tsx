@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils/cn";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
@@ -13,8 +13,17 @@ const SORT_OPTIONS = [
     { label: "Best Selling", value: "best-selling" },
 ];
 
+const CATEGORIES = [
+    { name: "All", href: "/collections/all" },
+    { name: "T-Shirts", href: "/collections/t-shirts" },
+    { name: "Jackets", href: "/collections/jackets" },
+    { name: "Pants", href: "/collections/pants" },
+    { name: "Accessories", href: "/collections/accessories" },
+];
+
 export function FilterBar() {
     const router = useRouter();
+    const pathname = usePathname();
     const searchParams = useSearchParams();
     const [isSortOpen, setIsSortOpen] = useState(false);
     const sortRef = useRef<HTMLDivElement>(null);
@@ -43,24 +52,29 @@ export function FilterBar() {
 
     return (
         <div className="w-full flex items-center justify-between gap-4">
-            {/* Left: Filter Categories (Visual / Future Navigation) */}
+            {/* Left: Filter Categories (Navigation) */}
             <div className="overflow-x-auto no-scrollbar flex-1 -mx-4 sm:mx-0">
                 <div className="flex items-center gap-2 px-4 sm:px-0 min-w-max">
                     <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 mr-2">Filters</span>
-                    {["All", "T-Shirts", "Jackets", "Pants"].map((cat) => (
-                        <Button
-                            key={cat}
-                            variant="ghost"
-                            className={cn(
-                                "rounded-full px-4 h-8 text-xs font-medium transition-all duration-300 border",
-                                cat === "All" // Placeholder active state philosophy
-                                    ? "bg-zinc-900 text-white border-zinc-900"
-                                    : "bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300 hover:text-zinc-900"
-                            )}
-                        >
-                            {cat}
-                        </Button>
-                    ))}
+                    {CATEGORIES.map((cat) => {
+                        const isActive = pathname === cat.href;
+                        return (
+                            <Button
+                                key={cat.name}
+                                asChild
+                                href={cat.href}
+                                variant="ghost"
+                                className={cn(
+                                    "rounded-full px-4 h-8 text-xs font-medium transition-all duration-300 border",
+                                    isActive
+                                        ? "bg-zinc-900 text-white border-zinc-900"
+                                        : "bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300 hover:text-zinc-900"
+                                )}
+                            >
+                                {cat.name}
+                            </Button>
+                        );
+                    })}
                 </div>
             </div>
 
