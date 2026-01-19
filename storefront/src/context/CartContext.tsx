@@ -77,24 +77,48 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     };
 
     const mapCartData = (cart: any) => {
-        const mappedItems: CartItem[] = cart.lines.edges.map((edge: any) => {
-            const node = edge.node;
-            const merchandise = node.merchandise;
-            return {
-                id: node.id,
-                variantId: merchandise.id,
-                merchandiseId: merchandise.id,
-                productTitle: merchandise.product.title,
-                variantTitle: merchandise.title === "Default Title" ? "" : merchandise.title,
-                price: parseFloat(node.cost.totalAmount.amount) / node.quantity, // Unit price
-                image: merchandise.product.featuredImage?.url || "",
-                quantity: node.quantity,
-                handle: merchandise.product.handle
-            };
-        });
+        if (!cart?.lines?.edges) {
+            setItems([]);
+            return;
+        }
+
+        const mappedItems: CartItem[] = cart.lines.edges
+            .map((edge: any) => {
+                const node = edge.node;
+                if (!node || !node.merchandise) return null;
+
+                const merchandise = node.merchandise;
+                const quantity = node.quantity || 0;
+
+                // Safety check: Filter out invalid quantities early to avoid math errors
+                if (quantity <= 0) return null;
+
+                let unitPrice = 0;
+                if (node.cost?.totalAmount?.amount) {
+                    const totalAmount = parseFloat(node.cost.totalAmount.amount);
+                    unitPrice = totalAmount / quantity;
+                }
+
+                return {
+                    id: node.id,
+                    variantId: merchandise.id,
+                    merchandiseId: merchandise.id,
+                    productTitle: merchandise.product?.title || "Unknown Product",
+                    variantTitle: merchandise.title === "Default Title" ? "" : merchandise.title,
+                    price: unitPrice || 0,
+                    image: merchandise.product?.featuredImage?.url || "",
+                    quantity: quantity,
+                    handle: merchandise.product?.handle || ""
+                };
+            })
+            .filter((item): item is CartItem => item !== null);
 
         setItems(mappedItems);
-        setSubtotal(parseFloat(cart.cost.subtotalAmount.amount));
+
+        if (cart.cost?.subtotalAmount?.amount) {
+            setSubtotal(parseFloat(cart.cost.subtotalAmount.amount));
+        }
+
         if (cart.checkoutUrl) {
             setCheckoutUrl(cart.checkoutUrl);
         }
