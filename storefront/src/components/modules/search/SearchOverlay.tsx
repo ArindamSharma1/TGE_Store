@@ -81,41 +81,49 @@ export function SearchOverlay() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="fixed inset-0 z-[60] bg-white/95 backdrop-blur-xl"
+                    transition={{ duration: 0.3 }}
+                    className="fixed inset-0 z-[60] bg-zinc-950/95 backdrop-blur-xl"
                 >
+                    {/* Noise Overlay */}
+                    <div
+                        className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-[0.05] z-0"
+                        style={{
+                            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.5'/%3E%3C/svg%3E")`
+                        }}
+                    />
+
                     {/* Header: Close Button */}
-                    <div className="absolute top-6 right-6 z-10">
+                    <div className="absolute top-6 right-6 z-20">
                         <div
                             onClick={closeSearch}
-                            className="p-2 rounded-full hover:bg-zinc-100 transition-colors cursor-pointer group"
+                            className="p-3 rounded-full hover:bg-white/10 transition-colors cursor-pointer group"
                         >
-                            <X className="w-8 h-8 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
+                            <X className="w-8 h-8 text-zinc-500 group-hover:text-white transition-colors" />
                         </div>
                     </div>
 
-                    <div className="w-full max-w-4xl mx-auto px-6 pt-32 h-full flex flex-col">
+                    <div className="w-full max-w-6xl mx-auto px-6 pt-32 h-full flex flex-col relative z-10">
                         {/* Search Input */}
                         <motion.div
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.1 }}
-                            className="relative border-b-2 border-zinc-100 focus-within:border-zinc-900 transition-colors duration-300 pb-4 mb-12"
+                            className="relative border-b border-white/10 focus-within:border-white/40 transition-colors duration-500 pb-8 mb-16"
                         >
                             {isSearching ? (
                                 <div className="absolute left-0 top-1/2 -translate-y-1/2">
-                                    <Loader2 className="w-8 h-8 text-zinc-900 animate-spin" />
+                                    <Loader2 className="w-10 h-10 text-white animate-spin" />
                                 </div>
                             ) : (
-                                <SearchIcon className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 text-zinc-300" />
+                                <SearchIcon className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 text-zinc-600" />
                             )}
                             <input
                                 ref={inputRef}
                                 type="text"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Search products..."
-                                className="w-full bg-transparent text-4xl md:text-5xl font-bold text-zinc-900 placeholder:text-zinc-200 outline-none pl-14"
+                                placeholder="SEARCH..."
+                                className="w-full bg-transparent text-6xl md:text-8xl font-black uppercase tracking-tighter text-white placeholder:text-zinc-800 outline-none pl-20"
                             />
                         </motion.div>
 
@@ -129,13 +137,13 @@ export function SearchOverlay() {
                                     animate={{ opacity: 1 }}
                                     transition={{ delay: 0.2 }}
                                 >
-                                    <p className="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-6">Trending Now</p>
-                                    <div className="flex flex-wrap gap-3 mb-12">
+                                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-8">Trending Searches</p>
+                                    <div className="flex flex-wrap gap-4 mb-16">
                                         {TRENDING_SEARCHES.map(term => (
                                             <button
                                                 key={term}
                                                 onClick={() => setQuery(term)}
-                                                className="px-6 py-3 rounded-full bg-zinc-50 border border-zinc-100 hover:border-zinc-900 hover:bg-white text-zinc-600 hover:text-zinc-900 transition-all text-sm font-medium"
+                                                className="px-8 py-4 rounded-full border border-white/5 bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all text-sm font-bold uppercase tracking-wide"
                                             >
                                                 {term}
                                             </button>

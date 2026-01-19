@@ -15,18 +15,6 @@ export default function AboutPage() {
                 </p>
             </section>
 
-            {/* 2. EDITORIAL IMAGE (FULL WIDTH) */}
-            <section className="mx-auto max-w-[95%] mb-24">
-                <div className="relative w-full h-[50vh] md:h-[70vh] rounded-[32px] overflow-hidden">
-                    <Image
-                        src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2000&auto=format&fit=crop"
-                        alt="TGE Editorial Campaign"
-                        fill
-                        className="object-cover"
-                        priority
-                    />
-                </div>
-            </section>
 
             {/* 3. MISSION TEXT (Reference Copy) */}
             <section className="mx-auto max-w-7xl px-4 mb-24">
