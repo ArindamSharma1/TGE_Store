@@ -11,9 +11,9 @@ export function CartItem({ item }: { item: CartItemType }) {
 
 
     return (
-        <div className="flex gap-4 py-6 border-b border-zinc-100 last:border-0">
+        <div className="flex gap-4 py-6 border-b border-white/5 last:border-0 relative group">
             {/* Image */}
-            <div className="relative h-24 w-20 flex-shrink-0 overflow-hidden rounded-md border border-zinc-100 bg-zinc-50 flex items-center justify-center">
+            <div className="relative h-24 w-20 flex-shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/5 flex items-center justify-center">
                 {item.image ? (
                     <Image
                         src={item.image}
@@ -22,16 +22,16 @@ export function CartItem({ item }: { item: CartItemType }) {
                         className="object-cover object-center"
                     />
                 ) : (
-                    <ShoppingBag className="w-8 h-8 text-zinc-300" />
+                    <ShoppingBag className="w-8 h-8 text-zinc-500" />
                 )}
             </div>
 
             {/* Details */}
             <div className="flex flex-1 flex-col">
                 <div>
-                    <div className="flex justify-between text-base font-medium text-zinc-900">
-                        <h3>{item.productTitle}</h3>
-                        <p className="ml-4">
+                    <div className="flex justify-between text-base font-bold text-white uppercase tracking-tight">
+                        <h3 className="line-clamp-2 pr-4">{item.productTitle}</h3>
+                        <p className="flex-shrink-0">
                             {new Intl.NumberFormat('en-IN', {
                                 style: 'currency',
                                 currency: 'INR',
@@ -41,13 +41,13 @@ export function CartItem({ item }: { item: CartItemType }) {
                         </p>
                     </div>
                     {item.variantTitle && (
-                        <p className="mt-1 text-sm text-zinc-500">{item.variantTitle}</p>
+                        <p className="mt-1 text-xs font-medium text-zinc-400 uppercase tracking-wider">{item.variantTitle}</p>
                     )}
                 </div>
 
                 <div className="flex flex-1 items-end justify-between text-sm">
                     {/* Quantity Controls */}
-                    <div className="flex items-center gap-3 border border-zinc-200 rounded-full px-3 py-1">
+                    <div className="flex items-center gap-3 border border-white/10 rounded-full px-3 py-1 bg-white/5">
                         <button
                             type="button"
                             onClick={() => {
@@ -56,20 +56,20 @@ export function CartItem({ item }: { item: CartItemType }) {
                                 }
                             }}
                             className={cn(
-                                "text-zinc-500 hover:text-zinc-900 transition-colors",
+                                "text-zinc-400 hover:text-white transition-colors",
                                 item.quantity <= 1 && "opacity-50 cursor-not-allowed"
                             )}
                             disabled={item.quantity <= 1}
                         >
                             <Minus className="w-3 h-3" />
                         </button>
-                        <span className="text-xs font-semibold tabular-nums w-4 text-center">
+                        <span className="text-xs font-bold tabular-nums w-4 text-center text-white">
                             {item.quantity}
                         </span>
                         <button
                             type="button"
                             onClick={() => updateItem(item.id, item.quantity + 1)}
-                            className="text-zinc-500 hover:text-zinc-900 transition-colors"
+                            className="text-zinc-400 hover:text-white transition-colors"
                         >
                             <Plus className="w-3 h-3" />
                         </button>
@@ -78,7 +78,7 @@ export function CartItem({ item }: { item: CartItemType }) {
                     <button
                         type="button"
                         onClick={() => removeItem(item.id)}
-                        className="font-medium text-zinc-400 hover:text-red-500 transition-colors"
+                        className="text-xs font-bold text-zinc-500 hover:text-white uppercase tracking-wider transition-colors"
                     >
                         Remove
                     </button>
