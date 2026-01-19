@@ -165,7 +165,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             });
 
             if (res?.cartLinesAdd?.cart) {
-                mapCartData(res.cartLinesAdd.cart);
+                // mapCartData(res.cartLinesAdd.cart); 
+                // Force a full refresh to ensure all fields (cost, quantity) are recalculated by Shopify
+                await refreshCart(activeCartId);
                 openCart();
                 toast.success("Added to cart");
             } else {
