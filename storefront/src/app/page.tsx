@@ -33,8 +33,9 @@ export default async function Home() {
   return (
     <main className="min-h-screen bg-zinc-50 pb-20">
       <Hero
-        heading="Dailywear, Redefined."
-        subheading="The new standard for modern essentials. Built for daily wear."
+        kicker="ENGINEERED DAILYWEAR"
+        heading="DAILYWEAR, REDEFINED."
+        subheading="Built for long hours. Designed for repeat wear."
       />
 
       {/* SECTION 2: EDITORIAL CATEGORIES */}

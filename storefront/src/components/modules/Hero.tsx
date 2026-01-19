@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 interface HeroProps {
     heading?: string;
     subheading?: string;
+    kicker?: string;
     ctaText?: string;
     ctaLink?: string;
     imageUrl?: string;
@@ -13,12 +14,13 @@ interface HeroProps {
 export function Hero({
     heading = "THE NEW UNIFORM",
     subheading = "Essential. Deliberate. Forever.",
+    kicker = "Engineered Dailywear",
     ctaText = "Shop Collection",
     ctaLink = "/collections",
     imageUrl = "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=2674&auto=format&fit=crop"
 }: HeroProps) {
     return (
-        <section className="relative h-[92vh] w-full bg-zinc-950 overflow-hidden flex items-center justify-center rounded-b-[32px] mb-4">
+        <section className="relative h-[85vh] w-full bg-zinc-950 overflow-hidden flex items-center justify-center rounded-b-[32px] mb-4">
 
             {/* Background Typography (Layer 0) */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl px-4 z-0 pointer-events-none opacity-[0.03]">
@@ -43,21 +45,27 @@ export function Hero({
                 />
             </div>
 
-            {/* Premium Overlay (Layer 2) */}
-            <div className="absolute inset-0 bg-black/10 z-10 pointer-events-none" />
+            {/* Premium Overlay (Layer 2) - Darker Gradient for Contrast */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30 z-10 pointer-events-none" />
 
             {/* Main Content (Layer 3) */}
-            <div className="relative z-20 flex flex-col items-center justify-center text-center px-4 max-w-3xl mx-auto">
+            <div className="relative z-20 flex flex-col items-center justify-center text-center px-4 max-w-4xl mx-auto mt-12">
 
-                {/* Headline: Mask & Skew Reveal */}
-                {/* Headline: Mask & Skew Reveal */}
-                <h1 className="text-5xl md:text-8xl font-black text-white uppercase tracking-tight leading-[0.9] mb-8" data-animate="text">
+                {/* Kicker Micro-line */}
+                {kicker && (
+                    <span className="block text-xs font-bold uppercase tracking-[0.3em] text-white/80 mb-6" data-animate="text">
+                        {kicker}
+                    </span>
+                )}
+
+                {/* Headline: Mask & Skew Reveal - Slightly Reduced Size */}
+                <h1 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tight leading-[0.9] mb-8" data-animate="text">
                     {heading}
                 </h1>
 
                 {/* Subheadline: Staggered Reveal */}
                 {subheading && (
-                    <p className="text-xs md:text-sm tracking-[0.2em] font-bold uppercase text-white/90 mb-10">
+                    <p className="text-sm md:text-base tracking-wide font-medium text-white/90 mb-10 max-w-md mx-auto leading-relaxed">
                         {subheading}
                     </p>
                 )}
