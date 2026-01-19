@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Search, ShoppingBag, User, Menu } from "lucide-react";
+import { Search, ShoppingBag, User } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useScroll } from "framer-motion";
 import { useState, useEffect } from "react";
@@ -63,9 +63,7 @@ export function Header() {
                             isScrolled ? "bg-white/80 shadow-sm border-zinc-200/50" : "bg-black/20 hover:bg-black/30 text-white"
                         )}
                     >
-                        <Button variant="ghost" size="icon" className="rounded-xl md:hidden text-current hover:bg-white/10">
-                            <Menu className="w-5 h-5" />
-                        </Button>
+
                         <Link href="/" className="px-3 py-1.5 flex items-center">
                             <Image
                                 src="/logo-main-white.svg"
