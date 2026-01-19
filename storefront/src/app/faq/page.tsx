@@ -40,7 +40,7 @@ export default function FAQPage() {
                     />
                     <FAQItem
                         question="Where are your clothes sourced?"
-                        answer="We are a proud 100% Indian brand. We do not manufacture in-house; instead, we source premium surplus and factory-direct inventory from top manufacturers across India and International. This allows us to offer high-quality garments at exceptional value."
+                        answer="We are a proud 100% Indian brand. We do not manufacture in-house; instead, we source premium surplus and factory-direct inventory from top manufacturers across India and Internationally available outlets. This allows us to offer high-quality garments at exceptional value."
                     />
                 </div>
             </div>
