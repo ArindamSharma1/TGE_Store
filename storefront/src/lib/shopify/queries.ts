@@ -82,6 +82,7 @@ export const getCustomerQuery = /* GraphQL */ `
           node {
           id
           orderNumber
+          name
           processedAt
           financialStatus
           fulfillmentStatus

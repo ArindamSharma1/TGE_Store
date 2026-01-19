@@ -140,7 +140,7 @@ export default function AccountPage() {
                                                 <div className="flex flex-col md:flex-row justify-between gap-6 mb-6">
                                                     <div className="space-y-1">
                                                         <div className="flex items-center gap-3">
-                                                            <span className="font-bold text-lg text-zinc-900">Order #{order.orderNumber}</span>
+                                                            <span className="font-bold text-lg text-zinc-900">{order.name}</span>
                                                             <span className={cn(
                                                                 "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider",
                                                                 order.fulfillmentStatus === "FULFILLED" ? "bg-emerald-100 text-emerald-700" : "bg-zinc-100 text-zinc-600"

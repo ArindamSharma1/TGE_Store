@@ -222,20 +222,34 @@ export default async function Home() {
                 Shop the Look
               </h3>
               <div className="grid grid-cols-2 gap-8" data-animate="grid">
-                {[
-                  { name: "Technical Overshirt", price: "$140.00", img: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=400&auto=format&fit=crop" },
-                  { name: "Wide Pleated Pant", price: "$110.00", img: "https://images.unsplash.com/photo-1479064555552-3ef4979f8908?q=80&w=400&auto=format&fit=crop" }
-                ].map((item, i) => (
-                  <Link key={i} href="#" className="group block">
-                    <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-zinc-100 mb-4 opacity-100 group-hover:opacity-90 transition-opacity">
-                      <Image src={item.img} alt={item.name} fill className="object-cover" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-sm text-zinc-900 group-hover:underline underline-offset-4 decoration-1">{item.name}</p>
-                      <p className="text-xs text-zinc-400 mt-1">{item.price}</p>
-                    </div>
-                  </Link>
-                ))}
+                {products.length > 0 ? (
+                  products.slice(0, 2).map((product: any) => {
+                    const img = product.featuredImage?.url || product.images?.edges?.[0]?.node?.url;
+                    const price = parseFloat(product.priceRange?.minVariantPrice?.amount || "0");
+                    const currency = product.priceRange?.minVariantPrice?.currencyCode || "INR";
+                    const formattedPrice = new Intl.NumberFormat('en-IN', { style: 'currency', currency }).format(price);
+
+                    return (
+                      <Link key={product.id} href={`/products/${product.handle}`} className="group block">
+                        <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-zinc-100 mb-4 opacity-100 group-hover:opacity-90 transition-opacity">
+                          {img ? (
+                            <Image src={img} alt={product.title} fill className="object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-zinc-200 flex items-center justify-center text-zinc-400">No Image</div>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm text-zinc-900 group-hover:underline underline-offset-4 decoration-1 line-clamp-1">{product.title}</p>
+                          <p className="text-xs text-zinc-400 mt-1">{formattedPrice}</p>
+                        </div>
+                      </Link>
+                    );
+                  })
+                ) : (
+                  <div className="col-span-2 py-10 text-center text-zinc-400 italic">
+                    Add products to your store to see them here.
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -1,10 +1,27 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import Link from "next/link";
-import { ArrowRight, Package, RefreshCw, Truck } from "lucide-react";
+import { ArrowRight, Package, RefreshCw, Truck, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function ReturnsPage() {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+
+    const handleReturnSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        // Simulate API call
+        setTimeout(() => {
+            setIsSubmitting(false);
+            setIsSuccess(true);
+            toast.success("Return initiated successfully");
+        }, 1500);
+    };
     return (
         <div className="min-h-screen pt-32 pb-20 px-4">
             <div className="max-w-4xl mx-auto">
@@ -84,12 +101,69 @@ export default function ReturnsPage() {
 
                             <div className="bg-zinc-900 text-white p-8 rounded-3xl mt-8">
                                 <h3 className="text-xl font-bold uppercase mb-4">Start a Return</h3>
-                                <p className="text-zinc-400 mb-6 max-w-lg">
-                                    Ready to send something back? Visit our return portal to print your prepaid shipping label and track the status of your refund.
-                                </p>
-                                <Button className="bg-white text-zinc-900 hover:bg-zinc-100 rounded-full font-bold px-8">
-                                    Go to Return Portal <ArrowRight className="w-4 h-4 ml-2" />
-                                </Button>
+
+                                {!isSuccess ? (
+                                    <>
+                                        <p className="text-zinc-400 mb-6 max-w-lg">
+                                            Ready to send something back? Enter your order details below to verify eligibility and print your prepaid shipping label.
+                                        </p>
+                                        <form onSubmit={handleReturnSubmit} className="max-w-md space-y-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="space-y-2">
+                                                    <label htmlFor="orderNumber" className="text-xs font-bold uppercase tracking-wider text-zinc-400">Order Number</label>
+                                                    <Input
+                                                        id="orderNumber"
+                                                        placeholder="TGE1001"
+                                                        className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-600 focus:border-white"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-zinc-400">Email</label>
+                                                    <Input
+                                                        id="email"
+                                                        type="email"
+                                                        placeholder="you@example.com"
+                                                        className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-600 focus:border-white"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            <Button
+                                                type="submit"
+                                                className="w-full bg-white text-zinc-900 hover:bg-zinc-200 rounded-lg font-bold h-12"
+                                                disabled={isSubmitting}
+                                            >
+                                                {isSubmitting ? (
+                                                    <span className="flex items-center gap-2">
+                                                        <Loader2 className="w-4 h-4 animate-spin" /> Verifying...
+                                                    </span>
+                                                ) : (
+                                                    "Find Order"
+                                                )}
+                                            </Button>
+                                        </form>
+                                    </>
+                                ) : (
+                                    <div className="bg-zinc-800/50 border border-zinc-700 rounded-xl p-6 animate-in fade-in zoom-in duration-300">
+                                        <div className="flex items-center gap-3 mb-2 text-emerald-400">
+                                            <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+                                                <Package className="w-4 h-4" />
+                                            </div>
+                                            <span className="font-bold text-lg">Return Requested</span>
+                                        </div>
+                                        <p className="text-zinc-300 mb-4">
+                                            We've sent a return shipping label to your email. Please print it and attach it to your package.
+                                        </p>
+                                        <Button
+                                            onClick={() => setIsSuccess(false)}
+                                            variant="outline"
+                                            className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                                        >
+                                            Process Another Return
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </section>
