@@ -11,6 +11,7 @@ interface Product {
     thumbnail?: string | null;
     images?: { url: string }[] | null;
     variants: any[];
+    tags?: string[];
 }
 
 interface ProductGridProps {
@@ -73,7 +74,7 @@ export function ProductGrid({ products }: ProductGridProps) {
                                 main: mainImg,
                                 hover: hoverImg
                             }}
-                            variants={product.variants}
+                            tags={product.tags} // Pass tags
                         />
                     </motion.div>
                 );

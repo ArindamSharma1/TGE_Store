@@ -155,6 +155,7 @@ export default async function Home() {
                 images={{ main: thumbnail, hover: hoverImage }}
                 defaultVariantId={product.variants?.edges?.[0]?.node?.id}
                 variants={product.variants?.edges?.map((e: any) => e.node) || []}
+                tags={product.tags}
               />
             );
           })}

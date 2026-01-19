@@ -19,6 +19,7 @@ interface ProductCardProps {
         main: string;
         hover: string;
     };
+    tags?: string[];
     defaultVariantId?: string;
     variants?: any[];
 }
@@ -33,6 +34,7 @@ export function ProductCard({
         main: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop",
         hover: "https://images.unsplash.com/photo-1582552938357-32b906df40cb?q=80&w=1000&auto=format&fit=crop"
     },
+    tags = [],
     defaultVariantId,
     variants = []
 }: ProductCardProps) {
@@ -53,6 +55,13 @@ export function ProductCard({
             displayPrice = parseFloat(variant.price.amount);
         }
     }
+
+    // Metadata Logic: Find first relevant tag (GSM, Fit, Material)
+    // Priority: GSM -> Cotton/Material -> Fit
+    const metadataTag = tags.find(t => t.toLowerCase().includes('gsm')) ||
+        tags.find(t => t.toLowerCase().includes('cotton') || t.toLowerCase().includes('linen')) ||
+        tags.find(t => t.toLowerCase().includes('fit')) ||
+        "Premium Essentials"; // Fallback
 
     const handleAddToCart = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -79,7 +88,7 @@ export function ProductCard({
                         src={images.main || "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop"}
                         alt={title}
                         fill
-                        className="object-cover transition-transform duration-500 ease-out group-hover:scale-105 will-change-transform"
+                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] will-change-transform"
                         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                     />
                     {/* Hover Image */}
@@ -87,7 +96,7 @@ export function ProductCard({
                         src={images.hover || images.main || "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop"}
                         alt={`${title} - Alternate View`}
                         fill
-                        className="absolute inset-0 object-cover opacity-0 transition-all duration-500 ease-out group-hover:opacity-100 group-hover:scale-105 will-change-transform"
+                        className="absolute inset-0 object-cover opacity-0 transition-all duration-700 ease-out group-hover:opacity-100 group-hover:scale-[1.03] will-change-transform"
                         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                     />
 
@@ -115,7 +124,8 @@ export function ProductCard({
                             }).format(displayPrice)}
                         </span>
                     </div>
-                    <p className="text-xs text-zinc-400 capitalize">New Season</p>
+                    {/* Metadata Line */}
+                    <p className="text-xs text-zinc-400 font-medium tracking-wide uppercase">{metadataTag}</p>
                 </div>
             </Link>
         </div>

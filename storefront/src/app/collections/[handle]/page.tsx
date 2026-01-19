@@ -111,6 +111,7 @@ export default async function CollectionPage({ params, searchParams }: Collectio
                     handle: p.handle,
                     thumbnail: thumbnail,
                     images: { main: thumbnail, hover: hoverImage },
+                    tags: p.tags, // Map tags
                     defaultVariantId: p.variants?.edges?.[0]?.node?.id,
                     variants: p.variants?.edges?.map((e: any) => e.node) || []
                 };
@@ -148,6 +149,7 @@ export default async function CollectionPage({ params, searchParams }: Collectio
                         handle: p.handle,
                         thumbnail: thumbnail,
                         images: { main: thumbnail, hover: hoverImage },
+                        tags: p.tags, // Map tags
                         defaultVariantId: p.variants?.edges?.[0]?.node?.id,
                         variants: p.variants?.edges?.map((e: any) => e.node) || []
                     };
