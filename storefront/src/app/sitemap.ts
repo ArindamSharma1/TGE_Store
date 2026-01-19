@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://tge-store-3.vercel.app';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://tge-store.vercel.app';
 
     // In a real app, verify backend product handle list here
     // For now, static routes
