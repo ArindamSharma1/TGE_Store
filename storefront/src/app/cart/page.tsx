@@ -1,160 +1,172 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
-import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, ShoppingBag, Trash2 } from "lucide-react";
-import { ProductCard } from "@/components/modules/ProductCard";
+import { cn } from "@/lib/utils/cn";
+
+const formatINR = (amount: number) =>
+    new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: 0 }).format(amount);
 
 export default function CartPage() {
-    const { items, subtotal, removeItem, addItem, checkoutUrl } = useCart();
-
-    // Mock Trending Products for Empty State
-    const TRENDING_PRODUCTS = [
-        { id: "t1", title: "Heavyweight Box Tee", price: 45, img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800&auto=format&fit=crop", handle: "heavyweight-box-tee" },
-        { id: "t2", title: "Technical Cargo Pant", price: 120, img: "https://images.unsplash.com/photo-1552168324-d612d77725e3?q=80&w=800&auto=format&fit=crop", handle: "technical-cargo-pant" },
-        { id: "t3", title: "Oversized Puffer", price: 240, img: "https://images.unsplash.com/photo-1544923246-77307dd654cb?q=80&w=800&auto=format&fit=crop", handle: "oversized-puffer" },
-        { id: "t4", title: "Mohair Knit Cardigan", price: 160, img: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?q=80&w=800&auto=format&fit=crop", handle: "mohair-knit-cardigan" },
-    ];
+    const { items, subtotal, removeItem, updateItem, checkoutUrl } = useCart();
 
     if (items.length === 0) {
         return (
-            <div className="min-h-screen pt-32 pb-24 px-4 max-w-7xl mx-auto">
-                <div className="flex flex-col items-center justify-center text-center max-w-lg mx-auto py-12">
-                    <div className="h-20 w-20 rounded-full bg-zinc-100 flex items-center justify-center mb-6">
-                        <ShoppingBag className="h-10 w-10 text-zinc-400" />
+            <main className="min-h-screen bg-bone text-carbon pt-16">
+                <div className="max-w-[1600px] mx-auto px-spacing-component">
+                    <div className="pt-spacing-editorial pb-spacing-section-inner border-b border-graphite/20">
+                        <p className="text-mono text-acid mb-spacing-component">YOUR SYSTEM</p>
+                        <h1 className="text-display-l uppercase leading-none mb-4">Empty</h1>
+                        <p className="text-body text-graphite">Nothing in the system yet.</p>
                     </div>
-                    <h1 className="text-3xl font-black uppercase tracking-tight text-zinc-900 mb-4">
-                        Your bag is empty
-                    </h1>
-                    <p className="text-zinc-500 text-lg mb-8">
-                        Looks like you haven't added anything yet.
-                    </p>
-                    <Button asChild size="lg" className="rounded-full px-12 h-14 text-base font-bold">
-                        <Link href="/collections/all">Start Shopping</Link>
-                    </Button>
-                </div>
 
-                {/* Trending Section */}
-                <div className="mt-24 border-t border-zinc-100 pt-16">
-                    <h2 className="text-2xl font-bold uppercase tracking-tight text-zinc-900 mb-8">
-                        Trending Now
-                    </h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        {TRENDING_PRODUCTS.map((product) => (
-                            <ProductCard
-                                key={product.id}
-                                id={product.id}
-                                title={product.title}
-                                price={product.price}
-                                currencyCode="INR"
-                                handle={product.handle}
-                                thumbnail={product.img}
-                                images={{ main: product.img, hover: product.img }}
-                            />
-                        ))}
+                    <div className="py-spacing-section-gap">
+                        <p className="text-mono text-graphite mb-6">START BUILDING YOUR DAILY UNIFORM</p>
+                        <div className="flex flex-col gap-3 max-w-xs">
+                            {[
+                                { label: "New System", href: "/collections/new-system" },
+                                { label: "Uniforms", href: "/collections/uniforms" },
+                                { label: "Field Notes", href: "/journal" },
+                                { label: "All Objects", href: "/collections/all" },
+                            ].map((link) => (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    className="flex items-center justify-between py-4 border-b border-graphite/20 text-body uppercase hover:text-acid group transition-colors"
+                                >
+                                    <span>{link.label}</span>
+                                    <span className="text-acid opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                                </Link>
+                            ))}
+                        </div>
                     </div>
                 </div>
-            </div>
+            </main>
         );
     }
 
     return (
-        <div className="min-h-screen pt-32 pb-24 px-4 max-w-7xl mx-auto">
-            <h1 className="text-4xl font-black uppercase tracking-tight text-zinc-900 mb-12">Shopping Bag</h1>
+        <main className="min-h-screen bg-bone text-carbon pt-16">
+            <div className="max-w-[1600px] mx-auto px-spacing-component">
 
-            <div className="lg:grid lg:grid-cols-12 lg:gap-16 lg:items-start">
-                {/* Cart Items */}
-                <section className="lg:col-span-8 space-y-6">
-                    {items.map((item) => (
-                        <div key={item.id} className="flex gap-6 py-6 border-b border-zinc-100 first:border-t">
-                            <Link href={`/products/${item.handle}`} className="relative h-40 w-32 shrink-0 overflow-hidden rounded-lg bg-zinc-100">
-                                <Image
-                                    src={item.image}
-                                    alt={item.productTitle}
-                                    fill
-                                    className="object-cover"
-                                />
+                <div className="pt-spacing-section-inner pb-6 border-b border-graphite/20">
+                    <p className="text-mono text-acid mb-2">YOUR SYSTEM</p>
+                    <h1 className="text-heading uppercase">{items.length.toString().padStart(2, "0")} {items.length === 1 ? "Object" : "Objects"}</h1>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 py-spacing-section-gap">
+
+                    {/* Cart Items */}
+                    <section className="lg:col-span-7" aria-label="Cart items">
+                        <ul className="divide-y divide-graphite/10">
+                            {items.map((item) => (
+                                <li key={item.id} className="flex gap-5 py-6 first:pt-0">
+                                    {/* Image */}
+                                    <Link href={`/products/${item.handle}`} className="relative h-32 w-24 flex-shrink-0 bg-fog overflow-hidden">
+                                        {item.image && (
+                                            <Image src={item.image} alt={item.productTitle} fill className="object-cover" />
+                                        )}
+                                    </Link>
+
+                                    {/* Details */}
+                                    <div className="flex flex-1 flex-col justify-between">
+                                        <div className="flex justify-between gap-4">
+                                            <div>
+                                                <Link href={`/products/${item.handle}`} className="text-body font-medium uppercase hover:text-acid transition-colors">
+                                                    {item.productTitle}
+                                                </Link>
+                                                {item.variantTitle && (
+                                                    <p className="text-mono text-graphite mt-0.5">{item.variantTitle}</p>
+                                                )}
+                                            </div>
+                                            <p className="text-mono flex-shrink-0">{formatINR(item.price * item.quantity)}</p>
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                            {/* Quantity */}
+                                            <div className="flex items-center border border-graphite/30">
+                                                <button
+                                                    onClick={() => item.quantity > 1 && updateItem(item.id, item.quantity - 1)}
+                                                    disabled={item.quantity <= 1}
+                                                    className={cn("px-3 py-1.5 text-mono transition-colors", item.quantity <= 1 ? "text-graphite/30 cursor-not-allowed" : "hover:bg-carbon hover:text-bone")}
+                                                    aria-label="Decrease quantity"
+                                                >−</button>
+                                                <span className="px-3 py-1.5 text-mono border-x border-graphite/30 min-w-[2.5rem] text-center">{item.quantity}</span>
+                                                <button
+                                                    onClick={() => updateItem(item.id, item.quantity + 1)}
+                                                    className="px-3 py-1.5 text-mono hover:bg-carbon hover:text-bone transition-colors"
+                                                    aria-label="Increase quantity"
+                                                >+</button>
+                                            </div>
+                                            <button
+                                                onClick={() => removeItem(item.id)}
+                                                className="text-meta uppercase text-graphite hover:text-carbon transition-colors underline underline-offset-4"
+                                                aria-label={`Remove ${item.productTitle}`}
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+
+                        <div className="mt-8">
+                            <Link href="/collections/all" className="text-meta uppercase text-graphite hover:text-carbon transition-colors underline underline-offset-4">
+                                Continue building your system
                             </Link>
+                        </div>
+                    </section>
 
-                            <div className="flex flex-1 flex-col justify-between py-1">
-                                <div className="flex justify-between items-start gap-4">
-                                    <div>
-                                        <h3 className="text-lg font-bold text-zinc-900 leading-tight">
-                                            <Link href={`/products/${item.handle}`} className="hover:underline">
-                                                {item.productTitle}
-                                            </Link>
-                                        </h3>
-                                        <p className="mt-1 text-sm text-zinc-500">{item.variantTitle}</p>
-                                    </div>
-                                    <p className="text-lg font-bold text-zinc-900">
-                                        {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(item.price * item.quantity)}
-                                    </p>
-                                </div>
+                    {/* Order Summary */}
+                    <section className="lg:col-span-5 sticky top-20 h-fit border-t border-graphite/20 pt-6" aria-label="Order summary">
+                        <h2 className="text-heading uppercase mb-6">Summary</h2>
 
-                                <div className="flex items-center justify-between mt-4">
-                                    <div className="flex items-center gap-1">
-                                        <p className="text-sm text-zinc-500 font-medium">Qty: {item.quantity}</p>
-                                    </div>
-                                    <button
-                                        onClick={() => removeItem(item.id)}
-                                        className="text-sm font-medium text-zinc-400 hover:text-red-600 transition-colors flex items-center gap-2 group"
-                                    >
-                                        <Trash2 className="w-4 h-4 group-hover:text-red-600" />
-                                        Remove
-                                    </button>
-                                </div>
+                        <div className="flex flex-col gap-3 mb-6">
+                            <div className="flex justify-between text-mono">
+                                <span className="text-graphite">Subtotal</span>
+                                <span>{formatINR(subtotal)}</span>
+                            </div>
+                            <div className="flex justify-between text-mono">
+                                <span className="text-graphite">Delivery</span>
+                                <span className="text-graphite">Calculated at checkout</span>
+                            </div>
+                            <div className="flex justify-between border-t border-graphite/20 pt-3 mt-1">
+                                <span className="text-body font-medium uppercase">Total</span>
+                                <span className="text-heading">{formatINR(subtotal)}</span>
                             </div>
                         </div>
-                    ))}
 
-                    <div className="pt-6">
-                        <Link href="/collections/all" className="inline-flex items-center gap-2 text-sm font-bold text-zinc-900 hover:text-zinc-600 transition-colors">
-                            <ArrowLeft className="w-4 h-4" />
-                            Continue Shopping
-                        </Link>
-                    </div>
-                </section>
-
-                {/* Cart Summary */}
-                <section className="lg:col-span-4 mt-16 lg:mt-0 p-8 bg-zinc-50/80 rounded-3xl border border-zinc-100 sticky top-32">
-                    <h2 className="text-xl font-bold uppercase tracking-wide text-zinc-900 mb-6">Order Summary</h2>
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <p className="text-zinc-500">Subtotal</p>
-                            <p className="font-bold text-zinc-900">
-                                {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(subtotal)}
-                            </p>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <p className="text-zinc-500">Shipping</p>
-                            <p className="font-bold text-zinc-900">Calculated at checkout</p>
-                        </div>
-                        <div className="flex items-center justify-between border-t border-zinc-200 pt-4 mt-4">
-                            <p className="text-lg font-black text-zinc-900">Total</p>
-                            <p className="text-lg font-black text-zinc-900">
-                                {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(subtotal)}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="mt-8">
                         {checkoutUrl ? (
-                            <Button size="lg" className="w-full h-14 text-base font-bold rounded-full" asChild>
-                                <a href={checkoutUrl}>Proceed to Checkout</a>
-                            </Button>
+                            <a href={checkoutUrl}>
+                                <button className="w-full bg-carbon text-bone py-4 text-meta uppercase tracking-widest hover:bg-acid hover:text-carbon transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid">
+                                    Proceed to Checkout
+                                </button>
+                            </a>
                         ) : (
-                            <Button size="lg" disabled className="w-full h-14 text-base font-bold rounded-full opacity-50 cursor-not-allowed">
-                                Loading Checkout...
-                            </Button>
+                            <button disabled className="w-full bg-fog text-graphite py-4 text-meta uppercase tracking-widest cursor-not-allowed" aria-busy="true">
+                                Preparing Checkout…
+                            </button>
                         )}
-                        <p className="mt-4 text-xs text-center text-zinc-400">
-                            Secure Checkout - Taxes calculated at next step
-                        </p>
-                    </div>
-                </section>
+
+                        <p className="text-mono text-graphite/60 mt-3 text-center">All taxes included. Free returns within 30 days.</p>
+
+                        {/* Recommendations */}
+                        <div className="mt-spacing-section-inner border-t border-graphite/20 pt-6">
+                            <p className="text-mono text-graphite mb-4">COMPLETE THE SHIFT</p>
+                            <div className="flex flex-col gap-2">
+                                {["Add a layer", "Same material, different form", "After-hours alternative"].map((rec) => (
+                                    <Link key={rec} href="/collections/all" className="text-meta uppercase text-graphite hover:text-acid transition-colors underline underline-offset-4">
+                                        {rec}
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
             </div>
-        </div>
+        </main>
     );
 }

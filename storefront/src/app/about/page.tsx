@@ -1,81 +1,106 @@
-import Image from "next/image";
-import { Button } from "@/components/ui/Button";
+import { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+    title: "The Garment Experiment | TGE",
+    description: "TGE is a daily uniform system for creative people moving between work, city, travel, and after-hours culture.",
+};
 
 export default function AboutPage() {
     return (
-        <main className="min-h-screen bg-zinc-50 pt-32 pb-20">
-            {/* 1. HERO HEADER */}
-            <section className="mx-auto max-w-7xl px-4 mb-16 text-center">
-                <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-zinc-900 mb-6">
-                    Defining the <br className="hidden md:block" /> New Standard
-                </h1>
-                <p className="text-xl text-zinc-500 max-w-2xl mx-auto leading-relaxed">
-                    TGE is built for everyday wear and real use. Clothing that fits into your actual life, not just your feed.
-                </p>
+        <main className="min-h-screen bg-bone text-carbon pt-16">
+
+            {/* Opening Statement */}
+            <section className="max-w-[1600px] mx-auto px-spacing-component pt-spacing-editorial pb-spacing-section-gap border-b border-graphite/20">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-spacing-section-gap">
+                    <div className="lg:col-span-7">
+                        <p className="text-mono text-acid mb-spacing-component">TGE / 01</p>
+                        <h1 className="text-display-xl uppercase leading-none mb-spacing-section-inner overflow-hidden">
+                            The Garment<br/>Experiment
+                        </h1>
+                        <p className="text-body-large text-graphite max-w-lg">
+                            A daily uniform system for creative people moving between work, city, travel, and after-hours culture.
+                        </p>
+                    </div>
+                    <div className="lg:col-span-5 flex flex-col justify-end">
+                        <div className="text-mono text-graphite space-y-1">
+                            <p>FOUNDED: INDIA</p>
+                            <p>CONDITION: DAILY</p>
+                            <p>EDITION: 01</p>
+                        </div>
+                    </div>
+                </div>
             </section>
 
-
-            {/* 3. MISSION TEXT (Reference Copy) */}
-            <section className="mx-auto max-w-7xl px-4 mb-24">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-24 items-start">
+            {/* Worldview */}
+            <section className="max-w-[1600px] mx-auto px-spacing-component py-spacing-editorial">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-spacing-section-gap">
                     <div>
-                        <h2 className="text-3xl font-bold uppercase tracking-tight text-zinc-900 mb-6 sticky top-32">
-                            Built for <br /> Real Life
+                        <p className="text-mono text-graphite mb-spacing-component">THE SYSTEM</p>
+                        <h2 className="text-display-m uppercase mb-spacing-component leading-none">
+                            Not a brand.<br/>A method.
                         </h2>
                     </div>
-                    <div className="space-y-8 text-lg text-zinc-600 leading-relaxed font-medium">
-                        <p>
-                            We focus on clothing that fits into daily life, whether it’s for college, work, casual outings, or special occasions.
+                    <div className="flex flex-col justify-center gap-8">
+                        <p className="text-body-large text-graphite">
+                            We don't build seasonal collections. We build a repeating system of garments that perform across the friction points of daily life.
                         </p>
-                        <p>
-                            Our collections cover dailywear essentials, outerwear, and partywear. Each piece is designed to be easy to wear, easy to style, and comfortable throughout the day. We keep the designs clean and modern so they work across different settings without feeling overdone.
+                        <p className="text-body text-graphite">
+                            Each object is field-tested for the conditions it claims to address. If it fails under pressure, it doesn't enter the system. If it survives repetition — daily wash, daily wear, daily transition — it earns its code.
                         </p>
-                        <p className="text-zinc-900 font-bold">
-                            We believe good clothing should be practical first. That’s why we prioritise fit, fabric, and wearability over trends that don’t last.
+                        <p className="text-body text-graphite">
+                            We are India-first. We build for heat, transit, humidity, and the particular texture of moving between dense urban environments. We are globally legible, but not globally generic.
                         </p>
                     </div>
                 </div>
             </section>
 
-            {/* 4. VALUES GRID */}
-            <section className="mx-auto max-w-7xl px-4 py-16 bg-white rounded-[32px] mb-24">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
-                    <div className="space-y-4 px-4">
-                        <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mb-4 mx-auto md:mx-0">
-                            <span className="font-bold text-lg">01</span>
-                        </div>
-                        <h3 className="text-xl font-bold uppercase tracking-wide">Everyday Utility</h3>
-                        <p className="text-zinc-500">Reliable, well-made clothes you can reach for every single morning without hesitation.</p>
-                    </div>
-                    <div className="space-y-4 px-4 border-t md:border-t-0 md:border-l border-zinc-100 pt-8 md:pt-0">
-                        <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mb-4 mx-auto md:mx-0">
-                            <span className="font-bold text-lg">02</span>
-                        </div>
-                        <h3 className="text-xl font-bold uppercase tracking-wide">Clean Design</h3>
-                        <p className="text-zinc-500">Modern silhouettes that work across settings without appearing overdone or trying too hard.</p>
-                    </div>
-                    <div className="space-y-4 px-4 border-t md:border-t-0 md:border-l border-zinc-100 pt-8 md:pt-0">
-                        <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mb-4 mx-auto md:mx-0">
-                            <span className="font-bold text-lg">03</span>
-                        </div>
-                        <h3 className="text-xl font-bold uppercase tracking-wide">Lasting Fit</h3>
-                        <p className="text-zinc-500">Prioritizing fabric and wearability over fleeting trends. Clothing built to last.</p>
+            {/* System Values */}
+            <section className="bg-carbon text-bone py-spacing-editorial px-spacing-component">
+                <div className="max-w-[1600px] mx-auto">
+                    <p className="text-mono text-acid mb-spacing-section-inner">FIELD CONDITIONS</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-spacing-component">
+                        {[
+                            {
+                                index: "01",
+                                title: "Repetition Over Novelty",
+                                body: "The best garment is the one you reach for every morning without deciding. We design for habit, not occasion.",
+                            },
+                            {
+                                index: "02",
+                                title: "Utility as Identity",
+                                body: "Function is the material of our aesthetic. Nothing decorative without reason. Nothing structural without purpose.",
+                            },
+                            {
+                                index: "03",
+                                title: "Material Honesty",
+                                body: "We document the composition, weight, and treatment of every object. What it is made from is part of what it means.",
+                            },
+                        ].map((item) => (
+                            <div key={item.index} className="border-t border-bone/10 pt-6">
+                                <p className="text-mono text-acid mb-4">{item.index}</p>
+                                <h3 className="text-heading uppercase mb-4">{item.title}</h3>
+                                <p className="text-body text-bone/70">{item.body}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>
 
-            {/* 5. BOTTOM CTA */}
-            <section className="mx-auto max-w-7xl px-4 text-center">
-                <h2 className="text-4xl font-black uppercase tracking-tighter mb-8">
-                    Ready to Upgrade?
+            {/* CTA */}
+            <section className="max-w-[1600px] mx-auto px-spacing-component py-spacing-editorial text-center">
+                <p className="text-mono text-graphite mb-spacing-component">ENTER THE SYSTEM</p>
+                <h2 className="text-display-l uppercase mb-spacing-section-gap leading-none">
+                    Start with<br/>the daily object.
                 </h2>
-                <Link href="/collections/all">
-                    <Button size="lg" className="rounded-full h-16 px-10 text-lg font-bold">
-                        Shop the Collection
-                    </Button>
+                <Link
+                    href="/collections/new-system"
+                    className="inline-block border border-carbon text-carbon px-12 py-5 text-meta uppercase tracking-widest hover:bg-carbon hover:text-bone transition-colors"
+                >
+                    View New System
                 </Link>
             </section>
+
         </main>
     );
 }

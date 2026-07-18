@@ -14,15 +14,26 @@ export async function shopifyFetch<T>({
     headers?: Record<string, string>;
     cache?: RequestCache;
 }): Promise<T> {
+    // Guard: skip fetch entirely when env vars are not configured
+    if (!domain || domain === 'undefined' || !storefrontAccessToken) {
+        // Only log once per cold start in development
+        if (process.env.NODE_ENV === 'development') {
+            console.warn(
+                '[TGE] Shopify env vars not set — skipping fetch. ' +
+                'Add SHOPIFY_STORE_DOMAIN and SHOPIFY_STOREFRONT_ACCESS_TOKEN to .env.local'
+            );
+        }
+        return {} as T;
+    }
+
     const endpoint = `https://${domain}/api/2023-10/graphql.json`;
-    const key = storefrontAccessToken;
 
     try {
         const result = await fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Shopify-Storefront-Access-Token': key!,
+                'X-Shopify-Storefront-Access-Token': storefrontAccessToken,
                 ...headers,
             },
             body: JSON.stringify({
@@ -30,7 +41,7 @@ export async function shopifyFetch<T>({
                 ...(variables && { variables }),
             }),
             cache,
-            ...(cache !== 'no-store' && { next: { revalidate: 900 } }), // Only revalidate if caching is enabled
+            ...(cache !== 'no-store' && { next: { revalidate: 900 } }),
         });
 
         const body = await result.json();
@@ -41,10 +52,8 @@ export async function shopifyFetch<T>({
 
         return body.data;
     } catch (e) {
-        console.error('Error connecting to Shopify:', e);
-        throw {
-            error: e,
-            query,
-        };
+        // Log a compact error — omit the full query to keep the terminal readable
+        console.error('[TGE] Shopify fetch failed:', (e as Error)?.message || e);
+        throw e;
     }
 }

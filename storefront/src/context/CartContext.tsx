@@ -108,7 +108,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                     handle: merchandise.product?.handle || ""
                 };
             })
-            .filter((item): item is CartItem => item !== null);
+            .filter((item: CartItem | null): item is CartItem => item !== null);
 
         setItems(mappedItems);
 

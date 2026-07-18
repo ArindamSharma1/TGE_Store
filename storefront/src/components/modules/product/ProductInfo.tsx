@@ -1,14 +1,20 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Button } from "@/components/ui/Button";
-import { VariantSelector } from "./VariantSelector";
-import { ShoppingBag, Star, Heart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { cn } from "@/lib/utils/cn";
+
+type FitPreference = "close" | "standard" | "relaxed";
+
+const FIT_OPTIONS: Record<FitPreference, string> = {
+    close: "Sits close to the body. No excess material.",
+    standard: "Our designed fit. Works across most builds.",
+    relaxed: "Full ease through the body. Drape-oriented.",
+};
 
 interface ProductOption {
-    name: string; // e.g. "Size", "Color"
+    name: string;
     values: string[];
 }
 
@@ -18,11 +24,22 @@ interface ProductInfoProps {
     options?: ProductOption[];
     image: string;
     handle: string;
-    variants?: any[]; // Shopify Variants
+    variants?: any[];
+    objectCode?: string;
 }
 
-export function ProductInfo({ title, description, options = [], image, handle, variants = [] }: ProductInfoProps) {
+export function ProductInfo({
+    title,
+    description,
+    options = [],
+    image,
+    handle,
+    variants = [],
+    objectCode,
+}: ProductInfoProps) {
     const [selections, setSelections] = useState<Record<string, string>>({});
+    const [fit, setFit] = useState<FitPreference>("standard");
+    const [isAdding, setIsAdding] = useState(false);
     const { addItem } = useCart();
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
@@ -32,40 +49,28 @@ export function ProductInfo({ title, description, options = [], image, handle, v
 
     const allSelected = options.every((opt) => selections[opt.name]);
 
-    // Resolve selected variant
     const selectedVariant = useMemo(() => {
         if (variants.length === 0) return undefined;
-        if (variants.length === 1 && options.length === 0) return variants[0];
+        if (variants.length === 1) return variants[0];
+        return (
+            variants.find((v) =>
+                v.selectedOptions.every((vo: any) => selections[vo.name] === vo.value)
+            ) || variants[0]
+        );
+    }, [variants, selections]);
 
-        // Find match based on Shopify Structure: selectedOptions: { name, value }[]
-        return variants.find(v => {
-            return v.selectedOptions.every((vo: any) => selections[vo.name] === vo.value);
-        }) || variants[0];
-    }, [variants, options, selections]);
-
-    // Resolve Price
     const resolvedPrice = useMemo(() => {
-        if (!selectedVariant) return null;
-
-        const amount = selectedVariant.price?.amount;
-        const currencyCode = selectedVariant.price?.currencyCode || 'INR';
-
-        if (!amount) return "Price Unavailable";
-
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: currencyCode
-        }).format(amount);
+        const amount = selectedVariant?.price?.amount;
+        if (!amount) return null;
+        return new Intl.NumberFormat("en-IN", {
+            style: "currency",
+            currency: selectedVariant?.price?.currencyCode || "INR",
+            minimumFractionDigits: 0,
+        }).format(parseFloat(amount));
     }, [selectedVariant]);
 
-    // Stock Logic (Simplified for Shopify)
-    const isOutOfStock = useMemo(() => {
-        if (!selectedVariant) return false;
-        return selectedVariant.availableForSale === false;
-    }, [selectedVariant]);
-
-    // Wishlist Logic
-    const productId = selectedVariant?.id; // Shopify Global ID
+    const isOutOfStock = !selectedVariant?.availableForSale;
+    const productId = selectedVariant?.id;
     const inWishlist = productId ? isInWishlist(productId) : false;
 
     const toggleWishlist = () => {
@@ -73,130 +78,172 @@ export function ProductInfo({ title, description, options = [], image, handle, v
         if (inWishlist) {
             removeFromWishlist(productId);
         } else {
-            const priceVal = selectedVariant?.price?.amount ? parseFloat(selectedVariant.price.amount) : 0;
-
             addToWishlist({
                 id: productId,
-                title: title,
-                handle: handle,
+                title,
+                handle,
                 thumbnail: image,
-                price: priceVal
+                price: parseFloat(selectedVariant?.price?.amount || "0"),
             });
         }
     };
 
-    const handleAddToBag = async () => {
-        if (!allSelected && options.length > 0) {
-            console.warn("Not all options selected");
-            return;
-        }
-
-        if (!selectedVariant) {
-            console.error("No variant found");
-            return;
-        }
-
-        if (isOutOfStock) {
-            return;
-        }
-
+    const handleAddToSystem = async () => {
+        if (!selectedVariant || isOutOfStock) return;
+        setIsAdding(true);
         try {
-            await addItem({
-                variantId: selectedVariant.id,
-                quantity: 1
-            });
-        } catch (e) {
-            console.error("Add to cart failed", e);
+            await addItem({ variantId: selectedVariant.id, quantity: 1 });
+        } finally {
+            setIsAdding(false);
         }
     };
 
     return (
-        <div className="flex flex-col gap-8 sticky top-32">
-            {/* Header */}
-            <div className="space-y-4">
-                <div className="flex items-center gap-2 text-yellow-500 text-sm font-medium">
-                    <Star className="w-4 h-4 fill-current" />
-                    <span>4.9 (128 reviews)</span>
+        <div className="flex flex-col gap-8 sticky top-20">
+            {/* Object Metadata */}
+            <div className="border-b border-graphite/20 pb-6">
+                {objectCode && (
+                    <p className="text-mono text-acid mb-2">{objectCode}</p>
+                )}
+                <p className="text-mono text-graphite mb-4">TGE / {title.toUpperCase()}</p>
+                <h1 className="text-heading uppercase leading-tight mb-4">{title}</h1>
+                <div className="flex items-center gap-4">
+                    <p className="text-display-m">{resolvedPrice || "—"}</p>
+                    {isOutOfStock && selectedVariant && (
+                        <span className="text-mono bg-carbon text-bone px-2 py-0.5">SOLD OUT</span>
+                    )}
                 </div>
-                <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-zinc-900 leading-[0.9]">
-                    {title}
-                </h1>
-                <div className="flex flex-col items-start gap-1">
-                    <div className="flex items-center gap-4">
-                        <p className="text-2xl font-medium text-zinc-900">{resolvedPrice || "Price Unavailable"}</p>
-                        {isOutOfStock && (
-                            <span className="px-3 py-1 bg-zinc-100 text-zinc-500 text-xs font-bold uppercase rounded-full">
-                                Sold Out
-                            </span>
-                        )}
-                    </div>
-                    <p className="text-xs text-zinc-400 font-medium uppercase tracking-wide">Inclusive of all taxes</p>
-                </div>
+                <p className="text-mono text-graphite mt-1">Inclusive of all taxes</p>
             </div>
-
-            {/* Options */}
-            {options.length > 0 && (
-                <div className="space-y-6">
-                    {options.map((option) => (
-                        <VariantSelector
-                            key={option.name}
-                            label={option.name}
-                            options={option.values}
-                            selected={selections[option.name]}
-                            onSelect={(value) => handleSelect(option.name, value)}
-                        />
-                    ))}
-                </div>
-            )}
 
             {/* Description */}
-            <div className="prose prose-zinc text-zinc-500 leading-relaxed">
-                <p>{description}</p>
-            </div>
+            <p className="text-body text-graphite leading-relaxed">{description}</p>
 
-            {/* Actions */}
-            <div className="pt-6 border-t border-zinc-100 flex flex-col gap-4">
-                <p className="text-xs font-medium text-zinc-400 italic">
-                    Crafted for the modern journey.
-                </p>
-                <Button
-                    size="lg"
-                    className={`w-full h-16 rounded-full text-lg font-bold flex items-center justify-center gap-2 transition-all
-                        ${isOutOfStock
-                            ? "bg-zinc-100 text-zinc-400 cursor-not-allowed hover:bg-zinc-100"
-                            : "bg-zinc-900 hover:bg-zinc-800 text-white"
-                        }`}
-                    disabled={(!allSelected && options.length > 0) || isOutOfStock}
-                    onClick={handleAddToBag}
-                >
-                    <ShoppingBag className="w-5 h-5" />
-                    {isOutOfStock
-                        ? "Out of Stock"
-                        : (allSelected || options.length === 0 ? "Add to Bag" : "Select Options")
-                    }
-                </Button>
-
-                <button
-                    onClick={toggleWishlist}
-                    className="flex items-center justify-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors py-2"
-                >
-                    <Heart className={`w-4 h-4 ${inWishlist ? "fill-red-500 text-red-500" : ""}`} />
-                    {inWishlist ? "Saved to Wishlist" : "Add to Wishlist"}
-                </button>
-            </div>
-
-            {/* Shipping/Returns Micro-copy */}
-            <div className="grid grid-cols-2 gap-4 text-xs font-medium text-zinc-400 uppercase tracking-wide">
-                <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-green-500" />
-                    In Stock, Ready to Ship
+            {/* Fit Selector */}
+            <div>
+                <p className="text-mono text-graphite mb-3">HOW DO YOU WANT IT TO SIT?</p>
+                <div className="flex gap-0 border border-graphite/30">
+                    {(Object.keys(FIT_OPTIONS) as FitPreference[]).map((f) => (
+                        <button
+                            key={f}
+                            onClick={() => setFit(f)}
+                            className={cn(
+                                "flex-1 py-3 text-meta uppercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid",
+                                fit === f
+                                    ? "bg-carbon text-bone"
+                                    : "text-graphite hover:text-carbon border-r border-graphite/30 last:border-r-0"
+                            )}
+                            aria-pressed={fit === f}
+                        >
+                            {f.charAt(0).toUpperCase() + f.slice(1)}
+                        </button>
+                    ))}
                 </div>
-                <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-zinc-300" />
-                    Free Returns (30 Days)
+                <p className="text-meta text-graphite mt-2">{FIT_OPTIONS[fit]}</p>
+            </div>
+
+            {/* Size Options */}
+            {options.map((option) => (
+                <div key={option.name}>
+                    <p className="text-mono text-graphite mb-3">
+                        {option.name.toUpperCase()}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                        {option.values.map((value) => {
+                            const isSelected = selections[option.name] === value;
+                            // Check if this variant combination is available
+                            const matchingVariant = variants.find((v) =>
+                                v.selectedOptions.some(
+                                    (vo: any) => vo.name === option.name && vo.value === value
+                                )
+                            );
+                            const isAvailable = matchingVariant?.availableForSale !== false;
+
+                            return (
+                                <button
+                                    key={value}
+                                    onClick={() => isAvailable && handleSelect(option.name, value)}
+                                    disabled={!isAvailable}
+                                    className={cn(
+                                        "min-w-[44px] h-11 px-4 text-meta uppercase transition-colors border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid",
+                                        isSelected
+                                            ? "bg-carbon text-bone border-carbon"
+                                            : isAvailable
+                                                ? "border-graphite/30 text-graphite hover:border-carbon hover:text-carbon"
+                                                : "border-graphite/10 text-graphite/30 cursor-not-allowed line-through"
+                                    )}
+                                    aria-pressed={isSelected}
+                                    aria-label={`${option.name}: ${value}${!isAvailable ? " — sold out" : ""}`}
+                                >
+                                    {value}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            ))}
+
+            {/* Add to System */}
+            <button
+                onClick={handleAddToSystem}
+                disabled={(!allSelected && options.length > 0) || isOutOfStock || isAdding}
+                className={cn(
+                    "w-full py-4 text-meta uppercase tracking-widest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid",
+                    isOutOfStock
+                        ? "bg-fog text-graphite cursor-not-allowed"
+                        : (!allSelected && options.length > 0)
+                            ? "bg-fog text-graphite cursor-not-allowed"
+                            : "bg-carbon text-bone hover:bg-acid hover:text-carbon"
+                )}
+                aria-busy={isAdding}
+            >
+                {isAdding
+                    ? "Adding…"
+                    : isOutOfStock
+                        ? "Sold Out"
+                        : (!allSelected && options.length > 0)
+                            ? "Select Options"
+                            : "Add to System"
+                }
+            </button>
+
+            {/* Save */}
+            <button
+                onClick={toggleWishlist}
+                className="text-meta uppercase text-graphite hover:text-carbon transition-colors underline underline-offset-4 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid"
+            >
+                {inWishlist ? "Saved to System" : "Save Object"}
+            </button>
+
+            {/* Delivery Note */}
+            <div className="border-t border-graphite/20 pt-6 flex flex-col gap-2">
+                <div className="flex items-center gap-3 text-meta text-graphite">
+                    <span className={cn("w-2 h-2", isOutOfStock ? "bg-graphite" : "bg-acid")} />
+                    {isOutOfStock ? "Currently unavailable" : "In stock — ships in 3–5 days"}
+                </div>
+                <div className="flex items-center gap-3 text-meta text-graphite">
+                    <span className="w-2 h-2 border border-graphite/40" />
+                    Free returns within 30 days
                 </div>
             </div>
 
+            {/* Product Details accordion placeholder */}
+            <div className="border-t border-graphite/20 pt-4">
+                {[
+                    { label: "Fit", content: `${fit.charAt(0).toUpperCase() + fit.slice(1)} fit. ${FIT_OPTIONS[fit]}` },
+                    { label: "Material", content: "Composition details available on product page." },
+                    { label: "Care", content: "Machine wash cold. Do not tumble dry. Hang to dry." },
+                    { label: "Delivery & Returns", content: "Standard delivery 3–5 days. Free returns within 30 days." },
+                ].map(({ label, content }) => (
+                    <details key={label} className="border-b border-graphite/20 group">
+                        <summary className="flex justify-between py-3 cursor-pointer text-meta uppercase text-carbon list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid">
+                            {label}
+                            <span className="text-graphite group-open:rotate-45 transition-transform">+</span>
+                        </summary>
+                        <p className="text-meta text-graphite pb-4 leading-relaxed">{content}</p>
+                    </details>
+                ))}
+            </div>
         </div>
     );
 }

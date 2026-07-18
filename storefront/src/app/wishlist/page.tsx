@@ -1,86 +1,69 @@
 "use client";
 
+import { useWishlist } from "@/context/WishlistContext";
 import { ProductCard } from "@/components/modules/ProductCard";
-import { Button } from "@/components/ui/Button";
 import Link from "next/link";
-import { Heart } from "lucide-react";
-
-// Mock Wishlist Data - will update it account wise
-const WISHLIST_ITEMS = [
-    {
-        id: "w1",
-        title: "Oversized Puffer",
-        price: 16400,
-        handle: "oversized-puffer",
-        image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: "w2",
-        title: "Technical Cargo Pant",
-        price: 8500,
-        handle: "technical-cargo-pant",
-        image: "https://images.unsplash.com/photo-1552168324-d612d77725e3?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: "w3",
-        title: "Signature Utility Jacket",
-        price: 12500,
-        handle: "signature-utility-jacket",
-        image: "https://images.unsplash.com/photo-1551488852-078bd9101521?q=80&w=800&auto=format&fit=crop"
-    }
-];
 
 export default function WishlistPage() {
-    const isEmpty = WISHLIST_ITEMS.length === 0;
+    const { items, removeFromWishlist } = useWishlist();
 
-    if (isEmpty) {
+    if (items.length === 0) {
         return (
-            <div className="min-h-screen pt-32 pb-24 px-4 flex flex-col items-center justify-center text-center max-w-lg mx-auto">
-                <div className="h-20 w-20 rounded-full bg-zinc-100 flex items-center justify-center mb-6">
-                    <Heart className="h-10 w-10 text-zinc-400" />
+            <main className="min-h-screen bg-bone text-carbon pt-16">
+                <div className="max-w-[1600px] mx-auto px-spacing-component">
+                    <div className="pt-spacing-editorial pb-spacing-section-inner border-b border-graphite/20">
+                        <p className="text-mono text-acid mb-spacing-component">YOUR SAVES</p>
+                        <h1 className="text-display-l uppercase leading-none mb-4">Saved Objects</h1>
+                        <p className="text-body text-graphite">No objects saved yet.</p>
+                    </div>
+                    <div className="py-spacing-section-gap">
+                        <p className="text-mono text-graphite mb-6">START EXPLORING</p>
+                        <div className="flex flex-col gap-3 max-w-xs">
+                            {[
+                                { label: "New System", href: "/collections/new-system" },
+                                { label: "Uniforms", href: "/collections/uniforms" },
+                                { label: "All Objects", href: "/collections/all" },
+                            ].map((link) => (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    className="flex items-center justify-between py-4 border-b border-graphite/20 text-body uppercase hover:text-acid group transition-colors"
+                                >
+                                    <span>{link.label}</span>
+                                    <span className="text-acid opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
                 </div>
-                <h1 className="text-3xl font-black uppercase tracking-tight text-zinc-900 mb-4">
-                    Your Wishlist is Empty
-                </h1>
-                <p className="text-zinc-500 text-lg mb-8">
-                    Save items you love to revisit them later.
-                </p>
-                <Button asChild size="lg" className="rounded-full px-12 h-14 text-base font-bold bg-zinc-900 text-white hover:bg-zinc-800">
-                    <Link href="/collections/all">Start Shopping</Link>
-                </Button>
-            </div>
+            </main>
         );
     }
 
     return (
-        <div className="min-h-screen pt-32 pb-24 px-4 bg-zinc-50/50">
-            <div className="max-w-7xl mx-auto">
-                <div className="flex items-end justify-between mb-12">
-                    <div>
-                        <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-zinc-900 mb-2">
-                            Wishlist
-                        </h1>
-                        <p className="text-zinc-500">
-                            {WISHLIST_ITEMS.length} {WISHLIST_ITEMS.length === 1 ? 'Item' : 'Items'} Saved
-                        </p>
-                    </div>
+        <main className="min-h-screen bg-bone text-carbon pt-16">
+            <div className="max-w-[1600px] mx-auto px-spacing-component">
+                <div className="pt-spacing-section-inner pb-6 border-b border-graphite/20">
+                    <p className="text-mono text-acid mb-2">YOUR SAVES</p>
+                    <h1 className="text-heading uppercase">
+                        {items.length.toString().padStart(2, "0")} {items.length === 1 ? "Object" : "Objects"} Saved
+                    </h1>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 gap-y-12">
-                    {WISHLIST_ITEMS.map((product) => (
+                <div className="py-spacing-section-gap grid grid-cols-2 lg:grid-cols-4 gap-x-4 md:gap-x-spacing-component gap-y-12">
+                    {items.map((product) => (
                         <ProductCard
                             key={product.id}
                             id={product.id}
                             title={product.title}
-                            price={product.price}
+                            price={product.price ?? 0}
                             currencyCode="INR"
                             handle={product.handle}
-                            thumbnail={product.image}
-                            images={{ main: product.image, hover: product.image }}
+                            objectImage={product.thumbnail}
                         />
                     ))}
                 </div>
             </div>
-        </div>
+        </main>
     );
 }

@@ -2,132 +2,166 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-import { GlassCard } from "@/components/ui/GlassCard";
-import { Button } from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
+
+export type ProductCardVariant = "object" | "worn" | "editorial" | "campaign";
 
 interface ProductCardProps {
     id: string;
+    objectCode?: string;       // e.g. "OBJ_014"
     title: string;
+    editorialName?: string;    // e.g. "Daily Trouser"
     handle: string;
-    thumbnail: string;
     price: number;
-    currencyCode: string;
-    images?: {
-        main: string;
-        hover: string;
-    };
-    tags?: string[];
+    currencyCode?: string;
+    objectImage: string;
+    wornImage?: string;
+    materials?: string;        // e.g. "COTTON / NYLON"
+    field?: string;            // e.g. "DAILY"
+    variant?: ProductCardVariant;
+    isNew?: boolean;
+    isAvailable?: boolean;
     defaultVariantId?: string;
     variants?: any[];
+    sizes?: string[];          // Widths: ["XS","S","M","L","XL"]
 }
 
 export function ProductCard({
     id,
+    objectCode,
     title,
+    editorialName,
     handle,
     price,
-    currencyCode,
-    images = {
-        main: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop",
-        hover: "https://images.unsplash.com/photo-1582552938357-32b906df40cb?q=80&w=1000&auto=format&fit=crop"
-    },
-    tags = [],
+    currencyCode = "INR",
+    objectImage,
+    wornImage,
+    materials,
+    field,
+    variant = "object",
+    isNew = false,
+    isAvailable = true,
     defaultVariantId,
-    variants = []
+    variants = [],
+    sizes = [],
 }: ProductCardProps) {
     const { addItem } = useCart();
-
-    // Resolve Variant (for Quick Add)
     const activeVariantId = defaultVariantId || variants?.[0]?.id;
 
-    // Resolve Price
-    // Priority: Prop > Calculated > INR > First
-    let displayPrice = price;
+    const formattedPrice = new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: currencyCode,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    }).format(price);
 
-    // If prop price is 0 or suspicious, try resolving from variants
-    if (!displayPrice && variants.length > 0) {
-        const variant = variants[0];
-        // Shopify Variant Price Check
-        if (variant.price?.amount) {
-            displayPrice = parseFloat(variant.price.amount);
-        }
-    }
-
-    // Metadata Logic: Find first relevant tag (GSM, Fit, Material)
-    // Priority: GSM -> Cotton/Material -> Fit
-    const metadataTag = tags.find(t => t.toLowerCase().includes('gsm')) ||
-        tags.find(t => t.toLowerCase().includes('cotton') || t.toLowerCase().includes('linen')) ||
-        tags.find(t => t.toLowerCase().includes('fit')) ||
-        "Premium Essentials"; // Fallback
-
-    const handleAddToCart = async (e: React.MouseEvent) => {
+    const handleQuickAdd = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-
         if (activeVariantId) {
-            await addItem({
-                variantId: activeVariantId,
-                quantity: 1
-            });
-        } else {
-            console.warn("No variant ID available for quick add");
-            // Ideally open product modal or navigate to product page
+            await addItem({ variantId: activeVariantId, quantity: 1 });
         }
     };
 
+    const displayName = editorialName || title;
+    const code = objectCode || id.slice(-6).toUpperCase();
+
     return (
-        <div className="group relative block h-full w-full">
-            <Link href={`/products/${handle}`} className="block h-full w-full">
-                <GlassCard className="relative aspect-[4/5] w-full overflow-hidden bg-white border-zinc-100 mb-4 transition-all duration-500 group-hover:shadow-lg">
-                    {/* Main Image */}
-                    {/* Main Image */}
-                    <Image
-                        src={images.main || "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop"}
-                        alt={title}
-                        fill
-                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] will-change-transform"
-                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                    />
-                    {/* Hover Image */}
-                    <Image
-                        src={images.hover || images.main || "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop"}
-                        alt={`${title} - Alternate View`}
-                        fill
-                        className="absolute inset-0 object-cover opacity-0 transition-all duration-700 ease-out group-hover:opacity-100 group-hover:scale-[1.03] will-change-transform"
-                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                    />
+        <Link
+            href={`/products/${handle}`}
+            className={cn(
+                "group block relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid"
+            )}
+            aria-label={`${displayName}, ${formattedPrice}`}
+        >
+            {/* Image Container */}
+            <div className="relative overflow-hidden bg-fog mb-4">
+                <div className="aspect-[3/4]">
+                    {/* Object Image */}
+                    {objectImage && (
+                        <Image
+                            src={objectImage}
+                            alt={`${displayName} — object view`}
+                            fill
+                            className={cn(
+                                "object-cover transition-all duration-700",
+                                wornImage
+                                    ? "opacity-100 group-hover:opacity-0"
+                                    : "opacity-100"
+                            )}
+                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                        />
+                    )}
 
-                    {/* Quick Add (Floating Circle) */}
-                    <div className="absolute bottom-3 right-3 z-10 translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                        <Button
-                            size="icon"
-                            className="bg-white text-zinc-900 shadow-md hover:bg-zinc-900 hover:text-white rounded-full h-10 w-10"
-                            onClick={handleAddToCart}
-                        >
-                            <Plus className="w-5 h-5" />
-                        </Button>
-                    </div>
-                </GlassCard>
+                    {/* Worn Image */}
+                    {wornImage && (
+                        <Image
+                            src={wornImage}
+                            alt={`${displayName} — worn view`}
+                            fill
+                            className="object-cover transition-all duration-700 opacity-0 scale-[1.02] group-hover:opacity-100 group-hover:scale-100"
+                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                        />
+                    )}
 
-                <div className="space-y-1 px-1">
-                    <div className="flex justify-between items-start">
-                        <h3 className="font-bold text-sm uppercase tracking-wide text-zinc-900 group-hover:underline underline-offset-4 decoration-1 decoration-zinc-300 truncate pr-4">
-                            {title}
-                        </h3>
-                        <span className="font-medium text-sm text-zinc-900 text-right">
-                            {new Intl.NumberFormat('en-IN', {
-                                style: 'currency',
-                                currency: 'INR'
-                            }).format(displayPrice)}
-                        </span>
-                    </div>
-                    {/* Metadata Line */}
-                    <p className="text-xs text-zinc-400 font-medium tracking-wide uppercase">{metadataTag}</p>
+                    {/* Fallback gradient when no image */}
+                    {!objectImage && (
+                        <div className="absolute inset-0 bg-gradient-to-br from-fog to-graphite/20 flex items-center justify-center">
+                            <span className="text-mono text-graphite/50">{code}</span>
+                        </div>
+                    )}
                 </div>
-            </Link>
-        </div>
+
+                {/* Badges */}
+                <div className="absolute top-3 left-3 flex flex-col gap-1">
+                    {isNew && (
+                        <span className="bg-acid text-carbon px-2 py-0.5 text-mono leading-tight">
+                            NEW
+                        </span>
+                    )}
+                    {!isAvailable && (
+                        <span className="bg-carbon text-bone px-2 py-0.5 text-mono leading-tight">
+                            SOLD OUT
+                        </span>
+                    )}
+                </div>
+
+                {/* Acid accent line on hover */}
+                <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-acid group-hover:w-full transition-all duration-500" />
+
+                {/* Quick Add — slides up on hover */}
+                {isAvailable && (
+                    <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                        <button
+                            onClick={handleQuickAdd}
+                            className="w-full bg-carbon text-bone py-3 text-meta uppercase tracking-widest hover:bg-acid hover:text-carbon transition-colors focus-visible:outline-none focus-visible:bg-acid focus-visible:text-carbon"
+                            aria-label={`Quick add ${displayName} to system`}
+                        >
+                            Add to System
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {/* Product Info */}
+            <div className="flex justify-between items-start gap-2">
+                <div className="flex-1 min-w-0">
+                    <p className="text-mono text-graphite mb-0.5 truncate">{code}</p>
+                    <p className="text-body font-medium uppercase truncate group-hover:text-acid transition-colors">
+                        {displayName}
+                    </p>
+                    {materials && (
+                        <p className="text-mono text-graphite/70 mt-0.5">{materials}</p>
+                    )}
+                </div>
+                <div className="flex-shrink-0 text-right">
+                    <p className="text-mono">{formattedPrice}</p>
+                    {field && (
+                        <p className="text-mono text-acid">{field}</p>
+                    )}
+                </div>
+            </div>
+        </Link>
     );
 }

@@ -1,62 +1,141 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-geist-sans), "Helvetica Neue", sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+  --font-serif: var(--font-instrument-serif), serif;
 
-  --color-background: #F5F5F7;
-  /* Soft Smoke White (Premium/Apple-like) */
-  --color-foreground: #09090B;
-  /* zinc-950 */
+  --color-background: var(--color-bone);
+  --color-foreground: var(--color-carbon);
 
-  --color-zinc-50: #F5F5F7;
-  --color-zinc-100: #EBEBEF;
-  --color-zinc-200: #E4E4E7;
-  --color-zinc-300: #D4D4D8;
-  --color-zinc-400: #A1A1AA;
-  --color-zinc-500: #71717A;
-  --color-zinc-900: #18181B;
-  --color-zinc-950: #09090B;
+  /* TGE Luxury Streetwear Tokens */
+  --color-carbon: #11110F;
+  --color-bone: #F1EEE5;
+  --color-chalk: #FAF9F5;
+  --color-graphite: #62615B;
+  --color-fog: #D8D5CC;
+  --color-acid: #D8FF3E;
+  --color-cobalt: #4057F5;
+  --color-oxide: #E8754D;
 
-  --radius-lg: 32px;
-  --radius-md: 24px;
-  --radius-sm: 12px;
-  --radius-pill: 9999px;
+  /* Spacing Tokens */
+  --spacing-micro: 4px;
+  --spacing-label: 8px;
+  --spacing-control: 16px;
+  --spacing-component: 24px;
+  --spacing-section-inner: 40px;
+  --spacing-section-gap: 64px;
+  --spacing-editorial: 96px;
+  --spacing-transition-major: 160px;
+  --spacing-transition-campaign: 240px;
 }
 
-@layer utilities {
-  .glass-card {
-    background: rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(20px);
-    /* -webkit-backdrop-filter: blur(16px); */
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    will-change: transform, opacity;
-    transform: translate3d(0, 0, 0);
-    backface-visibility: hidden;
-    transform-style: preserve-3d;
-    /* Soft subtle shadow */
+@layer base {
+  :root {
+    --color-carbon: #11110F;
+    --color-bone: #F1EEE5;
+    --color-chalk: #FAF9F5;
+    --color-graphite: #62615B;
+    --color-fog: #D8D5CC;
+    --color-acid: #D8FF3E;
+    --color-cobalt: #4057F5;
+    --color-oxide: #E8754D;
   }
 
-  .glass-heavy {
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(20px);
-    /* -webkit-backdrop-filter: blur(18px); */
-    border: 1px solid rgba(255, 255, 255, 0.3);
+  body {
+    background-color: var(--color-bone);
+    color: var(--color-carbon);
+    font-family: var(--font-geist-sans), sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-}
 
-body {
-  @apply bg-zinc-50 text-zinc-950 antialiased selection:bg-zinc-900 selection:text-white;
+  /* Typography Scales */
+  .text-display-xl {
+    font-family: var(--font-instrument-serif), serif;
+    font-size: clamp(4rem, 11vw, 13rem);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+  }
+
+  .text-display-l {
+    font-family: var(--font-instrument-serif), serif;
+    font-size: clamp(3.25rem, 7vw, 8rem);
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .text-display-m {
+    font-family: var(--font-instrument-serif), serif;
+    font-size: clamp(2.5rem, 5vw, 5.5rem);
+    line-height: 1.05;
+  }
+
+  .text-heading {
+    font-family: var(--font-geist-sans), sans-serif;
+    font-size: clamp(1.75rem, 3vw, 3.5rem);
+    line-height: 1.1;
+  }
+
+  .text-body-large {
+    font-size: 1.25rem;
+    line-height: 1.35;
+  }
+
+  .text-body {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .text-meta {
+    font-size: 0.6875rem;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .text-mono {
+    font-family: var(--font-geist-mono), monospace;
+    font-size: 0.6875rem;
+    line-height: 1.25;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
 }
 
 /* Globally hide scrollbar */
 * {
-  -ms-overflow-style: none;
-  /* IE and Edge */
-  scrollbar-width: none;
-  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 *::-webkit-scrollbar {
   display: none;
+}
+
+/* Utility: explicitly hide scrollbar */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus ring consistent with Acid Signal */
+:focus-visible {
+  outline: 2px solid var(--color-acid);
+  outline-offset: 2px;
 }

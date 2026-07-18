@@ -1,9 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils/cn";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 
 const SORT_OPTIONS = [
@@ -13,105 +11,176 @@ const SORT_OPTIONS = [
     { label: "Best Selling", value: "best-selling" },
 ];
 
-const CATEGORIES = [
-    { name: "All", href: "/collections/all" },
-    { name: "T-Shirts", href: "/collections/t-shirts" },
-    { name: "Jackets", href: "/collections/jackets" },
-    { name: "Pants", href: "/collections/pants" },
-    { name: "Accessories", href: "/collections/accessories" },
+const FILTER_GROUPS = [
+    {
+        id: "use",
+        label: "Use",
+        options: ["Daily", "Work", "Travel", "After Hours", "Outer"],
+    },
+    {
+        id: "fit",
+        label: "Fit",
+        options: ["Close", "Standard", "Relaxed"],
+    },
+    {
+        id: "material",
+        label: "Material",
+        options: ["Cotton", "Nylon", "Wool", "Recycled"],
+    },
+    {
+        id: "availability",
+        label: "Availability",
+        options: ["In Stock", "Pre-Order"],
+    },
 ];
 
-export function FilterBar() {
+export function FilterBar({ resultCount }: { resultCount?: number }) {
     const router = useRouter();
-    const pathname = usePathname();
     const searchParams = useSearchParams();
-    const [isSortOpen, setIsSortOpen] = useState(false);
-    const sortRef = useRef<HTMLDivElement>(null);
+    const [openGroup, setOpenGroup] = useState<string | null>(null);
+    const ref = useRef<HTMLDivElement>(null);
 
-    // Get current state from URL
-    const currentSort = searchParams.get('sort') || 'created-desc';
-    const activeLabel = SORT_OPTIONS.find(o => o.value === currentSort)?.label || "Sort By";
+    const currentSort = searchParams.get("sort") || "created-desc";
+    const activeSort = SORT_OPTIONS.find((o) => o.value === currentSort)?.label || "Sort";
 
-    // Close dropdown on click outside
-    useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-            if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
-                setIsSortOpen(false);
-            }
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-
-    const handleSort = (value: string) => {
+    const updateParam = (key: string, value: string) => {
         const params = new URLSearchParams(searchParams.toString());
-        params.set('sort', value);
+        const existing = params.getAll(key);
+        if (existing.includes(value)) {
+            params.delete(key);
+            existing.filter((v) => v !== value).forEach((v) => params.append(key, v));
+        } else {
+            params.append(key, value);
+        }
         router.replace(`?${params.toString()}`, { scroll: false });
-        setIsSortOpen(false);
     };
 
+    const setSort = (value: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("sort", value);
+        router.replace(`?${params.toString()}`, { scroll: false });
+        setOpenGroup(null);
+    };
+
+    const clearAll = () => {
+        router.replace("?", { scroll: false });
+        setOpenGroup(null);
+    };
+
+    // Close on outside click
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) {
+                setOpenGroup(null);
+            }
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, []);
+
+    const hasFilters = FILTER_GROUPS.some(g => searchParams.getAll(g.id).length > 0);
+
     return (
-        <div className="w-full flex items-center justify-between gap-4">
-            {/* Left: Filter Categories (Navigation) */}
-            <div className="overflow-x-auto no-scrollbar flex-1 -mx-4 sm:mx-0">
-                <div className="flex items-center gap-2 px-4 sm:px-0 min-w-max">
-                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 mr-2">Filters</span>
-                    {CATEGORIES.map((cat) => {
-                        const isActive = pathname === cat.href;
+        <div ref={ref} className="w-full relative">
+            <div className="flex items-center justify-between border-b border-graphite/20 pb-3 gap-4 overflow-x-auto">
+                <div className="flex items-center gap-spacing-control flex-nowrap min-w-max">
+                    {/* Filter groups */}
+                    {FILTER_GROUPS.map((group) => {
+                        const selected = searchParams.getAll(group.id);
+                        const isOpen = openGroup === group.id;
                         return (
-                            <Button
-                                key={cat.name}
-                                asChild
-                                href={cat.href}
-                                variant="ghost"
+                            <button
+                                key={group.id}
+                                onClick={() => setOpenGroup(isOpen ? null : group.id)}
                                 className={cn(
-                                    "rounded-full px-4 h-8 text-xs font-medium transition-all duration-300 border",
-                                    isActive
-                                        ? "bg-zinc-900 text-white border-zinc-900"
-                                        : "bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300 hover:text-zinc-900"
+                                    "text-meta uppercase flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid",
+                                    selected.length > 0 ? "text-carbon" : "text-graphite hover:text-carbon",
+                                    isOpen && "text-carbon"
                                 )}
+                                aria-expanded={isOpen}
                             >
-                                {cat.name}
-                            </Button>
+                                {group.label}
+                                {selected.length > 0 && (
+                                    <span className="bg-acid text-carbon px-1.5 py-0.5 text-[10px] leading-none">
+                                        {selected.length}
+                                    </span>
+                                )}
+                            </button>
                         );
                     })}
-                </div>
-            </div>
 
-            {/* Right: Sort Dropdown */}
-            <div className="relative shrink-0" ref={sortRef}>
-                <button
-                    onClick={() => setIsSortOpen(!isSortOpen)}
-                    className="flex items-center gap-2 h-10 px-5 bg-white border border-zinc-200 rounded-full text-sm font-medium text-zinc-900 hover:border-zinc-300 transition-colors shadow-sm"
-                >
-                    <span className="text-zinc-500">Sort by:</span>
-                    <span>{activeLabel}</span>
-                    <ChevronDown className={cn("w-4 h-4 text-zinc-400 transition-transform ml-1", isSortOpen && "rotate-180")} />
-                </button>
-
-                {/* Dropdown Menu */}
-                <div
-                    className={cn(
-                        "absolute right-0 top-full mt-2 w-48 bg-white border border-zinc-100 rounded-xl shadow-xl p-1 z-50 origin-top-right transition-all duration-200",
-                        isSortOpen ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible"
-                    )}
-                >
-                    {SORT_OPTIONS.map((option) => (
+                    {hasFilters && (
                         <button
-                            key={option.value}
-                            onClick={() => handleSort(option.value)}
-                            className={cn(
-                                "w-full text-left px-4 py-2 text-sm rounded-lg transition-colors",
-                                currentSort === option.value
-                                    ? "bg-zinc-50 text-zinc-900 font-semibold"
-                                    : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
-                            )}
+                            onClick={clearAll}
+                            className="text-meta uppercase text-graphite hover:text-oxide underline underline-offset-4 transition-colors"
                         >
-                            {option.label}
+                            Clear
                         </button>
-                    ))}
+                    )}
+                </div>
+
+                {/* Right: Sort + count */}
+                <div className="flex items-center gap-spacing-control flex-shrink-0">
+                    {resultCount !== undefined && (
+                        <span className="text-mono text-graphite">{resultCount.toString().padStart(2, "0")} OBJECTS</span>
+                    )}
+                    <div className="relative">
+                        <button
+                            onClick={() => setOpenGroup(openGroup === "sort" ? null : "sort")}
+                            className="text-meta uppercase text-graphite hover:text-carbon transition-colors flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid"
+                        >
+                            {activeSort}
+                        </button>
+                        {openGroup === "sort" && (
+                            <div className="absolute right-0 top-full mt-2 bg-bone border border-graphite/20 min-w-[180px] z-30">
+                                {SORT_OPTIONS.map((opt) => (
+                                    <button
+                                        key={opt.value}
+                                        onClick={() => setSort(opt.value)}
+                                        className={cn(
+                                            "w-full text-left px-4 py-3 text-meta uppercase hover:bg-chalk transition-colors",
+                                            currentSort === opt.value ? "text-carbon font-bold" : "text-graphite"
+                                        )}
+                                    >
+                                        {opt.label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
+
+            {/* Dropdown panels */}
+            {FILTER_GROUPS.map((group) => openGroup === group.id && (
+                <div
+                    key={group.id}
+                    className="absolute top-full left-0 mt-2 bg-bone border border-graphite/20 min-w-[200px] z-30 p-4"
+                >
+                    <div className="flex flex-col gap-2">
+                        {group.options.map((opt) => {
+                            const isSelected = searchParams.getAll(group.id).includes(opt);
+                            return (
+                                <button
+                                    key={opt}
+                                    onClick={() => updateParam(group.id, opt)}
+                                    className={cn(
+                                        "flex items-center gap-3 text-meta uppercase text-left transition-colors",
+                                        isSelected ? "text-carbon" : "text-graphite hover:text-carbon"
+                                    )}
+                                    aria-pressed={isSelected}
+                                >
+                                    <span className={cn(
+                                        "w-3 h-3 border flex-shrink-0",
+                                        isSelected ? "bg-acid border-acid" : "border-graphite"
+                                    )} />
+                                    {opt}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            ))}
         </div>
     );
 }
